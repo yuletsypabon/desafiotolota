@@ -1,0 +1,150 @@
+// DESAFÍO Tolotá — modelo de datos (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoPrueba {
+  PENDIENTE
+  EN_CURSO
+  FINALIZADA
+}
+
+enum TipoPunto {
+  LEVE
+  MEDIA
+  GRAVE
+  POSITIVO
+}
+
+/// Un evento (edición) del desafío. Puede haber varios por año.
+model Evento {
+  id            String   @id @default(cuid())
+  anio          Int
+  nombre        String
+  logo          String? /// data URL (imagen redimensionada en el navegador)
+  numPistas     Int      @default(3)
+  pulsadorKey   String   @default("A")
+  /// Penalizaciones / bonificaciones de disciplina en milisegundos (siempre positivos)
+  penLeveMs     Int      @default(300)
+  penMediaMs    Int      @default(500)
+  penGraveMs    Int      @default(1000)
+  bonPositivoMs Int      @default(100)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pruebas Prueba[]
+  equipos Equipo[]
+
+  @@index([anio])
+}
+
+model Prueba {
+  id          String       @id @default(cuid())
+  eventoId    String
+  nombre      String
+  posicion    Int          @default(0)
+  estado      EstadoPrueba @default(PENDIENTE)
+  /// IDs de equipo en el orden de salida. Equipos que no estén aquí salen al final por número.
+  ordenSalida String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  evento     Evento            @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  resultados Resultado[]
+  puntos     PuntoDisciplina[]
+
+  @@index([eventoId])
+}
+
+model Equipo {
+  id        String   @id @default(cuid())
+  eventoId  String
+  numero    Int
+  nombre    String
+  capitan   String?
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evento        Evento            @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  participantes Participante[]
+  resultados    Resultado[]
+  puntos        PuntoDisciplina[]
+
+  @@unique([eventoId, nombre])
+  @@index([eventoId])
+}
+
+/// Ficha del participante (datos personales, contacto de emergencia y ficha médica)
+model Participante {
+  id                 String   @id @default(cuid())
+  equipoId           String
+  nombre             String
+  fechaNacimiento    String? /// YYYY-MM-DD
+  telefono           String?
+  email              String?
+  residencia         String?
+  profesion          String?
+  contactoNombre     String?
+  contactoParentesco String?
+  contactoTelefono   String?
+  tipoSangre         String?
+  alergias           String?
+  enfermedades       String?
+  medicamentos       String?
+  limitaciones       String?
+  observaciones      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  equipo Equipo            @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  puntos PuntoDisciplina[]
+
+  @@index([equipoId])
+}
+
+/// Tiempo de un equipo en una prueba. El tiempo final se calcula (bruto − detenciones ± disciplina)
+model Resultado {
+  id            String   @id @default(cuid())
+  pruebaId      String
+  equipoId      String
+  pista         Int?
+  salidaAt      DateTime
+  llegadaAt     DateTime
+  brutoMs       Int
+  detencionesMs Int      @default(0)
+  /// [{ "num": 1, "dur": 1234 }, ...]
+  detenciones   Json     @default("[]")
+  observacion   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  prueba Prueba @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+  equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  @@unique([pruebaId, equipoId])
+}
+
+model PuntoDisciplina {
+  id             String    @id @default(cuid())
+  pruebaId       String
+  equipoId       String
+  participanteId String?
+  tipo           TipoPunto
+  descripcion    String?
+  hora           String? /// HH:MM
+  createdAt      DateTime  @default(now())
+
+  prueba       Prueba        @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+  equipo       Equipo        @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  participante Participante? @relation(fields: [participanteId], references: [id], onDelete: SetNull)
+
+  @@index([pruebaId])
+  @@index([equipoId])
+}

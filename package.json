@@ -1,0 +1,51 @@
+{
+  "name": "desafio-tolota",
+  "version": "2.0.0",
+  "private": true,
+  "description": "DESAFÍO Tolotá — Sistema de cronometraje, equipos, disciplina y resultados",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.3.0",
+    "@mui/material": "^7.3.0",
+    "@mui/material-nextjs": "^7.3.0",
+    "@prisma/client": "^6.16.0",
+    "next": "^15.5.0",
+    "papaparse": "^5.5.0",
+    "react": "^19.1.0",
+    "server-only": "^0.0.1",
+    "react-dom": "^19.1.0",
+    "swr": "^2.3.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@types/node": "^22.0.0",
+    "@types/papaparse": "^5.3.15",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.5.0",
+    "prisma": "^6.16.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
