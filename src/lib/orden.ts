@@ -1,6 +1,6 @@
 // Orden de salida: patrones y cálculo del orden efectivo.
 
-export type Patron = 'normal' | 'inv' | 'centro' | 'mitad' | 'inter';
+export type Patron = 'normal' | 'inv' | 'centro' | 'mitad' | 'inter' | 'azar';
 
 export const PATRONES: { id: Patron; label: string }[] = [
   { id: 'normal', label: '↓ Normal' },
@@ -8,10 +8,11 @@ export const PATRONES: { id: Patron; label: string }[] = [
   { id: 'centro', label: '↔ Desde centro' },
   { id: 'mitad', label: '⬇ Mitad abajo' },
   { id: 'inter', label: '⇅ Intercalado' },
+  { id: 'azar', label: '🔀 Aleatorio' },
 ];
 
 /** `base` debe venir ordenado por número de inscripción. */
-export function aplicarPatron<T>(base: T[], p: Patron): T[] {
+export function aplicarPatron<T>(base: T[], p: Patron, random: () => number = Math.random): T[] {
   const n = base.length;
   switch (p) {
     case 'normal':
@@ -33,6 +34,15 @@ export function aplicarPatron<T>(base: T[], p: Patron): T[] {
       return base.slice(Math.floor(n / 2)).concat(base.slice(0, Math.floor(n / 2)));
     case 'inter':
       return base.filter((_, i) => i % 2 === 0).concat(base.filter((_, i) => i % 2 !== 0));
+    case 'azar': {
+      // Fisher–Yates: todas las permutaciones con la misma probabilidad
+      const o = base.slice();
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [o[i], o[j]] = [o[j], o[i]];
+      }
+      return o;
+    }
   }
 }
 

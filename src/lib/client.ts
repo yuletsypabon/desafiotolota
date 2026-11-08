@@ -1,6 +1,7 @@
 'use client';
 import useSWR, { type SWRConfiguration } from 'swr';
 import type { Clasificacion, EquipoDTO, EventoDTO, PuntoDTO } from './types';
+import type { Rol } from './sesion';
 
 export async function api<T = unknown>(url: string, method = 'GET', body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -9,12 +10,28 @@ export async function api<T = unknown>(url: string, method = 'GET', body?: unkno
     body: body !== undefined ? JSON.stringify(body) : undefined,
     cache: 'no-store',
   });
+  // Sesión vencida: volver a la pantalla de inicio de sesión
+  if (res.status === 401 && !url.startsWith('/api/auth/') && typeof window !== 'undefined') {
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((data as { error?: string }).error || `Error ${res.status}`);
   return data as T;
 }
 
 export const fetcher = <T,>(url: string) => api<T>(url);
+
+/** Rol de la sesión actual (null mientras carga o sin sesión). */
+export function useSesion(activa = true) {
+  const { data, isLoading } = useSWR<{ rol: Rol | null }>(activa ? '/api/auth/sesion' : null, fetcher);
+  const rol = data?.rol ?? null;
+  return { rol, esAdmin: rol === 'ADMIN', isLoading };
+}
+
+export async function cerrarSesion() {
+  await api('/api/auth/logout', 'POST');
+  window.location.href = '/login';
+}
 
 export function useEventos() {
   return useSWR<EventoDTO[]>('/api/eventos', fetcher);

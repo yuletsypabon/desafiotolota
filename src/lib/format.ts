@@ -1,13 +1,13 @@
 export const pad = (n: number) => String(n).padStart(2, '0');
 
-/** mm:ss.cc  (si pasa de una hora: h:mm:ss.cc) */
+/** hh:mm:ss:cc (horas:minutos:segundos:centésimas). Las centésimas se truncan, no se redondean. */
 export function fmt(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) ms = 0;
   const h = Math.floor(ms / 3_600_000);
   const m = Math.floor((ms % 3_600_000) / 60_000);
   const s = Math.floor((ms % 60_000) / 1000);
   const cs = Math.floor((ms % 1000) / 10);
-  return (h ? `${h}:` : '') + `${pad(m)}:${pad(s)}.${pad(cs)}`;
+  return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`;
 }
 
 /** +0.3s / -0.1s */

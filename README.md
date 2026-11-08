@@ -23,7 +23,7 @@ cronómetro multipista con pulsador físico, disciplina, resultados por prueba y
 | — | **Respaldo JSON** completo + importación, y **migración** de los datos de la versión anterior |
 | — | Orden de salida guardado por prueba (arrastrar, flechas o patrones) |
 | — | Varios dispositivos a la vez: los resultados se refrescan cada pocos segundos |
-| — | Protección opcional con usuario/contraseña (`ADMIN_PASSWORD`) |
+| PIN de administrador y cronometrador guardados en el navegador | **Inicio de sesión por rol** (Administrador / Cronometrador) validado en el servidor, contraseñas cifradas y cambiables en la app; el cronometrador solo ve las pruebas habilitadas y nunca las fichas |
 
 ---
 
@@ -79,7 +79,52 @@ tests/                     Pruebas unitarias de la lógica (npm test)
 
 ---
 
-## Instalación local
+## Día del evento sin internet (servidor local + nube)
+
+El día del evento la app corre en **un portátil** con PostgreSQL instalado. Los demás dispositivos
+(cronómetro, disciplina, pantalla de resultados) se conectan a ese portátil por **Wi-Fi local**:
+un router o el punto de acceso del propio portátil. **No hace falta internet.** Todos los tiempos quedan en la base
+de datos del portátil y, cuando haya conexión, se copian a la **nube (Supabase)**, donde queda el histórico.
+
+```
+ Tablet / celular / PC ──Wi-Fi local──▶ Portátil: app + PostgreSQL ──(con internet)──▶ Supabase (histórico)
+                                                                     Respaldo → Sincronizar
+```
+
+### Preparar el portátil (una sola vez, con internet)
+1. Instala **Node.js LTS** (nodejs.org) y **PostgreSQL 16** (postgresql.org/download/windows).
+   En el instalador de PostgreSQL apunta la contraseña del usuario `postgres`.
+2. Descarga o clona este repositorio y copia `.env.example` como `.env`. En `.env`:
+   - `DATABASE_URL` y `DIRECT_URL`: cambia `postgres:postgres` por `postgres:TU_CONTRASEÑA`.
+   - `NUBE_DATABASE_URL`: la URL **Session pooler (puerto 5432)** de Supabase.
+3. Doble clic en **`Iniciar evento.bat`**. La primera vez instala dependencias, crea la base `desafio_tolota`,
+   crea las tablas y compila (unos minutos).
+4. Crea las tablas en la nube (una vez, y de nuevo cada vez que cambie el modelo de datos):
+   ```bash
+   npm run nube:migrar
+   ```
+5. La primera vez que arranque, Windows preguntará si Node.js puede usar la red: permite **Redes privadas**.
+
+### Durante el evento
+- **Roles:** el **Administrador** ve todo; el **Cronometrador** solo cronometra y ve resultados de las pruebas
+  que el administrador habilitó (Configuración del evento → candado de cada prueba). La primera vez,
+  `Iniciar evento.bat` pide crear las dos contraseñas en su ventana (o `npm run claves`); luego se cambian en
+  **Respaldo → Contraseñas**. No se crean desde el navegador a propósito: así nadie en el Wi‑Fi puede adelantarse.
+- Doble clic en **`Iniciar evento.bat`**. La ventana muestra las direcciones para los otros dispositivos,
+  p. ej. `http://192.168.0.10:3000`. No cierres esa ventana mientras dure la jornada.
+- Los otros dispositivos deben estar en la misma red Wi-Fi y abrir esa dirección en el navegador.
+
+### Al terminar cada jornada (con internet)
+- **Respaldo → ☁️ Sincronizar ahora.** Cada evento se copia completo a la nube en una sola operación:
+  si se corta la conexión, la nube queda como estaba y se puede repetir.
+- Los eventos que existen solo en la nube (años anteriores) **se conservan**: el histórico no se borra.
+- La nube es para **consultar**: lo que se edite directamente en el sitio en la nube se reemplaza en la próxima
+  sincronización de ese evento. Las correcciones se hacen en el portátil.
+- Si se cambia de portátil: en el sitio en la nube, **Respaldo → Descargar**, y en el portátil nuevo, **Importar**.
+
+---
+
+## Instalación local (desarrollo)
 
 Requisitos: **Node.js 20.9+**, **npm**, y un PostgreSQL (local, Docker o en la nube).
 
@@ -118,8 +163,32 @@ git remote add origin https://github.com/TU_USUARIO/desafio-tolota.git
 git push -u origin main
 ```
 
-El workflow `.github/workflows/ci.yml` valida en cada push: instalación, migración contra un PostgreSQL temporal,
-typecheck, pruebas y build.
+El workflow `.github/workflows/ci.yml` valida en cada push a `main` y en cada pull request: instalación,
+migraciones y seed contra un PostgreSQL 16 temporal, lint, typecheck, pruebas y build.
+
+---
+
+## Base de datos en Supabase
+
+1. En **supabase.com → New project**: nombre `desafio-tolota`, región cercana (p. ej. *South America (São Paulo)*),
+   y una **contraseña de base de datos** (guárdala; mejor sin `@ # / : ? &` para no tener que codificarla).
+2. Cuando el proyecto esté listo: botón **Connect** (arriba) → pestaña **ORMs → Prisma**. Copia las dos URLs:
+   - `DATABASE_URL` → *Transaction pooler* (puerto **6543**) — agrega `?pgbouncer=true&connection_limit=1`
+   - `DIRECT_URL` → *Session pooler* (puerto **5432**)
+3. Pégalas en el archivo `.env` (reemplaza `[YOUR-PASSWORD]` por tu contraseña).
+4. Crea las tablas:
+   ```bash
+   npx prisma migrate deploy
+   npm run db:seed      # opcional: evento de demostración
+   npm run dev
+   ```
+5. Comprueba en Supabase → **Table Editor** que aparecen las tablas `Evento`, `Prueba`, `Equipo`, etc.
+
+La segunda migración activa **RLS** (Row Level Security) en todas las tablas. Así la API pública de Supabase
+(clave *anon*) no puede leer las fichas médicas; la app sigue funcionando porque Prisma entra como usuario `postgres`.
+No uses las claves `anon`/`service_role` en este proyecto: no hacen falta.
+
+En **Vercel**, agrega las mismas dos variables (`DATABASE_URL` y `DIRECT_URL`) en *Settings → Environment Variables*.
 
 ---
 
@@ -127,11 +196,13 @@ typecheck, pruebas y build.
 
 1. Sube el repositorio a GitHub.
 2. En **vercel.com → Add New → Project**, importa el repo (framework: Next.js, se detecta solo).
-3. Base de datos: en el proyecto, pestaña **Storage → Create Database → Neon (Postgres)**. Vercel crea
-   `DATABASE_URL` automáticamente. (O usa cualquier PostgreSQL y pega la URL en *Settings → Environment Variables*.)
+3. Base de datos: agrega `DATABASE_URL` y `DIRECT_URL` de Supabase (ver sección anterior) en
+   *Settings → Environment Variables*. (Alternativa: *Storage → Neon*; en ese caso usa la URL directa como `DIRECT_URL`.)
 4. *Settings → Build & Development → Build Command*: `npm run vercel-build`
    (genera Prisma, **aplica migraciones** y compila).
-5. (Opcional) agrega `ADMIN_PASSWORD` para proteger el sitio.
+5. Agrega `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales del sitio en la nube).
+   Región: `vercel.json` fija las funciones en `pdx1` (Portland), junto a la base de Supabase (us-west-2, Oregón). Si creas Supabase
+   en otra región, cambia `regions` por la región de Vercel más cercana (cada consulta cruza esa distancia).
 6. Deploy. Cada push a `main` vuelve a desplegar.
 
 > Límite de Vercel: los cuerpos de petición no pueden superar ~4.5 MB. Los logos se reducen a 256 px en el
@@ -141,11 +212,11 @@ typecheck, pruebas y build.
 
 **Base de datos:** *Azure Database for PostgreSQL – Flexible Server*.
 - Crea el servidor (versión 16), una base `desafio_tolota`, y en *Networking* permite acceso desde servicios de Azure.
-- `DATABASE_URL=postgresql://USUARIO:CLAVE@SERVIDOR.postgres.database.azure.com:5432/desafio_tolota?sslmode=require`
+- `DATABASE_URL` y `DIRECT_URL` (la misma): `postgresql://USUARIO:CLAVE@SERVIDOR.postgres.database.azure.com:5432/desafio_tolota?sslmode=require`
 
 **App:** *Azure App Service* (Linux, Node 20 LTS o 22 LTS).
 1. Variables en *Configuration → Application settings*: `DATABASE_URL`, `NEXT_OUTPUT=standalone`,
-   `ADMIN_PASSWORD` (opcional), `SCM_DO_BUILD_DURING_DEPLOYMENT=true`.
+   `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales), `SCM_DO_BUILD_DURING_DEPLOYMENT=true`.
 2. Comando de inicio: `npx prisma migrate deploy && node .next/standalone/server.js`
    (si usas build *standalone* copia `public` y `.next/static` dentro de `.next/standalone`, o usa simplemente
    `npm run start` sin `NEXT_OUTPUT`).

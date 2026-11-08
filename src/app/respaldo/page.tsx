@@ -7,6 +7,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { mutate } from 'swr';
 import { api } from '@/lib/client';
 import { useToast } from '@/components/Toast';
+import SincronizarNube from '@/components/SincronizarNube';
+import Contrasenas from '@/components/Contrasenas';
 import { COLORS, FONT_MONO } from '@/theme';
 
 // Script para extraer los datos guardados por la versión HTML anterior (localStorage)
@@ -43,6 +45,9 @@ export default function Respaldo() {
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>💾 Respaldo y migración</Typography>
       <Stack spacing={2}>
+        <SincronizarNube />
+        <Contrasenas />
+
         <Paper sx={{ p: 2.5 }}>
           <Typography variant="h5" sx={{ mb: 1 }}>Descargar respaldo completo</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>

@@ -7,7 +7,7 @@ import {
   MenuItem, Skeleton, Stack, TextField, Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { api, useEventos } from '@/lib/client';
+import { api, useEventos, useSesion } from '@/lib/client';
 import { useRun } from '@/components/Toast';
 import EquipoAvatar from '@/components/EquipoAvatar';
 import LogoUpload from '@/components/LogoUpload';
@@ -17,6 +17,7 @@ import { COLORS } from '@/theme';
 
 export default function Inicio() {
   const { data: eventos, isLoading, mutate } = useEventos();
+  const { esAdmin } = useSesion();
   const [open, setOpen] = useState(false);
 
   const porAnio = new Map<number, EventoDTO[]>();
@@ -31,16 +32,24 @@ export default function Inicio() {
             Cada evento (edición) tiene sus pruebas, equipos, fichas, tiempos y disciplina.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
-          Nuevo evento
-        </Button>
+        {esAdmin && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
+            Nuevo evento
+          </Button>
+        )}
       </Stack>
 
       {isLoading && <Skeleton variant="rounded" height={120} />}
       {!isLoading && !eventos?.length && (
         <Vacio icono="🏁">
-          Aún no hay eventos. Crea el primero, o ve a <Link href="/respaldo">Respaldo</Link> para importar los datos de la
-          versión anterior.
+          {esAdmin ? (
+            <>
+              Aún no hay eventos. Crea el primero, o ve a <Link href="/respaldo">Respaldo</Link> para importar los datos de
+              la versión anterior.
+            </>
+          ) : (
+            'Aún no hay eventos. El administrador debe crearlos.'
+          )}
         </Vacio>
       )}
 

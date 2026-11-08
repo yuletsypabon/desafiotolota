@@ -3,15 +3,16 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { Box, Container, Skeleton, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { useEvento } from '@/lib/client';
+import { useEvento, useSesion } from '@/lib/client';
 import EquipoAvatar from '@/components/EquipoAvatar';
 import { COLORS } from '@/theme';
 
+/** `crono`: pestañas que también ve el cronometrador */
 const TABS = [
-  { seg: 'cronometro', label: '⏱ Cronometraje' },
+  { seg: 'cronometro', label: '⏱ Cronometraje', crono: true },
   { seg: 'equipos', label: '🛡 Equipos' },
   { seg: 'disciplina', label: '⚖️ Disciplina' },
-  { seg: 'resultados', label: '🏆 Resultados' },
+  { seg: 'resultados', label: '🏆 Resultados', crono: true },
   { seg: 'espiritual', label: '✝️ Espiritual' },
   { seg: '', label: '⚙️ Configuración' },
 ];
@@ -20,6 +21,8 @@ export default function EventoLayout({ children }: { children: ReactNode }) {
   const { eventoId } = useParams<{ eventoId: string }>();
   const path = usePathname();
   const { data: ev, error } = useEvento(eventoId);
+  const { esAdmin } = useSesion();
+  const tabs = TABS.filter((t) => esAdmin || t.crono);
   const base = `/eventos/${eventoId}`;
   const actual = path.replace(base, '').replace(/^\//, '').split('/')[0] || '';
 
@@ -40,8 +43,8 @@ export default function EventoLayout({ children }: { children: ReactNode }) {
               )}
             </Box>
           </Stack>
-          <Tabs value={actual} variant="scrollable" scrollButtons="auto" sx={{ mt: 0.5 }}>
-            {TABS.map((t) => (
+          <Tabs value={tabs.some((t) => t.seg === actual) ? actual : false} variant="scrollable" scrollButtons="auto" sx={{ mt: 0.5 }}>
+            {tabs.map((t) => (
               <Tab key={t.seg} value={t.seg} label={t.label} component={Link} href={t.seg ? `${base}/${t.seg}` : base} />
             ))}
           </Tabs>

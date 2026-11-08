@@ -3,15 +3,18 @@ import { useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import PrintIcon from '@mui/icons-material/Print';
 import { aplicarPatron, PATRONES } from '@/lib/orden';
+import { htmlOrdenSalida, imprimirHtml } from '@/lib/imprimir';
 import EquipoAvatar from '@/components/EquipoAvatar';
 import type { EquipoDTO } from '@/lib/types';
 import { COLORS, FONT_DISPLAY } from '@/theme';
 
 export default function OrdenDialog({
-  titulo, inicial, onClose, onSave,
+  titulo, evento, inicial, onClose, onSave,
 }: {
   titulo: string;
+  evento: string;
   inicial: EquipoDTO[];
   onClose: () => void;
   onSave: (ids: string[]) => void;
@@ -66,6 +69,10 @@ export default function OrdenDialog({
         </Box>
       </DialogContent>
       <DialogActions>
+        <Button color="inherit" startIcon={<PrintIcon />} sx={{ mr: 'auto' }}
+          onClick={() => !imprimirHtml(htmlOrdenSalida({ evento, prueba: titulo, equipos: lista })) && alert('El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para este sitio.')}>
+          Imprimir / PDF
+        </Button>
         <Button color="inherit" onClick={onClose}>Cancelar</Button>
         <Button variant="contained" onClick={() => onSave(lista.map((e) => e.id))}>Guardar orden</Button>
       </DialogActions>

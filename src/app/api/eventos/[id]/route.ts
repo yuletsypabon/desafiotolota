@@ -1,15 +1,20 @@
 import { prisma } from '@/lib/prisma';
 import { handler, notFound, ok, parseBody, type Ctx } from '@/lib/api';
 import { eventoUpdate } from '@/lib/validators';
+import { pruebasHabilitadas, rolDe } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = handler(async (_req: Request, { params }: Ctx) => {
+export const GET = handler(async (req: Request, { params }: Ctx) => {
   const { id } = await params;
   const ev = await prisma.evento.findUnique({
     where: { id },
     include: {
-      pruebas: { orderBy: { posicion: 'asc' }, include: { _count: { select: { resultados: true } } } },
+      pruebas: {
+        where: rolDe(req) === 'CRONO' ? pruebasHabilitadas() : undefined,
+        orderBy: { posicion: 'asc' },
+        include: { _count: { select: { resultados: true } } },
+      },
       _count: { select: { equipos: true } },
     },
   });

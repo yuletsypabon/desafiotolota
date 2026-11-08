@@ -5,14 +5,20 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // conexión con pooler (app)
+  directUrl = env("DIRECT_URL") // conexión directa/sesión (migraciones)
 }
 
 enum EstadoPrueba {
   PENDIENTE
   EN_CURSO
   FINALIZADA
+}
+
+enum Rol {
+  ADMIN
+  CRONO
 }
 
 enum TipoPunto {
@@ -45,15 +51,17 @@ model Evento {
 }
 
 model Prueba {
-  id          String       @id @default(cuid())
-  eventoId    String
-  nombre      String
-  posicion    Int          @default(0)
-  estado      EstadoPrueba @default(PENDIENTE)
+  id              String       @id @default(cuid())
+  eventoId        String
+  nombre          String
+  posicion        Int          @default(0)
+  estado          EstadoPrueba @default(PENDIENTE)
   /// IDs de equipo en el orden de salida. Equipos que no estén aquí salen al final por número.
-  ordenSalida String[]     @default([])
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  ordenSalida     String[]     @default([])
+  /// Desde cuándo el cronometrador puede usar la prueba (null = no habilitada)
+  habilitadaDesde DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   evento     Evento            @relation(fields: [eventoId], references: [id], onDelete: Cascade)
   resultados Resultado[]
@@ -147,4 +155,11 @@ model PuntoDisciplina {
 
   @@index([pruebaId])
   @@index([equipoId])
+}
+
+/// Contraseña de cada rol (hash scrypt). Solo en la base local: no se sincroniza a la nube.
+model Credencial {
+  rol       Rol      @id
+  hash      String
+  updatedAt DateTime @updatedAt
 }

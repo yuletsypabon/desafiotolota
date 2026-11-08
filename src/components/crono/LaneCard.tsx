@@ -62,7 +62,8 @@ export default function LaneCard({
   onAccion: () => void;
   onDet: () => void;
   onElegir: (equipoId: string) => void;
-  onQuitar: () => void;
+  /** Sin función: no se muestra (con asignación automática la pista se volvería a llenar) */
+  onQuitar?: () => void;
   onCancelarSalida: () => void;
   onReintentar: () => void;
 }) {
@@ -146,7 +147,7 @@ export default function LaneCard({
 
       <Typography
         sx={{
-          fontFamily: FONT_MONO, fontWeight: 700, fontSize: { xs: 30, md: 34 }, lineHeight: 1,
+          fontFamily: FONT_MONO, fontWeight: 700, fontSize: { xs: 26, md: 30 }, lineHeight: 1, whiteSpace: 'nowrap',
           color: st === 'run' ? COLORS.green : st === 'det' ? COLORS.orange : st === 'fin' ? COLORS.gold : COLORS.text,
         }}
       >
@@ -178,7 +179,7 @@ export default function LaneCard({
       )}
 
       <Stack direction="row" spacing={0.5}>
-        {st === 'rdy' && <Button size="small" color="inherit" onClick={onQuitar}>Quitar de pista</Button>}
+        {st === 'rdy' && onQuitar && <Button size="small" color="inherit" onClick={onQuitar}>Quitar de pista</Button>}
         {activo && <Button size="small" color="inherit" onClick={onCancelarSalida}>↺ Salida en falso</Button>}
         {st === 'fin' && lane.guardado === 'error' && <Button size="small" color="error" onClick={onReintentar}>Reintentar guardar</Button>}
       </Stack>

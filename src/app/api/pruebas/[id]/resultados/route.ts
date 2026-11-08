@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { handler, ok, parseBody, type Ctx } from '@/lib/api';
 import { resultadoUpsert } from '@/lib/validators';
 import { sumaDetenciones } from '@/lib/scoring';
+import { exigirPruebaHabilitada } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,7 @@ export const GET = handler(async (_req: Request, { params }: Ctx) => {
 // PUT — guarda (o reemplaza) el tiempo de un equipo en la prueba. Se llama al marcar LLEGADA.
 export const PUT = handler(async (req: Request, { params }: Ctx) => {
   const { id } = await params;
+  await exigirPruebaHabilitada(req, id);
   const d = await parseBody(req, resultadoUpsert);
   const data = {
     pista: d.pista ?? null,

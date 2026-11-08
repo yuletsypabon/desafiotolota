@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import { calcularClasificacion, valorPunto } from '../src/lib/scoring';
 import { aplicarPatron, ordenEfectivo } from '../src/lib/orden';
 import { fmt, fmtSeg } from '../src/lib/format';
+import { intercambiarEnPistas, intercambiarEnSet } from '../src/lib/intercambio';
+import { htmlOrdenSalida } from '../src/lib/imprimir';
+import { crearToken, leerToken, permitidoCrono } from '../src/lib/sesion';
+import { asignacionesLibres } from '../src/lib/asignacion';
+import { accionDeBoton } from '../src/lib/gamepad';
 
 const cfg = { penLeveMs: 300, penMediaMs: 500, penGraveMs: 1000, bonPositivoMs: 100 };
 const evento = { id: 'ev', nombre: 'Desafío', anio: 2026, ...cfg };
@@ -21,10 +26,11 @@ const r = (id: string, pruebaId: string, equipoId: string, brutoMs: number, dete
 });
 
 test('formato de tiempo', () => {
-  assert.equal(fmt(0), '00:00.00');
-  assert.equal(fmt(61_234), '01:01.23');
-  assert.equal(fmt(3_725_010), '1:02:05.01');
-  assert.equal(fmt(-5), '00:00.00');
+  assert.equal(fmt(0), '00:00:00:00');
+  assert.equal(fmt(61_234), '00:01:01:23');
+  assert.equal(fmt(3_725_010), '01:02:05:01');
+  assert.equal(fmt(-5), '00:00:00:00');
+  assert.equal(fmt(22_371), '00:00:22:37'); // trunca, no redondea
   assert.equal(fmtSeg(300), '+0.3s');
   assert.equal(fmtSeg(-100), '-0.1s');
 });
@@ -122,4 +128,130 @@ test('orden efectivo agrega equipos nuevos al final por número', () => {
   ];
   assert.deepEqual(ordenEfectivo(['z', 'borrado', 'x'], eqs).map((e) => e.id), ['z', 'x', 'y']);
   assert.deepEqual(ordenEfectivo([], eqs).map((e) => e.id), ['y', 'z', 'x']);
+});
+
+// ── Corregir pista ─────────────────────────────────────────────
+
+test('corregir pista: intercambia equipos entre pistas y conserva tiempos', () => {
+  const lanes = [
+    { equipoId: 'a', brutoMs: 1000 },
+    { equipoId: 'b', brutoMs: 2000 },
+    { equipoId: null, brutoMs: null },
+    { equipoId: 'c', brutoMs: 3000 },
+  ];
+  const r = intercambiarEnPistas(lanes, 'a', 'b');
+  assert.deepEqual(r.map((l) => [l.equipoId, l.brutoMs]), [['b', 1000], ['a', 2000], [null, null], ['c', 3000]]);
+  // con un equipo que no está en pista (tiempo ya guardado): solo cambia la pista que lo tiene
+  const r2 = intercambiarEnPistas(lanes, 'c', 'z');
+  assert.equal(r2[3].equipoId, 'z');
+  assert.equal(r2[3].brutoMs, 3000);
+});
+
+test('corregir pista: intercambia la pertenencia en el conjunto de finalizados', () => {
+  assert.deepEqual([...intercambiarEnSet(new Set(['a', 'x']), 'a', 'b')].sort(), ['b', 'x']);
+  assert.deepEqual([...intercambiarEnSet(new Set(['a', 'b']), 'a', 'b')].sort(), ['a', 'b']);
+  assert.deepEqual([...intercambiarEnSet(new Set(['x']), 'a', 'b')], ['x']);
+});
+
+test('orden aleatorio: es una permutación y depende del azar', () => {
+  const b = [1, 2, 3, 4, 5, 6];
+  const o = aplicarPatron(b, 'azar');
+  assert.deepEqual(o.slice().sort(), b);
+  assert.deepEqual(b, [1, 2, 3, 4, 5, 6]); // no modifica la lista original
+  // con un azar fijo el resultado es reproducible
+  assert.deepEqual(aplicarPatron(b, 'azar', () => 0), [2, 3, 4, 5, 6, 1]);
+});
+
+// ── Hoja de orden de salida ────────────────────────────────────
+
+test('hoja de orden: lista los equipos en orden y escapa el HTML', () => {
+  const html = htmlOrdenSalida({
+    evento: 'Desafío 2026',
+    prueba: 'Muro',
+    equipos: [
+      { numero: 3, nombre: 'Halcones', capitan: 'Sofía' },
+      { numero: 1, nombre: '<script>x</script>', capitan: null },
+    ],
+  });
+  assert.ok(html.indexOf('Halcones') < html.indexOf('&lt;script&gt;x&lt;/script&gt;'));
+  assert.ok(!html.includes('<script>x</script>'));
+  assert.ok(html.includes('2 equipos'));
+});
+
+// ── Sesión y permisos por rol ──────────────────────────────────
+
+test('sesión: token válido, alterado y vencido', async () => {
+  process.env.AUTH_SECRET = 'secreto-de-prueba';
+  const t = await crearToken('CRONO');
+  assert.equal(await leerToken(t), 'CRONO');
+  // Cambiar el rol invalida la firma
+  assert.equal(await leerToken(t.replace(/^CRONO/, 'ADMIN')), null);
+  // Vence a las 12 horas
+  assert.equal(await leerToken(t, Date.now() + 13 * 3600 * 1000), null);
+  // Firmado con otro secreto: no sirve
+  process.env.AUTH_SECRET = 'otro';
+  assert.equal(await leerToken(t), null);
+  assert.equal(await leerToken('basura'), null);
+  assert.equal(await leerToken(undefined), null);
+});
+
+test('permisos del cronometrador', () => {
+  const q = (s = '') => new URLSearchParams(s);
+  const si = (m: string, r: string, s?: string) => assert.equal(permitidoCrono(m, r, q(s)), true, `${m} ${r}`);
+  const no = (m: string, r: string, s?: string) => assert.equal(permitidoCrono(m, r, q(s)), false, `${m} ${r}`);
+  // Puede: inicio, cronómetro, resultados y lo que estas pantallas usan
+  si('GET', '/');
+  si('GET', '/eventos/ev1/cronometro');
+  si('GET', '/eventos/ev1/resultados');
+  si('GET', '/api/eventos/ev1/equipos');
+  si('PUT', '/api/pruebas/p1/resultados');
+  si('POST', '/api/pruebas/p1/resultados/intercambiar');
+  si('DELETE', '/api/resultados/r1');
+  si('GET', '/api/eventos/ev1/exportar', 'tipo=general');
+  si('GET', '/api/auth/sesion');
+  si('POST', '/api/auth/logout');
+  // No puede: fichas, equipos, disciplina, configuración, respaldo, contraseñas
+  no('GET', '/eventos/ev1/equipos');
+  no('GET', '/eventos/ev1/disciplina');
+  no('GET', '/eventos/ev1');
+  no('GET', '/respaldo');
+  no('GET', '/api/eventos/ev1/exportar', 'tipo=participantes');
+  no('PATCH', '/api/participantes/x');
+  no('POST', '/api/eventos/ev1/disciplina');
+  no('DELETE', '/api/pruebas/p1');
+  no('PATCH', '/api/eventos/ev1');
+  no('GET', '/api/respaldo');
+  no('POST', '/api/sincronizar');
+  no('PUT', '/api/auth/claves');
+});
+
+test('asignación automática: llena las pistas libres en orden', () => {
+  const libre = { equipoId: null, state: 'idle' };
+  // Tres pistas libres, cuatro equipos en cola: entran los tres primeros
+  assert.deepEqual(asignacionesLibres([libre, libre, libre], ['a', 'b', 'c', 'd']), [[0, 'a'], [1, 'b'], [2, 'c']]);
+  // Pista 2 corriendo con a: la libre recibe el siguiente que no esté en pista
+  assert.deepEqual(asignacionesLibres([libre, { equipoId: 'a', state: 'run' }], ['a', 'b']), [[0, 'b']]);
+  // Sin equipos pendientes: no asigna nada
+  assert.deepEqual(asignacionesLibres([libre, libre], []), []);
+  // Más pistas que equipos: las sobrantes quedan libres
+  assert.deepEqual(asignacionesLibres([libre, libre, libre], ['z']), [[0, 'z']]);
+  // Ninguna pista libre
+  assert.deepEqual(asignacionesLibres([{ equipoId: 'a', state: 'rdy' }], ['b']), []);
+});
+
+test('encoder: cada botón hace lo mismo que en la versión HTML', () => {
+  // Botón 1: la pista seleccionada; sin selección, la pista 1
+  assert.deepEqual(accionDeBoton(0, 3, 2), { tipo: 'accion', pista: 2 });
+  assert.deepEqual(accionDeBoton(0, 3, null), { tipo: 'accion', pista: 0 });
+  // Botones 2 y 3: pistas 2 y 3
+  assert.deepEqual(accionDeBoton(1, 3, null), { tipo: 'accion', pista: 1 });
+  assert.deepEqual(accionDeBoton(2, 3, null), { tipo: 'accion', pista: 2 });
+  // Botón 4 solo si hay 4 pistas
+  assert.equal(accionDeBoton(3, 3, null), null);
+  assert.deepEqual(accionDeBoton(3, 4, null), { tipo: 'accion', pista: 3 });
+  // Botones 5–7: detenido en pistas 1–3
+  assert.deepEqual(accionDeBoton(4, 3, null), { tipo: 'detenido', pista: 0 });
+  assert.deepEqual(accionDeBoton(6, 3, null), { tipo: 'detenido', pista: 2 });
+  assert.equal(accionDeBoton(5, 1, null), null);
+  assert.equal(accionDeBoton(9, 3, null), null);
 });

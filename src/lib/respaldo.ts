@@ -16,34 +16,47 @@ export async function exportarTodo() {
   return { app: 'desafio-tolota', version: RESPALDO_VERSION, exportadoEn: new Date().toISOString(), eventos };
 }
 
-type Respaldo = Awaited<ReturnType<typeof exportarTodo>>;
+export type Respaldo = Awaited<ReturnType<typeof exportarTodo>>;
+type EventoRespaldo = Respaldo['eventos'][number];
+
+/**
+ * Escribe eventos completos en una base de datos (local o nube). Si un evento con el mismo ID
+ * ya existe, se borra (en cascada) y se vuelve a crear, así el destino queda idéntico al origen.
+ * Usa inserciones por lote: pocas consultas por evento aunque haya cientos de fichas.
+ */
+export async function escribirEventos(tx: Prisma.TransactionClient, eventos: EventoRespaldo[]) {
+  const total = { eventos: 0, pruebas: 0, equipos: 0, participantes: 0, resultados: 0, puntos: 0 };
+  for (const ev of eventos) {
+    const { pruebas, equipos, ...evData } = ev;
+    await tx.evento.deleteMany({ where: { id: ev.id } });
+    await tx.evento.create({ data: evData });
+
+    const participantes = equipos.flatMap((e) => e.participantes);
+    const resultados = pruebas.flatMap((p) => p.resultados);
+    const puntos = pruebas.flatMap((p) => p.puntos);
+    if (equipos.length) await tx.equipo.createMany({ data: equipos.map(({ participantes: _p, ...e }) => ({ ...e, eventoId: ev.id })) });
+    if (participantes.length) await tx.participante.createMany({ data: participantes });
+    if (pruebas.length)
+      await tx.prueba.createMany({ data: pruebas.map(({ resultados: _r, puntos: _pt, ...p }) => ({ ...p, eventoId: ev.id })) });
+    if (resultados.length)
+      await tx.resultado.createMany({
+        data: resultados.map((r) => ({ ...r, detenciones: (r.detenciones ?? []) as Prisma.InputJsonValue })),
+      });
+    if (puntos.length) await tx.puntoDisciplina.createMany({ data: puntos });
+
+    total.eventos++;
+    total.pruebas += pruebas.length;
+    total.equipos += equipos.length;
+    total.participantes += participantes.length;
+    total.resultados += resultados.length;
+    total.puntos += puntos.length;
+  }
+  return total;
+}
 
 /** Restaura un respaldo propio. Si un evento con el mismo ID existe, se reemplaza. */
 export async function importarRespaldo(data: Respaldo) {
-  let eventos = 0;
-  await prisma.$transaction(
-    async (tx) => {
-      for (const ev of data.eventos) {
-        const { pruebas, equipos, ...evData } = ev;
-        await tx.evento.deleteMany({ where: { id: ev.id } });
-        await tx.evento.create({ data: { ...evData, createdAt: new Date(evData.createdAt), updatedAt: new Date() } });
-        for (const { participantes, ...e } of equipos) {
-          await tx.equipo.create({ data: { ...e, eventoId: ev.id } });
-          if (participantes.length) await tx.participante.createMany({ data: participantes });
-        }
-        for (const { resultados, puntos, ...p } of pruebas) {
-          await tx.prueba.create({ data: { ...p, eventoId: ev.id } });
-          if (resultados.length)
-            await tx.resultado.createMany({
-              data: resultados.map((r) => ({ ...r, detenciones: r.detenciones as Prisma.InputJsonValue })),
-            });
-          if (puntos.length) await tx.puntoDisciplina.createMany({ data: puntos });
-        }
-        eventos++;
-      }
-    },
-    { timeout: 60_000 },
-  );
+  const { eventos } = await prisma.$transaction((tx) => escribirEventos(tx, data.eventos), { timeout: 60_000 });
   return { eventos };
 }
 

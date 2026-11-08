@@ -1,7 +1,6 @@
 'use client';
 import { useRef } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { resizeImage } from '@/lib/client';
 import { useToast } from './Toast';
 import EquipoAvatar from './EquipoAvatar';

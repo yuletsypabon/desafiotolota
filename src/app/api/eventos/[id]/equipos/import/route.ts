@@ -40,7 +40,7 @@ export const POST = handler(async (req: Request, { params }: Ctx) => {
       }
     }
     return { creados, actualizados, participantes };
-  });
+  }, { timeout: 30_000 }); // varias consultas por fila del CSV
 
   return ok(resumen);
 });

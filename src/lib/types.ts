@@ -10,6 +10,8 @@ export interface PruebaDTO {
   posicion: number;
   estado: EstadoPrueba;
   ordenSalida: string[];
+  /** ISO; null = no habilitada para el cronometrador */
+  habilitadaDesde: string | null;
   _count?: { resultados: number };
 }
 

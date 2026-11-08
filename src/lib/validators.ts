@@ -44,8 +44,13 @@ export const pruebaUpdate = z
     nombre: z.string().trim().min(1).max(200),
     estado: z.enum(['PENDIENTE', 'EN_CURSO', 'FINALIZADA']),
     ordenSalida: z.array(z.string()).max(500),
+    /** null = deshabilitada para el cronometrador */
+    habilitadaDesde: z.coerce.date().nullable(),
   })
   .partial();
+
+/** Lo único que el cronometrador puede cambiar de una prueba */
+export const pruebaUpdateCrono = pruebaUpdate.pick({ estado: true, ordenSalida: true }).strict();
 
 export const pruebasReorder = z.object({ ids: z.array(z.string()).min(1) });
 
@@ -102,6 +107,11 @@ export const resultadoUpsert = z.object({
   observacion: optStr,
 });
 
+/** Corregir pista: los tiempos de A pasan a B y los de B a A */
+export const resultadoIntercambio = z
+  .object({ equipoA: z.string().min(1), equipoB: z.string().min(1) })
+  .refine((d) => d.equipoA !== d.equipoB, { message: 'Elige dos equipos distintos' });
+
 export const puntoCreate = z.object({
   pruebaId: z.string().min(1),
   equipoId: z.string().min(1),
@@ -110,3 +120,17 @@ export const puntoCreate = z.object({
   descripcion: optStr,
   hora: optStr,
 });
+
+// ── Sesión y contraseñas ──────────────────────────────────────
+const rol = z.enum(['ADMIN', 'CRONO']);
+export const MIN_CLAVE = 4;
+const clave = z.string().min(MIN_CLAVE, `Mínimo ${MIN_CLAVE} caracteres`).max(100);
+
+export const login = z.object({ rol, clave: z.string().min(1, 'Escribe la contraseña').max(100) });
+
+/** Contraseñas iniciales (comando `npm run claves`) */
+export const clavesIniciales = z
+  .object({ admin: clave, crono: clave })
+  .refine((d) => d.admin !== d.crono, { message: 'Usa contraseñas distintas para cada rol' });
+
+export const cambioClave = z.object({ rol, nueva: clave, actual: z.string().max(100).optional() });

@@ -13,6 +13,7 @@ import { api, useEvento } from '@/lib/client';
 import { useRun } from '@/components/Toast';
 import LogoUpload from '@/components/LogoUpload';
 import type { EstadoPrueba, EventoDTO, PruebaDTO } from '@/lib/types';
+import HabilitacionPrueba from '@/components/HabilitacionPrueba';
 import { ESTADOS } from '@/lib/estados';
 import { COLORS, FONT_DISPLAY } from '@/theme';
 
@@ -135,6 +136,7 @@ export default function ConfigEvento() {
         <Typography variant="h4" sx={{ mb: 1 }}>Pruebas</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Renombra (se guarda al salir del campo), ordena, cambia el estado o agrega pruebas en cualquier momento.
+          El candado indica si el cronometrador puede usar la prueba: haz clic para habilitarla ahora o programarla.
         </Typography>
         {pruebas.map((p, i) => (
           <Stack key={p.id} direction="row" spacing={1} alignItems="center" sx={{ py: 0.75, borderBottom: `1px solid ${COLORS.border}` }}>
@@ -154,6 +156,7 @@ export default function ConfigEvento() {
                 <MenuItem key={k} value={k}><Chip size="small" color={ESTADOS[k].color} label={ESTADOS[k].label} /></MenuItem>
               ))}
             </TextField>
+            <HabilitacionPrueba desde={p.habilitadaDesde} onCambiar={(habilitadaDesde) => patchPrueba(p, { habilitadaDesde })} />
             <Tooltip title="Tiempos registrados"><Chip size="small" label={`${p._count?.resultados ?? 0} ⏱`} /></Tooltip>
             <IconButton size="small" onClick={() => mover(i, -1)} disabled={i === 0}><ArrowUpwardIcon fontSize="small" /></IconButton>
             <IconButton size="small" onClick={() => mover(i, 1)} disabled={i === pruebas.length - 1}><ArrowDownwardIcon fontSize="small" /></IconButton>
