@@ -1,7 +1,12 @@
-# DESAFÍO Tolotá — Sistema de Cronometraje v2
+# DESAFÍO Tolotá — Sitio web y sistema de cronometraje
 
-Aplicación web para cronometrar el Desafío Tolotá: eventos, pruebas, equipos con fichas médicas,
-cronómetro multipista con pulsador físico, disciplina, resultados por prueba y tabla general acumulada.
+Una sola aplicación con dos partes:
+
+- **Sitio público** (sin sesión): portada, página de la edición de cada año (`/desafio-2026`: equipos con su
+  alineación, pruebas y resultados en vivo), ediciones, historia, espiritual, recursos, galería y contacto.
+- **Sistema de cronometraje** en `/cronometro` (con sesión de Administrador o Cronometrador): eventos, pruebas,
+  equipos con fichas médicas, cronómetro multipista con pulsador físico, disciplina, componente espiritual,
+  resultados por prueba, tabla general acumulada, respaldo y sincronización con la nube.
 
 **Stack:** Next.js 15 (App Router) · React 19 + TypeScript · Material UI 7 · PostgreSQL + Prisma · SWR · Node.js 20+ · npm
 
@@ -17,13 +22,13 @@ cronómetro multipista con pulsador físico, disciplina, resultados por prueba y
 | Penalización calculada solo al momento de la llegada | Tiempo final **recalculado siempre**: si registras disciplina después, el resultado se actualiza |
 | Disciplina asignada a una prueba según la hora | Se elige la prueba explícitamente (por defecto la que está en curso) |
 | Integrantes como texto + fichas separadas | Integrantes = fichas de participante (datos, emergencia y ficha médica) |
-| Guardado manual "💾 Guardar prueba" | Cada llegada se guarda al instante; si falla la red, la pista avisa y permite reintentar |
+| Guardado manual "Guardar prueba" | Cada llegada se guarda sola al marcar LLEGADA; si falla la red, la pista avisa y permite reintentar |
 | Si se recargaba la página se perdían los cronómetros | El estado de las pistas se recupera al recargar (en ese mismo equipo) |
 | — | **Tabla general acumulada**, podios, exportación CSV (general, por prueba, fichas) |
 | — | **Respaldo JSON** completo + importación, y **migración** de los datos de la versión anterior |
 | — | Orden de salida guardado por prueba (arrastrar, flechas o patrones) |
 | — | Varios dispositivos a la vez: los resultados se refrescan cada pocos segundos |
-| PIN de administrador y cronometrador guardados en el navegador | **Inicio de sesión por rol** (Administrador / Cronometrador) validado en el servidor, contraseñas cifradas y cambiables en la app; el cronometrador solo ve las pruebas habilitadas y nunca las fichas |
+| PIN de administrador y cronometrador guardados en el navegador | **Inicio de sesión por rol** (Administrador / Cronometrador) validado en el servidor, contraseñas cifradas y cambiables en la app; el cronometrador ve las pruebas habilitadas y puede desbloquear el Histórico con una contraseña adicional |
 
 ---
 
@@ -31,29 +36,39 @@ cronómetro multipista con pulsador físico, disciplina, resultados por prueba y
 
 ```
 prisma/
-  schema.prisma            Modelo de datos (Evento, Prueba, Equipo, Participante, Resultado, PuntoDisciplina)
-  migrations/              Migración SQL inicial
+  schema.prisma            Modelo de datos (eventos, pruebas, equipos, fichas, resultados, disciplina, espiritual, reservas)
+  migrations/              Migraciones SQL
   seed.ts                  Datos de demostración
+scripts/                   Preparar la base, crear contraseñas y AUTH_SECRET, migrar la nube
 src/
   app/
-    page.tsx               Inicio: lista de eventos por año + crear evento
-    respaldo/              Respaldo / importación / migración desde la versión HTML
-    eventos/[eventoId]/
-      page.tsx             Configuración: datos, pistas, pulsador, valores de disciplina, pruebas
-      cronometro/          Cronómetro multipista, cola, orden de salida, resultados en vivo
-      equipos/             Equipos, logos, fichas de participantes, importación CSV
-      disciplina/          Registro de puntos (leve, media, grave, positivo)
-      resultados/          General acumulada + resultados por prueba + exportación
-      espiritual/          (Próximamente)
-    api/                   API REST (route handlers) — ver tabla abajo
-  components/              Componentes de UI (pistas, diálogos, avatar, toasts…)
+    page.tsx               Portada del sitio público
+    desafio/[anio]/        Página de cada edición (se ve como /desafio-2026)
+    ediciones/ historia/ espiritual/ recursos/ galeria/ contacto/   Secciones del sitio
+    login/                 Inicio de sesión del sistema
+    cronometro/            Sistema de cronometraje (privado)
+      page.tsx             Lista de eventos y creación de eventos
+      respaldo/            Respaldo, importación, contraseñas y sincronización con la nube
+      eventos/[eventoId]/
+        page.tsx           Configuración: datos, pistas, pulsador, disciplina, pruebas y su habilitación
+        cronometro/        Cronómetro multipista, cola, orden de salida
+        equipos/           Equipos, logos, color del capitán, fichas e importación CSV
+        disciplina/        Puntos de disciplina (leve, media, grave, positivo)
+        espiritual/        Actividades por prueba, puntos por equipo y descuento de tiempo
+        resultados/        General acumulada, resultados por prueba y exportación
+    api/                   API REST (ver tabla abajo)
+  components/
+    landing/ sitio/        Portada y páginas públicas (sitio/edicion: franjas de equipos y alineación)
+    crono/                 Piezas del cronómetro (pista, reloj, diálogos)
   lib/
     scoring.ts             Cálculo de tiempos, posiciones y general (funciones puras, con pruebas)
-    orden.ts               Patrones de orden de salida
+    sesion.ts auth.ts      Sesión firmada, roles, permisos y límite de intentos
     validators.ts          Validación de entradas (zod)
-    respaldo.ts            Exportar/importar respaldo y migración desde localStorage
-  middleware.ts            Autenticación básica opcional
-tests/                     Pruebas unitarias de la lógica (npm test)
+    respaldo.ts nube.ts    Respaldo JSON y sincronización con Supabase
+    contenido.ts evento.ts Textos del sitio y datos de la edición (fechas, lugar, ediciones)
+    marca.ts               Colores, letras y efecto vidrio (theme.ts los usa en el sistema)
+  middleware.ts            Exige sesión en /cronometro y /api; el cronometrador solo entra a lo suyo
+tests/                     Pruebas unitarias (npm test)
 ```
 
 ### API
@@ -76,6 +91,9 @@ tests/                     Pruebas unitarias de la lógica (npm test)
 | GET | `/api/eventos/:id/clasificacion` | Resultados por prueba + general |
 | GET | `/api/eventos/:id/exportar?tipo=general\|prueba\|todas\|participantes` | CSV |
 | GET/POST | `/api/respaldo` | Descargar / importar respaldo JSON |
+| PUT | `/api/pruebas/:id/reservas` | Equipos cargados en las pistas de cada dispositivo |
+| GET/POST | `/api/sincronizar` | Estado / copia de todos los eventos a la nube |
+| GET | `/api/publico/resultados/:eventoId` | Resultados públicos de la página de la edición (sin sesión) |
 
 ---
 
@@ -98,7 +116,7 @@ de datos del portátil y, cuando haya conexión, se copian a la **nube (Supabase
    - `DATABASE_URL` y `DIRECT_URL`: cambia `postgres:postgres` por `postgres:TU_CONTRASEÑA`.
    - `NUBE_DATABASE_URL`: la URL **Session pooler (puerto 5432)** de Supabase.
 3. Doble clic en **`Iniciar evento.bat`**. La primera vez instala dependencias, crea la base `desafio_tolota`,
-   crea las tablas y compila (unos minutos).
+   crea las tablas, genera la clave de las sesiones (`AUTH_SECRET`) y compila (unos minutos).
 4. Crea las tablas en la nube (una vez, y de nuevo cada vez que cambie el modelo de datos):
    ```bash
    npm run nube:migrar
@@ -106,16 +124,17 @@ de datos del portátil y, cuando haya conexión, se copian a la **nube (Supabase
 5. La primera vez que arranque, Windows preguntará si Node.js puede usar la red: permite **Redes privadas**.
 
 ### Durante el evento
-- **Roles:** el **Administrador** ve todo; el **Cronometrador** solo cronometra y ve resultados de las pruebas
-  que el administrador habilitó (Configuración del evento → candado de cada prueba). La primera vez,
-  `Iniciar evento.bat` pide crear las dos contraseñas en su ventana (o `npm run claves`); luego se cambian en
-  **Respaldo → Contraseñas**. No se crean desde el navegador a propósito: así nadie en el Wi‑Fi puede adelantarse.
+- **Roles:** el **Administrador** ve todo; el **Cronometrador** cronometra y ve resultados de las pruebas
+  que el administrador habilitó (Configuración del evento → candado de cada prueba). Para consultar el Histórico,
+  ingresa la contraseña adicional configurada por el administrador en **Respaldo → Contraseñas**; el acceso dura dos horas.
+  La primera vez, `Iniciar evento.bat` pide crear las dos contraseñas de rol en su ventana (o `npm run claves`).
+  Estas no se crean desde el navegador a propósito: así nadie en el Wi‑Fi puede adelantarse.
 - Doble clic en **`Iniciar evento.bat`**. La ventana muestra las direcciones para los otros dispositivos,
   p. ej. `http://192.168.0.10:3000`. No cierres esa ventana mientras dure la jornada.
 - Los otros dispositivos deben estar en la misma red Wi-Fi y abrir esa dirección en el navegador.
 
 ### Al terminar cada jornada (con internet)
-- **Respaldo → ☁️ Sincronizar ahora.** Cada evento se copia completo a la nube en una sola operación:
+- **Respaldo → Sincronizar ahora.** Cada evento se copia completo a la nube en una sola operación:
   si se corta la conexión, la nube queda como estaba y se puede repetir.
 - Los eventos que existen solo en la nube (años anteriores) **se conservan**: el histórico no se borra.
 - La nube es para **consultar**: lo que se edite directamente en el sitio en la nube se reemplaza en la próxima
@@ -200,12 +219,13 @@ En **Vercel**, agrega las mismas dos variables (`DATABASE_URL` y `DIRECT_URL`) e
    *Settings → Environment Variables*. (Alternativa: *Storage → Neon*; en ese caso usa la URL directa como `DIRECT_URL`.)
 4. *Settings → Build & Development → Build Command*: `npm run vercel-build`
    (genera Prisma, **aplica migraciones** y compila).
-5. Agrega `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales del sitio en la nube).
+5. Agrega `AUTH_SECRET` (obligatoria; ver `.env.example` para generarla), `ADMIN_PASSWORD` y `CRONO_PASSWORD`
+   (contraseñas iniciales del sitio en la nube).
    Región: `vercel.json` fija las funciones en `pdx1` (Portland), junto a la base de Supabase (us-west-2, Oregón). Si creas Supabase
    en otra región, cambia `regions` por la región de Vercel más cercana (cada consulta cruza esa distancia).
 6. Deploy. Cada push a `main` vuelve a desplegar.
 
-> Límite de Vercel: los cuerpos de petición no pueden superar ~4.5 MB. Los logos se reducen a 256 px en el
+> Límite de Vercel: los cuerpos de petición no pueden superar ~4.5 MB. Los logos se reducen a 512 px en el
 > navegador, así que solo afecta a importaciones de respaldos muy grandes (impórtalos en local apuntando a la misma BD).
 
 ## Despliegue en Azure
@@ -216,7 +236,7 @@ En **Vercel**, agrega las mismas dos variables (`DATABASE_URL` y `DIRECT_URL`) e
 
 **App:** *Azure App Service* (Linux, Node 20 LTS o 22 LTS).
 1. Variables en *Configuration → Application settings*: `DATABASE_URL`, `NEXT_OUTPUT=standalone`,
-   `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales), `SCM_DO_BUILD_DURING_DEPLOYMENT=true`.
+   `AUTH_SECRET`, `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales), `SCM_DO_BUILD_DURING_DEPLOYMENT=true`.
 2. Comando de inicio: `npx prisma migrate deploy && node .next/standalone/server.js`
    (si usas build *standalone* copia `public` y `.next/static` dentro de `.next/standalone`, o usa simplemente
    `npm run start` sin `NEXT_OUTPUT`).
@@ -245,7 +265,8 @@ asignados a "Prueba actual" (sin prueba guardada) no se pueden ubicar y se repor
   - Teclado: `1…N` salida/llegada, `Q W E…` detenido/arrancó.
   - Pulsador físico (encoder USB que emite una tecla, por defecto `A`): haz clic en la pista para
     seleccionarla y presiona el pulsador.
-  - *Salida en falso* reinicia la pista; en la tabla, ↺ borra un tiempo para repetir.
+  - *Salida en falso* reinicia la pista; en la tabla, *Borrar tiempo* deja repetir la prueba.
+  - Varias tablets pueden cronometrar la misma prueba: un equipo cargado en una no aparece en la cola de las otras.
   - La pantalla no se apaga mientras haya equipos en pista (en navegadores compatibles).
 - **Disciplina** puede registrarse desde otro celular al mismo tiempo; el tiempo final se ajusta solo.
 - **Resultados** muestra la general acumulada y cada prueba, se actualiza cada 5 s y exporta a CSV.
