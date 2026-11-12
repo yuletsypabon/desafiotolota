@@ -29,6 +29,10 @@ export const eventoCreate = z.object({
   penMediaMs: ms.optional(),
   penGraveMs: ms.optional(),
   bonPositivoMs: ms.optional(),
+  descuentoEspiritualPorPuntoMs: z.number().finite().min(0).max(600_000).optional(),
+  /** Nombre del reto de equipos de 2 y de 4 (portada) */
+  nombreX2: optStr,
+  nombreX4: optStr,
   /** Nombres de pruebas iniciales */
   pruebas: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
   /** Copiar equipos (sin resultados) de otro evento */
@@ -38,6 +42,16 @@ export const eventoCreate = z.object({
 export const eventoUpdate = eventoCreate.omit({ pruebas: true, copiarEquiposDe: true }).partial();
 
 export const pruebaCreate = z.object({ nombre: z.string().trim().min(1).max(200) });
+export const actividadEspiritualCreate = z.object({ nombre: z.string().trim().min(1, 'Nombre obligatorio').max(200) });
+export const actividadEspiritualUpdate = actividadEspiritualCreate.partial();
+export const puntajesEspiritualesUpdate = z.object({
+  puntajes: z.array(z.object({
+    equipoId: z.string().min(1),
+    puntos: z.number().int().min(0).max(1_000_000),
+  })).max(1000).refine((puntajes) => new Set(puntajes.map((p) => p.equipoId)).size === puntajes.length, {
+    message: 'No repitas equipos en los puntajes',
+  }),
+});
 
 export const pruebaUpdate = z
   .object({
@@ -59,6 +73,9 @@ export const equipoCreate = z.object({
   nombre: z.string().trim().min(1, 'Nombre obligatorio').max(200),
   capitan: optStr,
   logo,
+  /** Color de la carta del capitán (#rrggbb); vacío = se toma del logo */
+  color: z.string().regex(/^#[0-9a-f]{6}$/i, 'Color inválido').or(z.literal('')).nullable().optional()
+    .transform((v) => (v ? v.toLowerCase() : v === undefined ? undefined : null)),
 });
 export const equipoUpdate = equipoCreate.partial();
 
@@ -69,7 +86,8 @@ export const equiposImport = z.object({
         numero: z.number().int().optional().nullable(),
         nombre: z.string().trim().min(1),
         capitan: z.string().optional().nullable(),
-        integrantes: z.array(z.string().trim().min(1)).optional(),
+        /** Fichas de los integrantes (el nombre es obligatorio; el resto de la ficha es opcional) */
+        integrantes: z.array(z.lazy(() => participanteFields)).max(100).optional(),
       }),
     )
     .min(1)
@@ -107,6 +125,12 @@ export const resultadoUpsert = z.object({
   observacion: optStr,
 });
 
+/** Equipos que este dispositivo tiene cargados en sus pistas (reserva entre dispositivos) */
+export const reservasSync = z.object({
+  dispositivo: z.string().min(8).max(64),
+  equipos: z.array(z.object({ equipoId: z.string().min(1), pista: z.number().int().min(1).max(8) })).max(8),
+});
+
 /** Corregir pista: los tiempos de A pasan a B y los de B a A */
 export const resultadoIntercambio = z
   .object({ equipoA: z.string().min(1), equipoB: z.string().min(1) })
@@ -134,3 +158,5 @@ export const clavesIniciales = z
   .refine((d) => d.admin !== d.crono, { message: 'Usa contraseñas distintas para cada rol' });
 
 export const cambioClave = z.object({ rol, nueva: clave, actual: z.string().max(100).optional() });
+export const cambioClaveHistorico = z.object({ nueva: clave });
+export const accesoHistorico = z.object({ clave: z.string().min(1, 'Escribe la contraseña').max(100) });

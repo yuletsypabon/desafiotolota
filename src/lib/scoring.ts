@@ -36,7 +36,7 @@ function posiciones<T>(lista: T[], clave: (x: T) => string): number[] {
 }
 
 interface Input {
-  evento: { id: string; nombre: string; anio: number } & PenalizacionCfg;
+  evento: { id: string; nombre: string; anio: number; descuentoEspiritualPorPuntoMs?: number } & PenalizacionCfg;
   pruebas: { id: string; nombre: string; estado: EstadoPrueba; posicion: number }[];
   equipos: { id: string; numero: number; nombre: string }[];
   resultados: {
@@ -51,6 +51,7 @@ interface Input {
     detenciones: unknown;
   }[];
   puntos: { pruebaId: string; equipoId: string; tipo: TipoPunto }[];
+  puntajesEspirituales?: { pruebaId: string; equipoId: string; puntos: number }[];
 }
 
 export function calcularClasificacion(input: Input): Clasificacion {
@@ -63,6 +64,12 @@ export function calcularClasificacion(input: Input): Clasificacion {
     const k = `${p.pruebaId}|${p.equipoId}`;
     pen.set(k, (pen.get(k) || 0) + valorPunto(p.tipo, evento));
   }
+  const puntosEspirituales = new Map<string, number>();
+  for (const p of input.puntajesEspirituales ?? []) {
+    const k = `${p.pruebaId}|${p.equipoId}`;
+    puntosEspirituales.set(k, (puntosEspirituales.get(k) || 0) + p.puntos);
+  }
+  const descuentoPorPunto = input.evento.descuentoEspiritualPorPuntoMs ?? 0.02;
 
   const pruebasOrd = [...input.pruebas].sort((a, b) => a.posicion - b.posicion);
 
@@ -74,6 +81,8 @@ export function calcularClasificacion(input: Input): Clasificacion {
         const detenciones = Array.isArray(r.detenciones) ? (r.detenciones as Detencion[]) : [];
         const netoMs = Math.max(0, r.brutoMs - r.detencionesMs);
         const penMs = pen.get(`${pr.id}|${r.equipoId}`) || 0;
+        const puntosEspiritualesEquipo = puntosEspirituales.get(`${pr.id}|${r.equipoId}`) || 0;
+        const descuentoEspiritualMs = Math.round(puntosEspiritualesEquipo * descuentoPorPunto * 1000) / 1000;
         return {
           pos: 0,
           equipoId: r.equipoId,
@@ -87,12 +96,14 @@ export function calcularClasificacion(input: Input): Clasificacion {
           detencionesMs: r.detencionesMs,
           detenciones,
           penMs,
+          puntosEspirituales: puntosEspiritualesEquipo,
+          descuentoEspiritualMs,
           netoMs,
-          finalMs: Math.max(0, netoMs + penMs),
+          finalMs: Math.max(0, Math.round((netoMs + penMs - descuentoEspiritualMs) * 1000) / 1000),
         };
       })
       .sort((a, b) => a.finalMs - b.finalMs || a.numero - b.numero);
-    const pos = posiciones(filas, (f) => String(f.finalMs));
+    const pos = posiciones(filas, (f) => f.finalMs.toFixed(3));
     filas.forEach((f, i) => (f.pos = pos[i]));
     return { id: pr.id, nombre: pr.nombre, estado: pr.estado, posicion: pr.posicion, filas };
   });
@@ -103,12 +114,16 @@ export function calcularClasificacion(input: Input): Clasificacion {
     for (const f of pr.filas) {
       let g = acc.get(f.equipoId);
       if (!g) {
-        g = { pos: 0, equipoId: f.equipoId, numero: f.numero, nombre: f.nombre, completadas: 0, totalMs: 0, penMs: 0, porPrueba: {} };
+        g = {
+          pos: 0, equipoId: f.equipoId, numero: f.numero, nombre: f.nombre,
+          completadas: 0, totalMs: 0, penMs: 0, descuentoEspiritualMs: 0, porPrueba: {},
+        };
         acc.set(f.equipoId, g);
       }
       g.completadas++;
-      g.totalMs += f.finalMs;
+      g.totalMs = Math.round((g.totalMs + f.finalMs) * 1000) / 1000;
       g.penMs += f.penMs;
+      g.descuentoEspiritualMs = Math.round((g.descuentoEspiritualMs + f.descuentoEspiritualMs) * 1000) / 1000;
       g.porPrueba[pr.id] = { finalMs: f.finalMs, pos: f.pos };
     }
   }

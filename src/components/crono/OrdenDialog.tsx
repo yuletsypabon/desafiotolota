@@ -7,8 +7,9 @@ import PrintIcon from '@mui/icons-material/Print';
 import { aplicarPatron, PATRONES } from '@/lib/orden';
 import { htmlOrdenSalida, imprimirHtml } from '@/lib/imprimir';
 import EquipoAvatar from '@/components/EquipoAvatar';
+import { useAppDialog } from '@/components/AppDialog';
 import type { EquipoDTO } from '@/lib/types';
-import { COLORS, FONT_DISPLAY } from '@/theme';
+import { COLORS, FONT_DISPLAY, cajaVidrio } from '@/theme';
 
 export default function OrdenDialog({
   titulo, evento, inicial, onClose, onSave,
@@ -19,6 +20,7 @@ export default function OrdenDialog({
   onClose: () => void;
   onSave: (ids: string[]) => void;
 }) {
+  const dialog = useAppDialog();
   const [lista, setLista] = useState(inicial);
   const [drag, setDrag] = useState<number | null>(null);
 
@@ -32,7 +34,7 @@ export default function OrdenDialog({
 
   return (
     <Dialog open onClose={onClose} maxWidth="md">
-      <DialogTitle>🔀 Orden de salida — {titulo}</DialogTitle>
+      <DialogTitle>Orden de salida — {titulo}</DialogTitle>
       <DialogContent>
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75, mb: 1.5 }}>
           {PATRONES.map((p) => (
@@ -57,7 +59,7 @@ export default function OrdenDialog({
                 if (drag !== null) mover(drag, i);
                 setDrag(null);
               }}
-              sx={{ bgcolor: COLORS.surf, border: `1px solid ${drag === i ? COLORS.gold : COLORS.border}`, borderRadius: 2, px: 1, py: 0.5, cursor: 'grab' }}
+              sx={{ ...cajaVidrio, borderColor: drag === i ? COLORS.gold : COLORS.border, px: 1, py: 0.5, cursor: 'grab' }}
             >
               <Typography sx={{ fontFamily: FONT_DISPLAY, fontSize: 18, color: COLORS.gold, width: 22 }}>{i + 1}</Typography>
               <EquipoAvatar nombre={e.nombre} logo={e.logo} size={26} />
@@ -70,7 +72,15 @@ export default function OrdenDialog({
       </DialogContent>
       <DialogActions>
         <Button color="inherit" startIcon={<PrintIcon />} sx={{ mr: 'auto' }}
-          onClick={() => !imprimirHtml(htmlOrdenSalida({ evento, prueba: titulo, equipos: lista })) && alert('El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para este sitio.')}>
+          onClick={() =>
+            !imprimirHtml(htmlOrdenSalida({ evento, prueba: titulo, equipos: lista })) &&
+            dialog({
+              title: 'Impresión bloqueada',
+              message: 'El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
+              tone: 'info',
+              confirmLabel: 'Entendido',
+              cancelLabel: null,
+            })}>
           Imprimir / PDF
         </Button>
         <Button color="inherit" onClick={onClose}>Cancelar</Button>

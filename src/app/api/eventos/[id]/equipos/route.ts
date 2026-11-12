@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { handler, ok, parseBody, type Ctx } from '@/lib/api';
 import { equipoCreate } from '@/lib/validators';
 import { siguienteNumero } from '@/lib/data';
-import { rolDe } from '@/lib/auth';
+import { rolDe, exigirAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +18,7 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
 });
 
 export const POST = handler(async (req: Request, { params }: Ctx) => {
+  exigirAdmin(req);
   const { id } = await params;
   const data = await parseBody(req, equipoCreate);
   const numero = data.numero ?? (await siguienteNumero(id));

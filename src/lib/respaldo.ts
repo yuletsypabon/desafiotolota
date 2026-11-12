@@ -2,14 +2,20 @@ import 'server-only';
 import type { Prisma, TipoPunto } from '@prisma/client';
 import { prisma } from './prisma';
 
-export const RESPALDO_VERSION = 1;
+export const RESPALDO_VERSION = 2;
 
 /** Respaldo completo (todas las tablas, con IDs) */
 export async function exportarTodo() {
   const eventos = await prisma.evento.findMany({
     orderBy: { anio: 'asc' },
     include: {
-      pruebas: { include: { resultados: true, puntos: true } },
+      pruebas: {
+        include: {
+          resultados: true,
+          puntos: true,
+          actividadesEspirituales: { include: { puntajes: true } },
+        },
+      },
       equipos: { include: { participantes: true } },
     },
   });
@@ -25,7 +31,10 @@ type EventoRespaldo = Respaldo['eventos'][number];
  * Usa inserciones por lote: pocas consultas por evento aunque haya cientos de fichas.
  */
 export async function escribirEventos(tx: Prisma.TransactionClient, eventos: EventoRespaldo[]) {
-  const total = { eventos: 0, pruebas: 0, equipos: 0, participantes: 0, resultados: 0, puntos: 0 };
+  const total = {
+    eventos: 0, pruebas: 0, equipos: 0, participantes: 0, resultados: 0, puntos: 0,
+    actividadesEspirituales: 0, puntajesEspirituales: 0,
+  };
   for (const ev of eventos) {
     const { pruebas, equipos, ...evData } = ev;
     await tx.evento.deleteMany({ where: { id: ev.id } });
@@ -34,15 +43,25 @@ export async function escribirEventos(tx: Prisma.TransactionClient, eventos: Eve
     const participantes = equipos.flatMap((e) => e.participantes);
     const resultados = pruebas.flatMap((p) => p.resultados);
     const puntos = pruebas.flatMap((p) => p.puntos);
+    const actividadesEspirituales = pruebas.flatMap((p) => p.actividadesEspirituales ?? []);
+    const puntajesEspirituales = actividadesEspirituales.flatMap((a) => a.puntajes ?? []);
     if (equipos.length) await tx.equipo.createMany({ data: equipos.map(({ participantes: _p, ...e }) => ({ ...e, eventoId: ev.id })) });
     if (participantes.length) await tx.participante.createMany({ data: participantes });
     if (pruebas.length)
-      await tx.prueba.createMany({ data: pruebas.map(({ resultados: _r, puntos: _pt, ...p }) => ({ ...p, eventoId: ev.id })) });
+      await tx.prueba.createMany({
+        data: pruebas.map(({ resultados: _r, puntos: _pt, actividadesEspirituales: _ae, ...p }) => ({ ...p, eventoId: ev.id })),
+      });
     if (resultados.length)
       await tx.resultado.createMany({
         data: resultados.map((r) => ({ ...r, detenciones: (r.detenciones ?? []) as Prisma.InputJsonValue })),
       });
     if (puntos.length) await tx.puntoDisciplina.createMany({ data: puntos });
+    if (actividadesEspirituales.length) {
+      await tx.actividadEspiritual.createMany({
+        data: actividadesEspirituales.map(({ puntajes: _puntajes, ...actividad }) => actividad),
+      });
+    }
+    if (puntajesEspirituales.length) await tx.puntajeEspiritual.createMany({ data: puntajesEspirituales });
 
     total.eventos++;
     total.pruebas += pruebas.length;
@@ -50,6 +69,8 @@ export async function escribirEventos(tx: Prisma.TransactionClient, eventos: Eve
     total.participantes += participantes.length;
     total.resultados += resultados.length;
     total.puntos += puntos.length;
+    total.actividadesEspirituales += actividadesEspirituales.length;
+    total.puntajesEspirituales += puntajesEspirituales.length;
   }
   return total;
 }

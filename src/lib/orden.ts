@@ -3,12 +3,12 @@
 export type Patron = 'normal' | 'inv' | 'centro' | 'mitad' | 'inter' | 'azar';
 
 export const PATRONES: { id: Patron; label: string }[] = [
-  { id: 'normal', label: '↓ Normal' },
-  { id: 'inv', label: '↑ Invertido' },
-  { id: 'centro', label: '↔ Desde centro' },
-  { id: 'mitad', label: '⬇ Mitad abajo' },
-  { id: 'inter', label: '⇅ Intercalado' },
-  { id: 'azar', label: '🔀 Aleatorio' },
+  { id: 'normal', label: 'Normal' },
+  { id: 'inv', label: 'Invertido' },
+  { id: 'centro', label: 'Desde centro' },
+  { id: 'mitad', label: 'Mitad abajo' },
+  { id: 'inter', label: 'Intercalado' },
+  { id: 'azar', label: 'Aleatorio' },
 ];
 
 /** `base` debe venir ordenado por número de inscripción. */

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { handler, ok, parseBody } from '@/lib/api';
 import { eventoCreate } from '@/lib/validators';
-import { pruebasHabilitadas, rolDe } from '@/lib/auth';
+import { pruebasHabilitadas, rolDe, exigirAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +23,7 @@ export const GET = handler(async (req: Request) => {
 
 // POST /api/eventos — crea evento (+ pruebas iniciales, + copia opcional de equipos)
 export const POST = handler(async (req: Request) => {
+  exigirAdmin(req);
   const { pruebas, copiarEquiposDe, ...data } = await parseBody(req, eventoCreate);
   const evento = await prisma.$transaction(async (tx) => {
     const ev = await tx.evento.create({

@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import EquipoAvatar from '@/components/EquipoAvatar';
 import { fmt } from '@/lib/format';
-import { COLORS, FONT_DISPLAY, FONT_MONO } from '@/theme';
+import { COLORS, FONT_DISPLAY, FONT_MONO, alfa, cajaVidrio } from '@/theme';
 
 export interface OpcionCorregir {
   equipoId: string;
@@ -49,7 +49,7 @@ export default function CorregirDialog({
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
-      <DialogTitle sx={{ color: COLORS.gold }}>🔄 CORREGIR PISTA</DialogTitle>
+      <DialogTitle sx={{ color: COLORS.gold }}>CORREGIR PISTA</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Si cronometraste al equipo equivocado, elige los dos equipos para intercambiarlos. Cada tiempo se queda
@@ -72,9 +72,10 @@ export default function CorregirDialog({
                 onClick={() => !o.bloqueo && toggle(o.equipoId)}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && !o.bloqueo && (e.preventDefault(), toggle(o.equipoId))}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: 2,
+                  ...cajaVidrio,
+                  display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25,
                   border: `1px solid ${activo ? COLORS.blue : COLORS.border}`,
-                  bgcolor: activo ? 'rgba(79,142,247,.08)' : COLORS.surf,
+                  bgcolor: activo ? alfa(COLORS.blue, .1) : cajaVidrio.bgcolor,
                   cursor: o.bloqueo ? 'not-allowed' : 'pointer',
                   opacity: o.bloqueo ? 0.5 : 1,
                   '&:hover': o.bloqueo ? undefined : { borderColor: COLORS.gold },
@@ -96,7 +97,7 @@ export default function CorregirDialog({
 
         {a && b && (
           <Alert severity="warning" sx={{ mt: 1.5 }}>
-            <b>{a.nombre}</b> ({a.donde}{a.ms != null ? ` · ${fmt(a.ms)}` : ''}) ↔ <b>{b.nombre}</b> ({b.donde}
+            <b>{a.nombre}</b> ({a.donde}{a.ms != null ? ` · ${fmt(a.ms)}` : ''}) se intercambia con <b>{b.nombre}</b> ({b.donde}
             {b.ms != null ? ` · ${fmt(b.ms)}` : ''}).<br />
             Quedará: <b>{b.nombre}</b> con el tiempo de {a.donde.toLowerCase()} y <b>{a.nombre}</b> con el de {b.donde.toLowerCase()}.
           </Alert>
@@ -105,7 +106,7 @@ export default function CorregirDialog({
       <DialogActions>
         <Button color="inherit" onClick={onClose}>Cancelar</Button>
         <Button variant="contained" disabled={!a || !b || enviando} onClick={confirmar}>
-          {enviando ? 'Intercambiando…' : '🔄 Intercambiar'}
+          {enviando ? 'Intercambiando…' : 'Intercambiar'}
         </Button>
       </DialogActions>
     </Dialog>

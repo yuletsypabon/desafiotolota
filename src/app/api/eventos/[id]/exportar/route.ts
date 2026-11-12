@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { HttpError, handler, type Ctx } from '@/lib/api';
 import { getClasificacion } from '@/lib/data';
+import { exigirAdmin } from '@/lib/auth';
 import { toCSV } from '@/lib/csv';
 import { fmt, fHora } from '@/lib/format';
 
@@ -25,6 +26,7 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
   const tipo = url.searchParams.get('tipo') || 'general';
 
   if (tipo === 'participantes') {
+    exigirAdmin(req); // fichas médicas: solo el administrador
     const ev = await prisma.evento.findUnique({ where: { id }, select: { nombre: true } });
     const eqs = await prisma.equipo.findMany({
       where: { eventoId: id },
@@ -48,13 +50,16 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
 
   if (tipo === 'general') {
     const rows: (string | number)[][] = [
-      ['Pos', 'N°', 'Equipo', 'Pruebas completadas', ...c.pruebas.map((p) => p.nombre), 'Disciplina (s)', 'Total', 'Total (ms)'],
+      [
+        'Pos', 'N°', 'Equipo', 'Pruebas completadas', ...c.pruebas.map((p) => p.nombre),
+        'Disciplina (s)', 'Descuento espiritual (ms)', 'Total', 'Total (ms)',
+      ],
     ];
     for (const g of c.general)
       rows.push([
         g.pos, g.numero, g.nombre, `${g.completadas}/${c.totalPruebas}`,
         ...c.pruebas.map((p) => (g.porPrueba[p.id] ? fmt(g.porPrueba[p.id].finalMs) : '—')),
-        (g.penMs / 1000).toFixed(1), fmt(g.totalMs), g.totalMs,
+        (g.penMs / 1000).toFixed(1), g.descuentoEspiritualMs, fmt(g.totalMs), g.totalMs,
       ]);
     return csvResponse(`General_${c.evento.nombre}`, toCSV(rows));
   }
@@ -63,12 +68,16 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
     tipo === 'prueba' ? c.pruebas.filter((p) => p.id === url.searchParams.get('pruebaId')) : c.pruebas;
   if (!pruebas.length) throw new HttpError(404, 'Prueba no encontrada');
   const rows: (string | number | null)[][] = [
-    ['Prueba', 'Pos', 'N°', 'Equipo', 'Pista', 'Salida', 'Llegada', 'Bruto', 'Detenciones', 'Neto', 'Disciplina (s)', 'Final', 'Final (ms)'],
+    [
+      'Prueba', 'Pos', 'N°', 'Equipo', 'Pista', 'Salida', 'Llegada', 'Bruto', 'Detenciones', 'Neto',
+      'Disciplina (s)', 'Puntos espirituales', 'Descuento espiritual (ms)', 'Final', 'Final (ms)',
+    ],
   ];
   for (const p of pruebas)
     for (const f of p.filas)
       rows.push([p.nombre, f.pos, f.numero, f.nombre, f.pista, fHora(f.salidaAt), fHora(f.llegadaAt), fmt(f.brutoMs),
-        fmt(f.detencionesMs), fmt(f.netoMs), (f.penMs / 1000).toFixed(1), fmt(f.finalMs), f.finalMs]);
+        fmt(f.detencionesMs), fmt(f.netoMs), (f.penMs / 1000).toFixed(1), f.puntosEspirituales,
+        f.descuentoEspiritualMs, fmt(f.finalMs), f.finalMs]);
   const nombre = tipo === 'prueba' ? `${c.evento.nombre}_${pruebas[0].nombre}` : `Pruebas_${c.evento.nombre}`;
   return csvResponse(nombre, toCSV(rows));
 });

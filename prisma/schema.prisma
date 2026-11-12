@@ -41,6 +41,10 @@ model Evento {
   penMediaMs    Int      @default(500)
   penGraveMs    Int      @default(1000)
   bonPositivoMs Int      @default(100)
+  descuentoEspiritualPorPuntoMs Float @default(0.02)
+  /// Nombre del reto por categoría de equipo (2 o 4 integrantes); se muestra en la portada: "Desafío X2: (nombre)"
+  nombreX2      String?
+  nombreX4      String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -66,6 +70,8 @@ model Prueba {
   evento     Evento            @relation(fields: [eventoId], references: [id], onDelete: Cascade)
   resultados Resultado[]
   puntos     PuntoDisciplina[]
+  actividadesEspirituales ActividadEspiritual[]
+  reservas   Reserva[]
 
   @@index([eventoId])
 }
@@ -77,6 +83,8 @@ model Equipo {
   nombre    String
   capitan   String?
   logo      String?
+  /// Color del equipo (#rrggbb) para la carta del capitán; null = se toma del logo
+  color     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -84,6 +92,8 @@ model Equipo {
   participantes Participante[]
   resultados    Resultado[]
   puntos        PuntoDisciplina[]
+  puntajesEspirituales PuntajeEspiritual[]
+  reservas             Reserva[]
 
   @@unique([eventoId, nombre])
   @@index([eventoId])
@@ -157,9 +167,60 @@ model PuntoDisciplina {
   @@index([equipoId])
 }
 
+model ActividadEspiritual {
+  id        String   @id @default(cuid())
+  pruebaId  String
+  nombre    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prueba   Prueba             @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+  puntajes PuntajeEspiritual[]
+
+  @@index([pruebaId])
+}
+
+model PuntajeEspiritual {
+  id          String   @id @default(cuid())
+  actividadId String
+  equipoId    String
+  puntos      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  actividad ActividadEspiritual @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+  equipo    Equipo              @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  @@unique([actividadId, equipoId])
+  @@index([equipoId])
+}
+
 /// Contraseña de cada rol (hash scrypt). Solo en la base local: no se sincroniza a la nube.
 model Credencial {
   rol       Rol      @id
   hash      String
   updatedAt DateTime @updatedAt
+}
+
+/// Clave adicional para habilitar el histórico a la sesión del cronometrador.
+model ClaveHistorico {
+  id        String   @id @default("historico")
+  hash      String
+  updatedAt DateTime @updatedAt
+}
+
+/// Equipo cargado en una pista de algún dispositivo: mientras exista, los demás dispositivos no lo cargan.
+/// Cada dispositivo la renueva cada pocos segundos; si deja de hacerlo (se cerró), vence sola.
+model Reserva {
+  id          String   @id @default(cuid())
+  pruebaId    String
+  equipoId    String
+  dispositivo String
+  pista       Int
+  updatedAt   DateTime @updatedAt
+
+  prueba Prueba @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+  equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  @@unique([pruebaId, equipoId])
 }

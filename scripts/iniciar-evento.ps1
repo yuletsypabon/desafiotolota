@@ -18,6 +18,10 @@ if (-not (Test-Path node_modules)) {
   if ($LASTEXITCODE) { Falla 'Falló la instalación de dependencias.' }
 }
 
+Paso 'Revisando la clave de las sesiones'
+node scripts/asegurar-secreto.mjs
+if ($LASTEXITCODE) { Falla 'No se pudo crear AUTH_SECRET en el archivo .env.' }
+
 Paso 'Preparando la base de datos local'
 node --env-file=.env scripts/preparar-bd.mjs
 if ($LASTEXITCODE) { Falla 'No se pudo preparar la base de datos.' }

@@ -14,17 +14,22 @@ export async function getClasificacion(eventoId: string) {
       penMediaMs: true,
       penGraveMs: true,
       bonPositivoMs: true,
+      descuentoEspiritualPorPuntoMs: true,
       pruebas: { select: { id: true, nombre: true, estado: true, posicion: true } },
       equipos: { select: { id: true, numero: true, nombre: true } },
     },
   });
   if (!evento) notFound('Evento');
   const pruebaIds = evento.pruebas.map((p) => p.id);
-  const [resultados, puntos] = await Promise.all([
+  const [resultados, puntos, puntajesEspirituales] = await Promise.all([
     prisma.resultado.findMany({ where: { pruebaId: { in: pruebaIds } } }),
     prisma.puntoDisciplina.findMany({
       where: { pruebaId: { in: pruebaIds } },
       select: { pruebaId: true, equipoId: true, tipo: true },
+    }),
+    prisma.puntajeEspiritual.findMany({
+      where: { actividad: { pruebaId: { in: pruebaIds } } },
+      select: { actividad: { select: { pruebaId: true } }, equipoId: true, puntos: true },
     }),
   ]);
   return calcularClasificacion({
@@ -33,6 +38,11 @@ export async function getClasificacion(eventoId: string) {
     equipos: evento.equipos,
     resultados,
     puntos,
+    puntajesEspirituales: puntajesEspirituales.map((p) => ({
+      pruebaId: p.actividad.pruebaId,
+      equipoId: p.equipoId,
+      puntos: p.puntos,
+    })),
   });
 }
 

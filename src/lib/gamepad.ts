@@ -42,10 +42,10 @@ export function useBotonesGamepad(alPulsar: (boton: number) => void, avisar: (me
         previo.set(gp.index, gp.buttons.map((b) => b.pressed));
       }
     };
-    const conectado = (e: GamepadEvent) => aviso.current(`🎮 Botón arcade conectado (${e.gamepad.id.split('(')[0].trim()})`);
+    const conectado = (e: GamepadEvent) => aviso.current(`Botón arcade conectado (${e.gamepad.id.split('(')[0].trim()})`);
     const desconectado = (e: GamepadEvent) => {
       previo.delete(e.gamepad.index);
-      aviso.current('🎮 Botón arcade desconectado');
+      aviso.current('Botón arcade desconectado');
     };
 
     window.addEventListener('gamepadconnected', conectado);

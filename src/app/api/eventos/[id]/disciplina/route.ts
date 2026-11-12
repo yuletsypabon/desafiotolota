@@ -1,10 +1,12 @@
 import { prisma } from '@/lib/prisma';
 import { HttpError, handler, ok, parseBody, type Ctx } from '@/lib/api';
 import { puntoCreate } from '@/lib/validators';
+import { exigirAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = handler(async (_req: Request, { params }: Ctx) => {
+export const GET = handler(async (req: Request, { params }: Ctx) => {
+  exigirAdmin(req);
   const { id } = await params;
   const puntos = await prisma.puntoDisciplina.findMany({
     where: { prueba: { eventoId: id } },
@@ -14,6 +16,7 @@ export const GET = handler(async (_req: Request, { params }: Ctx) => {
 });
 
 export const POST = handler(async (req: Request, { params }: Ctx) => {
+  exigirAdmin(req);
   const { id } = await params;
   const d = await parseBody(req, puntoCreate);
   // Validar que prueba y equipo pertenecen al evento

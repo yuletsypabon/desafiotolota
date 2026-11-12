@@ -1,46 +1,73 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppBar, Box, Button, Chip, Toolbar, Typography } from '@mui/material';
-import BackupIcon from '@mui/icons-material/Backup';
-import HomeIcon from '@mui/icons-material/Home';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { cerrarSesion, useSesion } from '@/lib/client';
+import { cerrarSesion, useEventos, useSesion, useUltimoEvento } from '@/lib/client';
 import { ROL_LABEL } from '@/lib/sesion';
-import { COLORS, FONT_DISPLAY } from '@/theme';
+import LogoTolota from '@/components/sitio/LogoTolota';
+import { RUTAS, eventoDeRuta } from '@/lib/rutas';
+import s from './topbar.module.css';
 
+/** Secciones de un evento; las de administrador no las ve el cronometrador. */
+const SECCIONES_EVENTO = [
+  { segmento: 'cronometro', nombre: 'Cronometraje', soloAdmin: false },
+  { segmento: 'equipos', nombre: 'Equipos', soloAdmin: true },
+  { segmento: 'disciplina', nombre: 'Disciplina', soloAdmin: true },
+  { segmento: 'espiritual', nombre: 'Espiritual', soloAdmin: true },
+  { segmento: 'resultados', nombre: 'Histórico', soloAdmin: false },
+  { segmento: '', nombre: 'Configuración', soloAdmin: true },
+];
+
+/**
+ * Barra superior del sistema, con el mismo estilo que el menú del sitio: logo a la izquierda, secciones centradas
+ * (subrayado amarillo en la activa) y, a la derecha, el rol y «Salir».
+ */
 export default function TopBar() {
-  const enLogin = usePathname() === '/login';
-  const { rol, esAdmin } = useSesion(!enLogin);
+  const pathname = usePathname();
+  const { rol } = useSesion();
+  const evento = eventoDeRuta(pathname);
+  // Fuera de un evento, las secciones llevan al último evento abierto (o al más reciente si ese ya no existe)
+  const { data: eventos } = useEventos();
+  const ultimo = useUltimoEvento(evento?.id);
+  const destino = evento?.id ?? (eventos?.some((e) => e.id === ultimo) ? ultimo : eventos?.[0]?.id) ?? null;
+  const secciones = SECCIONES_EVENTO.filter((x) => !x.soloAdmin || rol === 'ADMIN');
 
   return (
-    <AppBar position="sticky" elevation={0}>
-      <Toolbar variant="dense" sx={{ gap: 1, minHeight: 54 }}>
-        <Typography
-          component={Link}
-          href="/"
-          sx={{ fontFamily: FONT_DISPLAY, fontSize: 24, letterSpacing: '0.18em', color: COLORS.gold, textDecoration: 'none' }}
-        >
-          DESAFÍO <Box component="span" sx={{ color: COLORS.text }}>Tolotá</Box>
-        </Typography>
-        <Box sx={{ flex: 1 }} />
+    <header className={s.barra}>
+      <Link href={RUTAS.inicio} className={s.logo}>
+        <LogoTolota tamano={36} />
+        Desafío Tolotá
+      </Link>
+
+      <nav className={s.enlaces} aria-label="Secciones del sistema">
+        <Link href={RUTAS.cronometro} className={s.enlace} aria-current={pathname === RUTAS.cronometro ? 'page' : undefined}>
+          Eventos
+        </Link>
+        {secciones.map((x) =>
+          destino ? (
+            <Link
+              key={x.nombre}
+              href={RUTAS.evento(destino, x.segmento)}
+              className={s.enlace}
+              aria-current={evento && evento.seccion === x.segmento ? 'page' : undefined}
+            >
+              {x.nombre}
+            </Link>
+          ) : (
+            <span key={x.nombre} className={`${s.enlace} ${s.desactivado}`} aria-disabled="true" title="Crea un evento para acceder a esta sección">
+              {x.nombre}
+            </span>
+          ),
+        )}
+      </nav>
+
+      <div className={s.acciones}>
         {rol && (
           <>
-            <Button component={Link} href="/" size="small" color="inherit" startIcon={<HomeIcon />}>
-              Eventos
-            </Button>
-            {esAdmin && (
-              <Button component={Link} href="/respaldo" size="small" color="inherit" startIcon={<BackupIcon />}>
-                Respaldo
-              </Button>
-            )}
-            <Chip size="small" label={`${esAdmin ? '🛡' : '⏱'} ${ROL_LABEL[rol]}`} sx={{ display: { xs: 'none', sm: 'flex' } }} />
-            <Button size="small" color="inherit" startIcon={<LogoutIcon />} onClick={cerrarSesion}>
-              Salir
-            </Button>
+            <span className={s.rol}>{ROL_LABEL[rol]}</span>
+            <button type="button" className={s.salir} onClick={cerrarSesion}>Salir</button>
           </>
         )}
-      </Toolbar>
-    </AppBar>
+      </div>
+    </header>
   );
 }

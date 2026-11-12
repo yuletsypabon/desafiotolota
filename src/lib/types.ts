@@ -29,6 +29,9 @@ export interface EventoDTO extends PenalizacionCfg {
   logo: string | null;
   numPistas: number;
   pulsadorKey: string;
+  descuentoEspiritualPorPuntoMs: number;
+  nombreX2: string | null;
+  nombreX4: string | null;
   pruebas: PruebaDTO[];
   _count?: { equipos: number };
 }
@@ -60,7 +63,24 @@ export interface EquipoDTO {
   nombre: string;
   capitan: string | null;
   logo: string | null;
+  /** Color de la carta del capitán (#rrggbb); null = se toma del logo */
+  color: string | null;
   participantes: ParticipanteDTO[];
+}
+
+export interface PuntajeEspiritualDTO {
+  id: string;
+  actividadId: string;
+  equipoId: string;
+  puntos: number;
+  equipo: { id: string; numero: number; nombre: string };
+}
+
+export interface ActividadEspiritualDTO {
+  id: string;
+  pruebaId: string;
+  nombre: string;
+  puntajes: PuntajeEspiritualDTO[];
 }
 
 export interface Detencion {
@@ -92,6 +112,8 @@ export interface FilaPrueba {
   detencionesMs: number;
   detenciones: Detencion[];
   penMs: number;
+  puntosEspirituales: number;
+  descuentoEspiritualMs: number;
   netoMs: number; // bruto − detenciones
   finalMs: number; // neto ± disciplina
 }
@@ -104,6 +126,7 @@ export interface FilaGeneral {
   completadas: number;
   totalMs: number;
   penMs: number;
+  descuentoEspiritualMs: number;
   porPrueba: Record<string, { finalMs: number; pos: number }>;
 }
 

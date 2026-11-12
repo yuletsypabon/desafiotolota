@@ -1,12 +1,13 @@
 import { prisma } from '@/lib/prisma';
-import { handler, ok, parseBody, type Ctx } from '@/lib/api';
+import { HttpError, handler, ok, parseBody, type Ctx } from '@/lib/api';
 import { resultadoUpsert } from '@/lib/validators';
 import { sumaDetenciones } from '@/lib/scoring';
-import { exigirPruebaHabilitada } from '@/lib/auth';
+import { exigirPruebaHabilitada, exigirAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = handler(async (_req: Request, { params }: Ctx) => {
+export const GET = handler(async (req: Request, { params }: Ctx) => {
+  exigirAdmin(req);
   const { id } = await params;
   const rs = await prisma.resultado.findMany({ where: { pruebaId: id }, orderBy: { llegadaAt: 'asc' } });
   return ok(rs);
@@ -17,6 +18,10 @@ export const PUT = handler(async (req: Request, { params }: Ctx) => {
   const { id } = await params;
   await exigirPruebaHabilitada(req, id);
   const d = await parseBody(req, resultadoUpsert);
+  const prueba = await prisma.prueba.findUnique({ where: { id }, select: { eventoId: true } });
+  if (!prueba) throw new HttpError(404, 'Prueba no encontrada');
+  if (!(await prisma.equipo.count({ where: { id: d.equipoId, eventoId: prueba.eventoId } })))
+    throw new HttpError(400, 'El equipo no pertenece al evento de esta prueba');
   const data = {
     pista: d.pista ?? null,
     salidaAt: d.salidaAt,

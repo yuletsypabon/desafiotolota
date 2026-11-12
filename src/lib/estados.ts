@@ -1,3 +1,4 @@
+import { COLORS } from '@/colors';
 import type { EstadoPrueba, TipoPunto } from './types';
 
 export const ESTADOS: Record<EstadoPrueba, { label: string; color: 'default' | 'success' | 'primary' }> = {
@@ -7,8 +8,8 @@ export const ESTADOS: Record<EstadoPrueba, { label: string; color: 'default' | '
 };
 
 export const TIPOS: Record<TipoPunto, { label: string; color: string; signo: 1 | -1 }> = {
-  LEVE: { label: '⚠️ Leve', color: '#f97316', signo: 1 },
-  MEDIA: { label: '🔶 Media', color: '#fb923c', signo: 1 },
-  GRAVE: { label: '🔴 Grave', color: '#f04040', signo: 1 },
-  POSITIVO: { label: '✅ Positivo', color: '#1fd66b', signo: -1 },
+  LEVE: { label: 'Leve', color: COLORS.detenido, signo: 1 },
+  MEDIA: { label: 'Media', color: '#ffa15c', signo: 1 },
+  GRAVE: { label: 'Grave', color: COLORS.red, signo: 1 },
+  POSITIVO: { label: 'Positivo', color: COLORS.green, signo: -1 },
 };

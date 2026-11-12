@@ -155,3 +155,6 @@ build
 next-env.d.ts
 .vercel
 .DS_Store
+
+# Fotos originales en alta (el sitio usa las versiones WebP de public/fotos)
+fotos-originales/

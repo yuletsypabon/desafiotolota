@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import EquipoAvatar from '@/components/EquipoAvatar';
+import RelojDigital from './RelojDigital';
+import { ahora } from '@/lib/reloj';
 import { fHora, fmt, fmtSeg } from '@/lib/format';
 import type { Detencion, EquipoDTO } from '@/lib/types';
-import { COLORS, FONT_DISPLAY, FONT_MONO } from '@/theme';
+import { COLORS, FONT_DISPLAY, FONT_MONO, alfa, superficieVidrio } from '@/theme';
 
 export type LaneState = 'idle' | 'rdy' | 'run' | 'det' | 'fin';
 
@@ -25,29 +27,33 @@ export const laneVacia = (): Lane => ({
 
 /** Reloj que se re-renderiza solo a sí mismo (~25 fps) */
 function useNow(activo: boolean) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => ahora());
   useEffect(() => {
     if (!activo) return;
-    const iv = setInterval(() => setNow(Date.now()), 40);
+    const iv = setInterval(() => setNow(ahora()), 40);
     return () => clearInterval(iv);
   }, [activo]);
   return now;
 }
 
-const BADGE: Record<LaneState, { t: string; c: string; bg: string }> = {
-  idle: { t: '⚪ Libre', c: COLORS.dim, bg: COLORS.border },
-  rdy: { t: '🟡 Listo para salir', c: COLORS.blue, bg: 'rgba(79,142,247,.14)' },
-  run: { t: '🟢 En pista', c: COLORS.green, bg: 'rgba(31,214,107,.14)' },
-  det: { t: '🟠 Detenido', c: COLORS.orange, bg: 'rgba(249,115,22,.14)' },
-  fin: { t: '✅ Finalizado', c: COLORS.gold, bg: 'rgba(232,184,75,.14)' },
+/** Botones grandes de la pista (llegada, detenido…): mismo tamaño y letra para que se vean iguales. */
+const BOTON_PISTA = { fontWeight: 700, letterSpacing: '0.06em', px: 1, whiteSpace: 'nowrap', minHeight: 44 } as const;
+
+/** Estado de la pista: texto y color (el color se lee de un vistazo en el evento). */
+const BADGE: Record<LaneState, { t: string; c: string }> = {
+  idle: { t: 'Libre', c: COLORS.dim },
+  rdy: { t: 'Listo para salir', c: COLORS.blue },
+  run: { t: 'En pista', c: COLORS.green },
+  det: { t: 'Detenido', c: COLORS.detenido },
+  fin: { t: 'Finalizado', c: COLORS.acento },
 };
 const BORDER: Record<LaneState, string> = {
-  idle: COLORS.border, rdy: COLORS.dim, run: COLORS.green, det: COLORS.orange, fin: COLORS.gold,
+  idle: COLORS.border, rdy: COLORS.dim, run: COLORS.green, det: COLORS.detenido, fin: COLORS.acento,
 };
 
 export default function LaneCard({
   n, lane, equipo, focused, dimmed, keyAccion, keyDet, penMs, candidatos,
-  onFocus, onAccion, onDet, onElegir, onQuitar, onCancelarSalida, onReintentar,
+  onFocus, onAccion, onDet, onElegir, onQuitar, onCancelarSalida,
 }: {
   n: number;
   lane: Lane;
@@ -65,7 +71,6 @@ export default function LaneCard({
   /** Sin función: no se muestra (con asignación automática la pista se volvería a llenar) */
   onQuitar?: () => void;
   onCancelarSalida: () => void;
-  onReintentar: () => void;
 }) {
   const activo = lane.state === 'run' || lane.state === 'det';
   const now = useNow(activo);
@@ -78,9 +83,14 @@ export default function LaneCard({
 
   const btn =
     st === 'idle' ? { t: 'CARGAR SIGUIENTE', color: 'inherit' as const, v: 'outlined' as const }
-      : st === 'rdy' ? { t: '▶ DAR SALIDA', color: 'success' as const, v: 'contained' as const }
-        : st === 'fin' ? { t: '✅ LIBERAR PISTA', color: 'inherit' as const, v: 'outlined' as const }
-          : { t: '🏁 LLEGADA', color: 'error' as const, v: 'contained' as const };
+      : st === 'rdy' ? { t: 'DAR SALIDA', color: 'success' as const, v: 'contained' as const }
+        : st === 'fin'
+          ? lane.guardado === 'si'
+            ? { t: 'LIBERAR PISTA', color: 'inherit' as const, v: 'outlined' as const }
+            : lane.guardado === 'error'
+              ? { t: 'REINTENTAR GUARDAR', color: 'error' as const, v: 'contained' as const }
+              : { t: 'GUARDANDO…', color: 'success' as const, v: 'outlined' as const }
+          : { t: 'LLEGADA', color: 'error' as const, v: 'contained' as const };
 
   return (
     <Box
@@ -89,14 +99,14 @@ export default function LaneCard({
         if (!tag) onFocus();
       }}
       sx={{
+        ...superficieVidrio,
         position: 'relative',
-        bgcolor: COLORS.card,
         border: `2px solid ${focused ? COLORS.blue : BORDER[st]}`,
-        boxShadow: focused ? `0 0 0 3px ${COLORS.blue}, 0 0 24px rgba(79,142,247,.35)` : activo ? `0 0 14px ${BORDER[st]}22` : 'none',
+        boxShadow: focused ? `0 0 0 3px ${COLORS.blue}, 0 0 24px ${alfa(COLORS.blue, .35)}` : activo ? `0 0 18px ${alfa(BORDER[st], .25)}` : superficieVidrio.boxShadow,
         opacity: dimmed ? 0.4 : 1,
-        borderRadius: 3,
         p: 1.5,
         pt: 3.5,
+        minWidth: 0,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -106,12 +116,12 @@ export default function LaneCard({
         transition: 'border-color .2s, box-shadow .2s, opacity .2s',
       }}
     >
-      <Typography sx={{ position: 'absolute', top: 6, left: 10, fontFamily: FONT_DISPLAY, letterSpacing: '0.15em', fontSize: 12, color: COLORS.muted }}>
+      <Typography sx={{ position: 'absolute', top: 6, right: 10, fontFamily: FONT_DISPLAY, letterSpacing: '0.15em', fontSize: 12, color: COLORS.muted, textAlign: 'right' }}>
         PISTA {n}
       </Typography>
-      <Box sx={{ position: 'absolute', top: 6, right: 8, display: 'flex', gap: 0.5 }}>
+      <Box sx={{ position: 'absolute', top: 26, right: 8, display: 'flex', gap: 0.5 }}>
         {focused ? (
-          <Chip size="small" label="🔘 SELECCIONADA" sx={{ height: 18, fontSize: 9, color: COLORS.blue, bgcolor: 'rgba(79,142,247,.15)' }} />
+          <Chip size="small" label="SELECCIONADA" sx={{ height: 18, fontSize: 9, fontWeight: 700, color: COLORS.blue, bgcolor: alfa(COLORS.blue, .15) }} />
         ) : (
           <Typography variant="caption" sx={{ color: COLORS.muted, fontFamily: FONT_MONO, fontSize: 10 }}>
             {keyAccion} · {keyDet}
@@ -119,7 +129,13 @@ export default function LaneCard({
         )}
       </Box>
 
-      <Box sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.25, borderRadius: 5, color: BADGE[st].c, bgcolor: BADGE[st].bg }}>
+      <Box
+        sx={{
+          display: 'flex', alignItems: 'center', gap: 0.75, fontSize: 11, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
+          px: 1.25, py: 0.4, borderRadius: 999, color: BADGE[st].c, bgcolor: alfa(BADGE[st].c, .14),
+        }}
+      >
+        <Box component="span" sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: BADGE[st].c }} />
         {BADGE[st].t}
       </Box>
 
@@ -145,43 +161,40 @@ export default function LaneCard({
         </Typography>
       )}
 
-      <Typography
-        sx={{
-          fontFamily: FONT_MONO, fontWeight: 700, fontSize: { xs: 26, md: 30 }, lineHeight: 1, whiteSpace: 'nowrap',
-          color: st === 'run' ? COLORS.green : st === 'det' ? COLORS.orange : st === 'fin' ? COLORS.gold : COLORS.text,
-        }}
-      >
-        {fmt(reloj)}
-      </Typography>
+      <Box sx={{ width: '100%' }}>
+        <RelojDigital
+          ms={reloj}
+          color={st === 'run' ? COLORS.green : st === 'det' ? COLORS.detenido : st === 'fin' ? COLORS.acento : COLORS.text}
+        />
+      </Box>
 
       <Box sx={{ minHeight: 30, textAlign: 'center' }}>
-        {lane.t0 && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>🟢 {fHora(lane.t0)}{lane.lTs && <> · 🏁 {fHora(lane.lTs)}</>}</Typography>}
+        {lane.t0 && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Salida {fHora(lane.t0)}{lane.lTs && <> · Llegada {fHora(lane.lTs)}</>}</Typography>}
         {st === 'det' && lane.detStart && (
-          <Typography variant="caption" sx={{ color: COLORS.orange, fontFamily: FONT_MONO }}>⏸ {fmt(now - lane.detStart)}</Typography>
+          <Typography variant="caption" sx={{ color: COLORS.detenido, fontFamily: FONT_MONO }}>Detenido {fmt(now - lane.detStart)}</Typography>
         )}
         {st === 'fin' && (
-          <Typography variant="caption" sx={{ display: 'block', color: lane.guardado === 'error' ? COLORS.red : COLORS.dim }}>
-            {lane.guardado === 'si' ? '☁️ Guardado' : lane.guardado === 'error' ? '⚠️ No se guardó' : 'Guardando…'}
+          <Typography variant="caption" sx={{ display: 'block', color: lane.guardado === 'si' ? COLORS.green : lane.guardado === 'error' ? COLORS.red : COLORS.detenido }}>
+            {lane.guardado === 'si' ? 'Guardado en Resultados' : lane.guardado === 'error' ? 'No se guardó' : 'Guardando…'}
             {penMs ? ` · disc. ${fmtSeg(penMs)}` : ''}
             {detMs ? ` · det. −${fmt(detMs)}` : ''}
           </Typography>
         )}
       </Box>
 
-      <Button fullWidth size="large" variant={btn.v} color={btn.color} onClick={onAccion} sx={{ fontWeight: 800, letterSpacing: '0.05em' }}>
+      <Button fullWidth size="large" variant={btn.v} color={btn.color} onClick={onAccion} sx={BOTON_PISTA}>
         {btn.t}
       </Button>
 
       {activo && (
-        <Button fullWidth variant={st === 'det' ? 'contained' : 'outlined'} color="warning" onClick={onDet} size="small">
-          {st === 'det' ? '▶ ARRANCÓ' : '⏸ MARCAR DETENIDO'}
+        <Button fullWidth size="large" variant={st === 'det' ? 'contained' : 'outlined'} color="warning" onClick={onDet} sx={BOTON_PISTA}>
+          {st === 'det' ? 'ARRANCÓ' : 'MARCAR DETENIDO'}
         </Button>
       )}
 
       <Stack direction="row" spacing={0.5}>
         {st === 'rdy' && onQuitar && <Button size="small" color="inherit" onClick={onQuitar}>Quitar de pista</Button>}
-        {activo && <Button size="small" color="inherit" onClick={onCancelarSalida}>↺ Salida en falso</Button>}
-        {st === 'fin' && lane.guardado === 'error' && <Button size="small" color="error" onClick={onReintentar}>Reintentar guardar</Button>}
+        {activo && <Button size="small" color="inherit" onClick={onCancelarSalida}>Salida en falso</Button>}
       </Stack>
 
       {lane.ints.length > 0 && (
@@ -189,7 +202,7 @@ export default function LaneCard({
           {lane.ints.map((d) => (
             <Stack key={d.num} direction="row" justifyContent="space-between" sx={{ borderBottom: `1px solid ${COLORS.border}` }}>
               <span>Det. #{d.num}</span>
-              <span style={{ color: COLORS.orange }}>−{fmt(d.dur)}</span>
+              <span style={{ color: COLORS.detenido }}>−{fmt(d.dur)}</span>
             </Stack>
           ))}
         </Box>

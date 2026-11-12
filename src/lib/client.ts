@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import useSWR, { type SWRConfiguration } from 'swr';
 import type { Clasificacion, EquipoDTO, EventoDTO, PuntoDTO } from './types';
 import type { Rol } from './sesion';
@@ -28,6 +29,25 @@ export function useSesion(activa = true) {
   return { rol, esAdmin: rol === 'ADMIN', isLoading };
 }
 
+const CLAVE_ULTIMO_EVENTO = 'tolota.ultimoEvento';
+
+/**
+ * Último evento abierto en este navegador. Guarda `actual` cuando hay uno abierto; si no, devuelve el guardado.
+ * Así las pestañas del sistema funcionan también desde la lista de eventos y Respaldo.
+ */
+export function useUltimoEvento(actual?: string) {
+  const [guardado, setGuardado] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      if (actual) localStorage.setItem(CLAVE_ULTIMO_EVENTO, actual);
+      else setGuardado(localStorage.getItem(CLAVE_ULTIMO_EVENTO));
+    } catch {
+      // almacenamiento bloqueado (modo privado): se usa el evento más reciente
+    }
+  }, [actual]);
+  return actual ?? guardado;
+}
+
 export async function cerrarSesion() {
   await api('/api/auth/logout', 'POST');
   window.location.href = '/login';
@@ -52,20 +72,33 @@ export function useClasificacion(eventoId?: string, ms = 5000) {
   });
 }
 
-/** Redimensiona una imagen en el navegador y devuelve un data URL liviano. */
-export function resizeImage(file: File, max = 256): Promise<string> {
+/**
+ * Reduce la imagen en el navegador a un tamaño nítido para los marcos de logo (512 px por lado, el doble de lo que
+ * ocupa en pantalla) y la guarda en WebP, que conserva la transparencia del archivo original. No se le quita el
+ * fondo: borrar los píxeles blancos dejaba bordes dentados y huecos en las partes blancas del logo.
+ */
+export function resizeImage(file: File, max = 512): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const s = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.width * s);
-      c.height = Math.round(img.height * s);
-      c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      const webp = c.toDataURL('image/webp', 0.85);
-      resolve(webp.startsWith('data:image/webp') ? webp : c.toDataURL('image/png'));
+      try {
+        const s = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * s);
+        c.height = Math.round(img.height * s);
+        const ctx = c.getContext('2d');
+        if (!ctx) throw new Error('No se pudo preparar el canvas');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        const webp = c.toDataURL('image/webp', 0.9);
+        resolve(webp.startsWith('data:image/webp') ? webp : c.toDataURL('image/png'));
+      } catch (error) {
+        URL.revokeObjectURL(url);
+        reject(error instanceof Error ? error : new Error('No se pudo procesar la imagen'));
+      }
     };
     img.onerror = () => reject(new Error('No se pudo leer la imagen'));
     img.src = url;
