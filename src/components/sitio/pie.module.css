@@ -1,0 +1,22 @@
+.pie{margin-top:clamp(80px,14vh,150px);padding:0 clamp(18px,4.5vw,88px) 40px;background:transparent;color:var(--texto);font-family:var(--font-body)}
+.columnas{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;padding:48px 0;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea)}
+.marca{display:flex;align-items:center;gap:14px}
+.marca b{font-size:22px;font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+.lema{margin:16px 0 14px;font-size:16px}
+.descripcion{margin:0 0 24px;max-width:340px;font-size:14px;line-height:1.6;color:var(--textoSuave)}
+.redes{display:flex;gap:10px}
+.red{display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--linea);color:var(--texto);transition:color .2s,border-color .2s}
+a.red:hover{color:var(--destacado);border-color:var(--destacado)}
+span.red{opacity:.4}
+.titulo{margin:0 0 18px;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
+.lista{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.lista a{color:var(--texto);text-decoration:none;font-size:16px;transition:color .2s}
+.lista a:hover{color:var(--destacado)}
+.base{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:24px;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.base span:first-child{color:var(--destacado)}
+.base span:last-child{color:var(--textoSuave)}
+.pie :focus-visible{outline:3px solid var(--destacado);outline-offset:3px}
+@media (max-width:760px){
+  .columnas{grid-template-columns:1fr 1fr}
+  .columnas>div:first-child{grid-column:1 / -1}
+}

@@ -1,0 +1,242 @@
+/* Portada del Desafío Tolotá (diseño de Figma): negro, blanco hueso y amarillo; títulos en Anton. */
+
+.landing{--margen:clamp(18px,4.5vw,88px);background:var(--fondo);color:var(--texto);font-family:var(--font-body);overflow-x:clip}
+.landing :focus-visible{outline:3px solid var(--destacado);outline-offset:3px}
+.landing a{color:inherit}
+
+/* ---------- Tipografía y piezas comunes ---------- */
+.etiqueta{margin:0;font-size:12.5px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
+.etiqueta span{margin:0 .5em;opacity:.7}
+.titulo{margin:18px 0 26px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
+  font-size:clamp(42px,4.8vw,80px);line-height:.98;letter-spacing:.005em;color:var(--texto)}
+.titulo em,.heroTitulo em{font-style:normal;color:var(--destacado)}
+.parrafo{margin:0;max-width:520px;font-size:clamp(16px,1.35vw,19px);line-height:1.5;color:var(--texto)}
+.parrafo strong{color:var(--destacado);font-weight:500}
+
+/* Botones píldora: principal en amarillo y secundario con contorno */
+.boton,.botonContorno{display:inline-flex;align-items:center;justify-content:center;padding:16px 30px;border-radius:999px;
+  font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;white-space:nowrap;
+  transition:transform .2s,background .2s,border-color .2s,color .2s}
+.boton{background:var(--primario);color:#0a0a0a !important}
+.boton:hover{background:var(--primario-hover);transform:translateY(-2px)}
+.botonContorno{border:1.5px solid rgba(244,243,236,.45);color:var(--texto) !important}
+.botonContorno:hover{border-color:var(--destacado);color:var(--destacado) !important;transform:translateY(-2px)}
+.botonAncho{width:100%}
+.enlaceFlecha{display:inline-flex;align-items:center;font-size:12.5px;font-weight:500;letter-spacing:.06em;
+  text-transform:uppercase;text-decoration:none;color:var(--texto)}
+.enlaceFlecha:hover{color:var(--destacado)}
+
+/* Vidrio esmerilado: semitransparente, desenfoca lo que hay detrás, borde fino luminoso */
+.vidrio{background:var(--vidrio);border:1px solid var(--vidrio-borde);border-radius:var(--vidrio-radio);
+  -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);box-shadow:var(--vidrio-brillo)}
+
+/* ---------- Fotos (reales o provisionales) ---------- */
+.foto{position:absolute;inset:0;overflow:hidden;background-color:#0c0f0c}
+.fotoImg{object-fit:cover}
+.tono_bosque{background:
+  radial-gradient(ellipse at 72% 12%,rgba(220,232,210,.22),transparent 42%),
+  repeating-linear-gradient(97deg,transparent 0 46px,rgba(0,0,0,.28) 46px 58px,transparent 58px 130px),
+  linear-gradient(165deg,#24352a 0%,#111c14 50%,#060906 100%)}
+.tono_amanecer{background:
+  radial-gradient(ellipse at 50% 8%,rgba(255,222,180,.42),transparent 52%),
+  linear-gradient(185deg,transparent 55%,rgba(0,0,0,.55) 56%),
+  linear-gradient(180deg,#6d675e 0%,#33403a 46%,#141a17 100%)}
+.tono_fogata{background:
+  radial-gradient(circle at 64% 80%,rgba(255,150,50,.5),transparent 26%),
+  radial-gradient(ellipse at 64% 90%,rgba(255,90,20,.25),transparent 45%),
+  linear-gradient(180deg,#0b1220 0%,#0f0f10 60%,#16100a 100%)}
+.tono_barro{background:
+  radial-gradient(ellipse at 38% 26%,rgba(205,190,150,.24),transparent 50%),
+  repeating-linear-gradient(28deg,transparent 0 70px,rgba(0,0,0,.25) 70px 84px),
+  linear-gradient(170deg,#36331f 0%,#1a1810 58%,#080806 100%)}
+
+/* ---------- 01 Hero ---------- */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:130px var(--margen) 56px;isolation:isolate}
+.hero>.foto{z-index:-2}
+.velo{position:absolute;inset:0;z-index:-1;background:
+  linear-gradient(90deg,rgba(5,5,5,.9) 0%,rgba(5,5,5,.6) 45%,rgba(5,5,5,.12) 75%),
+  linear-gradient(0deg,var(--fondo) 0%,transparent 30%)}
+.heroContenido{max-width:880px}
+.chipEdicion{display:inline-flex;align-items:center;gap:12px;margin:0;padding:6px 18px 6px 6px;border:1px solid var(--vidrio-borde);
+  border-radius:999px;background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);font-size:14px;font-weight:700}
+.chipEdicion b{padding:5px 14px;border-radius:999px;background:var(--primario);color:#0a0a0a}
+.heroTitulo{margin:22px 0 26px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
+  font-size:clamp(64px,10.5vw,160px);line-height:.9;letter-spacing:.005em}
+.heroTexto{margin:0 0 28px;max-width:600px;font-size:clamp(16px,1.5vw,21px);line-height:1.5}
+.datos{display:flex;flex-wrap:wrap;gap:20px 44px;margin:0 0 32px}
+.datos div{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}
+.datos svg{grid-row:span 2;width:26px;height:26px;color:var(--destacado)}
+.datos dt{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--textoSuave)}
+.datos dd{margin:0;font-size:16px;font-weight:700}
+.acciones{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.relojHero{display:flex;gap:12px;margin-top:36px}
+.relojHero div{display:grid;place-items:center;width:84px;padding:14px 0 12px;border:1px solid var(--vidrio-borde);border-radius:16px;
+  background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);box-shadow:var(--vidrio-brillo)}
+.relojHero b{font-family:var(--font-display);font-weight:400;font-size:36px;line-height:1}
+.relojHero span{margin-top:6px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--textoSuave)}
+
+/* ---------- Manifiesto: franja amarilla que se desplaza hacia la derecha ---------- */
+.manifiesto{overflow:hidden;background:var(--primario);color:#0a0a0a;padding:18px 0}
+.manifiestoPista{display:flex;width:max-content;animation:manifiesto 45s linear infinite}
+.manifiestoPista ul{display:flex;flex-shrink:0;margin:0;padding:0;list-style:none}
+.manifiestoPista li{display:flex;align-items:center;white-space:nowrap;font-family:var(--font-display);font-weight:400;
+  font-size:clamp(22px,2.4vw,34px);line-height:1;letter-spacing:.02em;text-transform:uppercase}
+.manifiestoPista li span{margin:0 clamp(18px,2.4vw,36px);opacity:.55}
+.manifiesto:hover .manifiestoPista{animation-play-state:paused}
+/* De -50 % a 0: el contenido avanza a la derecha; como la segunda copia es igual, el reinicio no se nota */
+@keyframes manifiesto{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+
+/* ---------- Secciones ---------- */
+.seccion{padding:clamp(80px,14vh,150px) var(--margen) 0}
+.dosColumnas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,110px);align-items:start}
+.cabeceraFila{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-bottom:44px}
+.cabeceraFila .titulo{margin-bottom:0}
+.tituloLinea{white-space:nowrap;font-size:clamp(34px,4.4vw,80px)}
+.cabeceraFila .parrafo{max-width:360px}
+
+/* 02 Propósito */
+.figura{margin:0}
+.marco{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:var(--vidrio-radio)}
+.figura figcaption{margin-top:22px;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.cifras{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:clamp(56px,9vh,90px) 0 0}
+.cifras div{display:flex;flex-direction:column-reverse;gap:8px;padding:22px 24px}
+.cifras dt{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--textoSuave)}
+.cifras dd{margin:0;font-family:var(--font-display);font-size:clamp(34px,4vw,58px);line-height:1;color:var(--texto)}
+.cifras div:nth-child(2) dd{color:var(--destacado)}
+.cifras small{font-size:.5em;vertical-align:top}
+
+/* ¿Qué es el Desafío Tolotá? */
+.quees{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(32px,5vw,80px);align-items:center}
+.queesTexto p{margin:0 0 16px;max-width:600px;font-size:clamp(15px,1.2vw,17px);line-height:1.65;color:rgba(244,243,236,.92)}
+.queesTexto strong{color:var(--texto);font-weight:700}
+.versiculos{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 0;padding:0;list-style:none}
+.versiculos li{padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700}
+.modalidades{display:grid;gap:16px}
+.modalidad{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:20px;padding:26px 28px}
+.modalidad b{display:grid;place-items:center;font-family:var(--font-display);font-weight:400;font-size:clamp(48px,4.6vw,64px);line-height:1;color:var(--destacado)}
+.modalidad b svg{width:52px;height:52px}
+.modalidad h3{margin:0 0 8px;font-family:var(--font-display);font-weight:400;font-size:clamp(22px,1.9vw,28px);text-transform:uppercase;line-height:1.05}
+.modalidad p{margin:0;font-size:15px;line-height:1.55;color:rgba(244,243,236,.8)}
+
+/* 03 Retos */
+.retos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.reto{position:relative;min-height:clamp(420px,62vh,560px);display:flex;flex-direction:column;justify-content:flex-end;
+  padding:14px;overflow:hidden;isolation:isolate;border-radius:var(--vidrio-radio);background:#0b0b0a}
+/* La foto ocupa la parte de arriba de la tarjeta; abajo queda el texto sobre su continuación difuminada */
+.reto>.foto{z-index:-2;bottom:26%;transition:transform .8s cubic-bezier(.2,.8,.15,1)}
+/* El borde de abajo de la foto se desenfoca y se funde con el fondo oscuro, sin línea: ahí va el texto */
+.reto::after{content:"";position:absolute;inset:48% 0 0;z-index:-1;pointer-events:none;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  background:linear-gradient(180deg,rgba(11,11,10,0) 0%,rgba(11,11,10,.7) 40%,#0b0b0a 75%);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 35%);mask-image:linear-gradient(180deg,transparent 0%,#000 35%)}
+.reto:hover>.foto{transform:scale(1.04)}
+.retoNumero{position:absolute;top:18px;left:18px;display:grid;place-items:center;width:46px;height:46px;font-family:var(--font-display);font-size:22px;color:var(--destacado)}
+.retoTexto{padding:12px 12px 14px;text-shadow:0 1px 3px rgba(0,0,0,.85),0 2px 18px rgba(0,0,0,.6)}
+.retoTexto h3{margin:10px 0 12px;font-family:var(--font-display);font-weight:400;font-size:clamp(28px,2.6vw,38px);
+  text-transform:uppercase;line-height:1}
+.retoTexto>p:not(.etiqueta){margin:0;font-size:15px;line-height:1.5}
+.retoTexto .retoCategorias{margin-top:14px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
+
+/* 04 Espiritual */
+.panoramica{padding-left:0;padding-right:0}
+.panoramicaFoto{position:relative;min-height:clamp(520px,80vh,720px);display:flex;align-items:center;isolation:isolate}
+.panoramicaFoto>.foto{z-index:-2}
+.veloLateral{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(5,5,5,.9) 0%,rgba(5,5,5,.6) 40%,transparent 75%)}
+.panoramicaTexto{margin:60px var(--margen);padding:clamp(28px,4vw,52px);max-width:720px}
+.panoramicaTexto .parrafo{max-width:480px}
+.versiculo{margin:44px 0 0;padding:0}
+.versiculo p{margin:0;max-width:560px;font-size:clamp(18px,1.7vw,24px);line-height:1.4;color:var(--destacado)}
+.versiculo cite{display:block;margin-top:14px;font-style:normal;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+
+/* 05 Recorrido */
+.recorridoIntro{display:flex;flex-direction:column;justify-content:space-between;gap:56px;height:100%}
+.nota p:not(.etiqueta){margin:12px 0 18px;max-width:340px;font-size:14px;line-height:1.5;color:var(--textoSuave)}
+.pasosLista{list-style:none;margin:0;padding:0;border-top:1px solid var(--linea)}
+.pasosLista li{display:grid;grid-template-columns:90px minmax(0,1fr);gap:20px;padding:26px 0;border-bottom:1px solid var(--linea)}
+.pasoDia{padding-top:6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
+.pasosLista h3{margin:0 0 8px;font-family:var(--font-display);font-weight:400;font-size:clamp(24px,2.2vw,32px);text-transform:uppercase;line-height:1}
+.pasosLista p{margin:0;font-size:15px;line-height:1.5;color:var(--textoSuave)}
+
+/* Pilares */
+.escena{position:relative;padding:clamp(40px,6vw,80px) clamp(18px,4vw,64px);overflow:hidden;isolation:isolate;border-radius:calc(var(--vidrio-radio) + 8px)}
+.escena>.foto{z-index:-2}
+.tituloPanel{margin:0 0 40px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(32px,3.2vw,46px);line-height:1}
+.pilares{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.pilar{padding:26px 28px 30px}
+/* El número acompaña (pequeño y solo en contorno); el que manda es el título */
+.pilarNumero{display:block;margin-bottom:14px;font-family:var(--font-display);font-size:clamp(30px,2.6vw,40px);line-height:1;
+  color:transparent;-webkit-text-stroke:1px rgba(244,243,236,.4)}
+.pilares .etiqueta{font-size:clamp(15px,1.2vw,18px);font-weight:700;letter-spacing:.12em}
+.pilares h3{margin:10px 0 14px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
+  font-size:clamp(28px,2.6vw,40px);line-height:1.02;color:var(--texto)}
+.pilares p:not(.etiqueta){margin:0 0 20px;font-size:15px;line-height:1.5;color:rgba(244,243,236,.82)}
+
+/* 06 Preguntas */
+.acordeon{display:grid;gap:12px}
+.acordeon details{padding:0 26px}
+.acordeon summary{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0;cursor:pointer;list-style:none;
+  font-size:clamp(17px,1.5vw,22px)}
+.acordeon summary::-webkit-details-marker{display:none}
+.acordeon summary i{position:relative;flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--destacado)}
+.acordeon summary i::before,.acordeon summary i::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:2px;
+  background:#0a0a0a;transform:translate(-50%,-50%);transition:transform .25s}
+.acordeon summary i::after{transform:translate(-50%,-50%) rotate(90deg)}
+.acordeon details[open] summary i::after{transform:translate(-50%,-50%) rotate(0)}
+.acordeon summary:hover{color:var(--destacado)}
+.acordeon details p{margin:-4px 0 24px;max-width:520px;font-size:16px;line-height:1.55;color:var(--textoSuave)}
+
+/* 07 Cierre */
+.cierre{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,6vw,100px);
+  padding:clamp(32px,6vw,80px);isolation:isolate;overflow:hidden;border-radius:calc(var(--vidrio-radio) + 8px)}
+.cierre>.foto{z-index:-2}
+.veloOscuro{position:absolute;inset:0;z-index:-1;background:rgba(5,5,5,.72)}
+/* ¿Qué es?: más oscuro detrás del texto (izquierda) que detrás de las tarjetas, para que se lea sobre cualquier foto */
+.veloQuees{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(5,5,5,.9) 0%,rgba(5,5,5,.78) 48%,rgba(5,5,5,.55) 100%)}
+.cierreTexto{display:flex;flex-direction:column}
+.cierreEdicion{margin-top:auto;padding-top:48px}
+.cierreAccion{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:clamp(24px,3vw,36px)}
+.cierreAccion .tituloPanel{margin:0}
+.reloj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+.reloj div{padding:14px 0;text-align:center;border:1px solid var(--vidrio-borde);border-radius:14px;background:rgba(255,255,255,.04)}
+.reloj b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,3.6vw,52px);line-height:1}
+.reloj span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--destacado)}
+
+/* ---------- Aparición al hacer scroll ---------- */
+/* Solo con JavaScript activo (.animado) se oculta el contenido para animarlo; si falla, todo se ve */
+.animado .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.8,.15,1),transform .8s cubic-bezier(.2,.8,.15,1)}
+.animado .in .reveal{opacity:1;transform:none}
+.d1{transition-delay:.1s}
+.d2{transition-delay:.2s}
+.d3{transition-delay:.3s}
+
+/* ---------- Pantallas medianas y celular ---------- */
+@media (max-width:900px){
+  .dosColumnas,.cierre,.quees{grid-template-columns:minmax(0,1fr)}
+  .modalidad{grid-template-columns:64px minmax(0,1fr);padding:22px}
+  .retos{grid-template-columns:minmax(0,1fr)}
+  .tituloLinea{white-space:normal}
+  .reto{min-height:400px}
+  .pilares{grid-template-columns:minmax(0,1fr)}
+  .cifras{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cifras div:last-child{grid-column:1 / -1}
+  .velo{background:linear-gradient(0deg,rgba(5,5,5,.95) 0%,rgba(5,5,5,.55) 60%,rgba(5,5,5,.35) 100%)}
+  .veloLateral{background:rgba(5,5,5,.72)}
+  .veloQuees{background:rgba(5,5,5,.82)}
+  .recorridoIntro{gap:28px}
+}
+@media (max-width:560px){
+  .hero{padding-top:110px}
+  .boton,.botonContorno{width:100%;padding:16px 22px}
+  .acciones{gap:22px}
+  .relojHero{gap:8px}
+  .relojHero div{width:auto;flex:1}
+  .relojHero b{font-size:30px}
+  .pasosLista li{grid-template-columns:minmax(0,1fr);gap:6px}
+  .reloj b{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){
+  .manifiestoPista{animation:none}
+  .animado .reveal{opacity:1;transform:none;transition:none}
+  .reto>.foto{transition:none}
+}
