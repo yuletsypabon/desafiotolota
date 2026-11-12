@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { ZodError, type ZodTypeAny, type z } from 'zod';
+import { MAX_CUERPO_BYTES } from './seguridad';
 
 export type Ctx<P extends Record<string, string> = { id: string }> = { params: Promise<P> };
 
@@ -13,6 +14,8 @@ export function fail(message: string, status = 400) {
 }
 
 export async function parseBody<S extends ZodTypeAny>(req: Request, schema: S): Promise<z.infer<S>> {
+  // Cuerpos gigantes se rechazan antes de leerlos (evita agotar la memoria del servidor)
+  if (Number(req.headers.get('content-length') ?? 0) > MAX_CUERPO_BYTES) throw new HttpError(413, 'La petición es demasiado grande');
   const json = await req.json().catch(() => {
     throw new ZodError([{ code: 'custom', path: [], message: 'JSON inválido' }]);
   });

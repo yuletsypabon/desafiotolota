@@ -1,7 +1,7 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
 import { HttpError } from './api';
-import { claveCorrecta, hashClave, textosIguales } from './clave';
+import { claveCorrecta, hashAnticuado, hashClave, textosIguales } from './clave';
 import { prisma } from './prisma';
 import { crearLimite, ipDe } from './limiteIntentos';
 import {
@@ -31,7 +31,12 @@ export async function estadoClaves() {
 
 export async function verificarClave(rol: Rol, clave: string) {
   const fila = await prisma.credencial.findUnique({ where: { rol } });
-  if (fila) return claveCorrecta(clave, fila.hash);
+  if (fila) {
+    const correcta = await claveCorrecta(clave, fila.hash);
+    // Contraseñas cifradas con el costo anterior: se vuelven a cifrar con el actual al entrar
+    if (correcta && hashAnticuado(fila.hash)) await guardarClave(rol, clave);
+    return correcta;
+  }
   // Sin contraseña guardada: se acepta la del .env y, si coincide, se guarda cifrada en la base
   const env = claveEnv(rol);
   if (!env || !textosIguales(clave, env)) return false;
@@ -56,7 +61,10 @@ export async function guardarClaveHistorico(clave: string) {
 
 export async function verificarClaveHistorico(clave: string) {
   const credencial = await prisma.claveHistorico.findUnique({ where: { id: 'historico' } });
-  return credencial ? claveCorrecta(clave, credencial.hash) : false;
+  if (!credencial) return false;
+  const correcta = await claveCorrecta(clave, credencial.hash);
+  if (correcta && hashAnticuado(credencial.hash)) await guardarClaveHistorico(clave);
+  return correcta;
 }
 
 export async function tieneClaveHistorico() {

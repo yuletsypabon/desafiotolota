@@ -19,6 +19,12 @@ if (!['localhost', '127.0.0.1', '::1', '[::1]'].includes(u.hostname)) {
   process.exit(0);
 }
 
+// El nombre va dentro de un CREATE DATABASE: solo letras, números y guion bajo (evita inyección de SQL)
+if (!/^[A-Za-z_][A-Za-z0-9_]{0,62}$/.test(nombre)) {
+  console.error(`El nombre de la base "${nombre}" no es válido: usa solo letras, números y guion bajo.`);
+  process.exit(1);
+}
+
 // Conectarse a la base "postgres" (siempre existe) para poder crear la otra
 u.pathname = '/postgres';
 const admin = new PrismaClient({ datasourceUrl: u.toString() });

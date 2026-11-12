@@ -12,6 +12,9 @@ import { RUTAS, SECCIONES, esRutaPrivada, eventoDeRuta, rutaEdicion } from '../s
 import { VUELTA_MS, numeroVuelta, progresoVuelta } from '../src/lib/reloj';
 import { equiposEnPistas } from '../src/lib/reservas';
 import { BLOQUEO_MS, MAX_FALLOS, crearLimite } from '../src/lib/limiteIntentos';
+import { esPeticionAjena } from '../src/lib/seguridad';
+import { toCSV } from '../src/lib/csv';
+import { claveCorrecta, hashAnticuado, hashClave } from '../src/lib/clave';
 import { EDICIONES, EVENTO, codigoEdicion, cuentaRegresiva, tituloCategoria, tituloEdicion } from '../src/lib/evento';
 
 const cfg = { penLeveMs: 300, penMediaMs: 500, penGraveMs: 1000, bonPositivoMs: 100 };
@@ -393,4 +396,35 @@ test('nombrePropio: mayúscula inicial y partículas en minúscula', () => {
   assert.equal(nombrePropio('luis DE LA cruz'), 'Luis de la Cruz');
   assert.equal(nombrePropio('  ana   maría '), 'Ana María');
   assert.equal(nombrePropio(null), '');
+});
+
+test('seguridad: se rechazan cambios enviados desde otro sitio (CSRF)', () => {
+  assert.equal(esPeticionAjena('POST', 'https://tolota.org', 'tolota.org', 'same-origin'), false);
+  assert.equal(esPeticionAjena('POST', 'https://malo.com', 'tolota.org', null), true);
+  assert.equal(esPeticionAjena('PUT', null, 'tolota.org', 'cross-site'), true);
+  assert.equal(esPeticionAjena('GET', 'https://malo.com', 'tolota.org', 'cross-site'), false); // leer no cambia nada
+  assert.equal(esPeticionAjena('POST', null, 'tolota.org', null), false); // sin navegador: igual necesita sesión
+});
+
+test('CSV exportado: los textos que parecen fórmula no se ejecutan en Excel', () => {
+  const csv = toCSV([['=HYPERLINK("x")', '+1', 'Normal', -5]]);
+  assert.ok(csv.includes(`"'=HYPERLINK(""x"")"`));
+  assert.ok(csv.includes("'+1"));
+  assert.ok(csv.includes(',-5')); // los números negativos no se tocan
+});
+
+test('contraseñas: scrypt con sal, costo alto y compatibilidad con el formato anterior', async () => {
+  const h = await hashClave('Clave-de-prueba');
+  assert.match(h, /^scrypt2\$131072\$8\$1\$/);
+  assert.notEqual(h, await hashClave('Clave-de-prueba')); // sal aleatoria: nunca el mismo hash
+  assert.equal(await claveCorrecta('Clave-de-prueba', h), true);
+  assert.equal(await claveCorrecta('otra', h), false);
+  assert.equal(hashAnticuado(h), false);
+  // Formato anterior (costo 2^14): sigue funcionando y se marca para volver a cifrar
+  const { scryptSync, randomBytes } = await import('node:crypto');
+  const sal = randomBytes(16);
+  const viejo = `scrypt$${sal.toString('base64')}$${scryptSync('vieja', sal, 32).toString('base64')}`;
+  assert.equal(await claveCorrecta('vieja', viejo), true);
+  assert.equal(hashAnticuado(viejo), true);
+  assert.equal(await claveCorrecta('x', 'basura'), false);
 });

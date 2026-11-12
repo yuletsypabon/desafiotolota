@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { RUTAS, esRutaPrivada, eventoDeRuta } from '@/lib/rutas';
+import { esPeticionAjena } from '@/lib/seguridad';
 import { COOKIE_HISTORICO, COOKIE_SESION, HEADER_ROL, leerToken, leerTokenHistorico, permitidoCrono } from '@/lib/sesion';
 
 /**
@@ -15,9 +16,13 @@ export async function middleware(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.delete(HEADER_ROL);
 
+  const esApi = pathname.startsWith('/api/');
+  // CSRF: ninguna página de otro sitio puede enviar cambios a la API (ni siquiera el inicio de sesión)
+  if (esApi && esPeticionAjena(req.method, req.headers.get('origin'), req.headers.get('host'), req.headers.get('sec-fetch-site')))
+    return NextResponse.json({ error: 'Petición rechazada: no viene de este sitio' }, { status: 403 });
+
   if (!esRutaPrivada(pathname) || API_PUBLICA.test(pathname)) return NextResponse.next({ request: { headers } });
 
-  const esApi = pathname.startsWith('/api/');
   const rol = await leerToken(req.cookies.get(COOKIE_SESION)?.value);
 
   if (!rol) {

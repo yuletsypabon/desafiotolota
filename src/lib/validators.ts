@@ -12,7 +12,8 @@ const optStr = z
 const logo = z
   .string()
   .max(1_500_000, 'El logo es demasiado grande')
-  .refine((v) => v === '' || v.startsWith('data:image/') || /^https?:\/\//.test(v), 'Logo inválido')
+  // Solo imágenes PNG, JPEG, WebP o GIF (no SVG: puede llevar código) o un enlace https
+  .refine((v) => v === '' || /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v) || /^https:\/\/[^\s"'<>()]+$/.test(v), 'Logo inválido')
   .optional()
   .nullable()
   .transform((v) => (v ? v : null));

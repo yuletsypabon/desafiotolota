@@ -45,7 +45,8 @@ function Pantalla() {
   const { data: estado, error: errorEstado, mutate: reintentarEstado } = useSWR<Estado>('/api/auth/estado', fetcher);
   // Solo se aceptan rutas internas para volver después de entrar (evita redirigir a otro sitio)
   const next = useSearchParams().get('next');
-  const destino = next?.startsWith('/') && !next.startsWith('//') ? next : RUTAS.cronometro;
+  // Solo rutas de este sitio: "//otro.com" o "/\otro.com" llevarían a otra página (redirección abierta)
+  const destino = next && /^\/(?![/\\])/.test(next) && !next.includes('\\') ? next : RUTAS.cronometro;
   const entrar = () => window.location.assign(destino);
 
   return (

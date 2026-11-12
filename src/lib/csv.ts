@@ -1,9 +1,12 @@
 import Papa from 'papaparse';
 
-/** Genera CSV con BOM (para que Excel abra bien las tildes). */
+/**
+ * Genera CSV con BOM (para que Excel abra bien las tildes). Los textos que empiezan con = + - @ (o tabulador) llevan
+ * un apóstrofo delante: así Excel no los ejecuta como fórmula (inyección de fórmulas desde un nombre o una ficha).
+ */
 export function toCSV(rows: (string | number | null | undefined)[][]): string {
   const esc = (v: string | number | null | undefined) => {
-    const s = v === null || v === undefined ? '' : String(v);
+    const s = v === null || v === undefined ? '' : typeof v === 'string' && /^[=+\-@\t\r]/.test(v) ? `'${v}` : String(v);
     return /[",;\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return '﻿' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
