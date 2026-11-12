@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { CRONOGRAMA } from '@/lib/contenido';
+import CarruselDias from '@/components/sitio/CarruselDias';
 import s from '../Landing.module.css';
 
-/** 05 · El recorrido: los seis días del campamento, de la llegada a la clausura. */
+/** 05 · El recorrido: los seis días del campamento en tarjetas giratorias, de la llegada a la clausura. */
 export default function Recorrido() {
   return (
     <section id="programa" className={s.seccion} aria-labelledby="recorrido-titulo">
@@ -19,17 +20,9 @@ export default function Recorrido() {
             <Link href="/recursos#cronograma" className={s.enlaceFlecha}>Ver cronograma completo</Link>
           </div>
         </div>
-        <ol className={s.pasosLista}>
-          {CRONOGRAMA.map((d, i) => (
-            <li key={d.num} className={`${s.reveal} ${[s.d1, s.d2, s.d3][i % 3]}`}>
-              <span className={s.pasoDia}>{d.dia} {d.num}</span>
-              <div>
-                <h3>{d.titulo}</h3>
-                <p>{d.resumen}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className={`${s.reveal} ${s.d1}`}>
+          <CarruselDias dias={CRONOGRAMA} />
+        </div>
       </div>
     </section>
   );

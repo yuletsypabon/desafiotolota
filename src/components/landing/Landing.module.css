@@ -152,11 +152,6 @@
 /* 05 Recorrido */
 .recorridoIntro{display:flex;flex-direction:column;justify-content:space-between;gap:56px;height:100%}
 .nota p:not(.etiqueta){margin:12px 0 18px;max-width:340px;font-size:14px;line-height:1.5;color:var(--textoSuave)}
-.pasosLista{list-style:none;margin:0;padding:0;border-top:1px solid var(--linea)}
-.pasosLista li{display:grid;grid-template-columns:90px minmax(0,1fr);gap:20px;padding:26px 0;border-bottom:1px solid var(--linea)}
-.pasoDia{padding-top:6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
-.pasosLista h3{margin:0 0 8px;font-family:var(--font-display);font-weight:400;font-size:clamp(24px,2.2vw,32px);text-transform:uppercase;line-height:1}
-.pasosLista p{margin:0;font-size:15px;line-height:1.5;color:var(--textoSuave)}
 
 /* Pilares */
 .escena{position:relative;padding:clamp(40px,6vw,80px) clamp(18px,4vw,64px);overflow:hidden;isolation:isolate;border-radius:calc(var(--vidrio-radio) + 8px)}
@@ -232,7 +227,6 @@
   .relojHero{gap:8px}
   .relojHero div{width:auto;flex:1}
   .relojHero b{font-size:30px}
-  .pasosLista li{grid-template-columns:minmax(0,1fr);gap:6px}
   .reloj b{font-size:30px}
 }
 @media (prefers-reduced-motion:reduce){

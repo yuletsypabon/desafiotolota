@@ -1,7 +1,7 @@
 .pagina{min-height:100vh;color:var(--texto);font-family:var(--font-body);
   background:linear-gradient(180deg,rgba(5,5,5,.72) 0%,rgba(5,5,5,.9) 45%,var(--fondo) 100%),var(--fondo-foto) center top / cover fixed,var(--fondo)}
-/* Vidrio esmerilado compartido por tarjetas y días */
-.tarjeta,.dia{background:var(--vidrio);border:1px solid var(--vidrio-borde);border-radius:var(--vidrio-radio);
+/* Vidrio esmerilado de las tarjetas */
+.tarjeta{background:var(--vidrio);border:1px solid var(--vidrio-borde);border-radius:var(--vidrio-radio);
   -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);box-shadow:var(--vidrio-brillo)}
 .cabecera{padding:clamp(64px,12vh,130px) clamp(18px,4.5vw,88px) clamp(36px,6vh,60px)}
 .eyebrow{margin:0;font-size:12.5px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
@@ -22,25 +22,8 @@
 .pronto{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--textoSuave);opacity:.75}
 .pagina :focus-visible{outline:3px solid var(--destacado);outline-offset:3px}
 
-/* Cronograma */
-.dias{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.dia{padding:26px 28px}
-.diaCabeza{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
-.diaCabeza b{font-family:var(--font-display);font-weight:400;font-size:48px;line-height:1;color:var(--destacado)}
-.diaCabeza span{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--textoSuave)}
-.dia h3{margin:4px 0 4px;font-family:var(--font-display);font-weight:400;font-size:24px;text-transform:uppercase}
-.dia>p{margin:0 0 16px;font-size:14px;color:var(--textoSuave)}
-.actividades{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14px}
-.actividades li{display:grid;grid-template-columns:128px 1fr;gap:10px;color:var(--textoSuave)}
-.actividades time{font-family:var(--font-mono);font-size:12.5px;opacity:.85}
-.actividades .destacada{color:var(--texto);font-weight:500}
-.actividades .destacada time{color:var(--destacado);opacity:1}
-
 /* Pasos de inscripción */
 .pasos{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--linea);counter-reset:paso}
 .pasos li{display:grid;grid-template-columns:56px 1fr;align-items:baseline;gap:14px;padding:20px 0;border-bottom:1px solid var(--linea);line-height:1.55}
 .pasos li::before{counter-increment:paso;content:"0" counter(paso);font-size:14px;color:var(--destacado)}
 
-@media (max-width:760px){
-  .actividades li{grid-template-columns:104px 1fr}
-}

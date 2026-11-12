@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import PaginaSitio from '@/components/sitio/PaginaSitio';
+import CarruselDias from '@/components/sitio/CarruselDias';
 import s from '@/components/sitio/pagina.module.css';
 import { CRONOGRAMA, DOCUMENTOS, INSCRIPCION } from '@/lib/contenido';
 
@@ -33,26 +34,7 @@ export default function Recursos() {
       <section id="cronograma" className={s.bloque} aria-labelledby="cronograma-titulo">
         <h2 id="cronograma-titulo">Cronograma · Seis días, una meta</h2>
         <p>Agenda de los participantes. Puede tener ajustes menores; los capitanes reciben los cambios en el evento.</p>
-        <div className={s.dias}>
-          {CRONOGRAMA.map((d) => (
-            <article key={d.num} className={s.dia}>
-              <div className={s.diaCabeza}>
-                <b>{d.num}</b>
-                <span>{d.dia} · diciembre</span>
-              </div>
-              <h3>{d.titulo}</h3>
-              <p>{d.resumen}</p>
-              <ul className={s.actividades}>
-                {d.actividades.map((x) => (
-                  <li key={x.hora + x.que} className={x.destacada ? s.destacada : undefined}>
-                    <time>{x.hora}</time>
-                    <span>{x.que}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
+        <CarruselDias dias={CRONOGRAMA} completo />
       </section>
 
       <section id="inscripcion" className={s.bloque} aria-labelledby="inscripcion-titulo">

@@ -1,0 +1,47 @@
+/* Cronograma en tarjetas giratorias (abanico): la del día elegido al frente, las demás a los lados */
+.carrusel{--ancho:300px;--paso:56%;outline:none;touch-action:pan-y;user-select:none}
+.completo{--ancho:340px}
+.carrusel:focus-visible .escena{outline:2px solid var(--destacado);outline-offset:8px;border-radius:24px}
+
+/* Todas las tarjetas en la misma celda: la escena toma el alto de la más alta */
+.escena{display:grid;justify-items:center;align-items:center;padding:24px 0 8px;overflow:hidden}
+.carta{grid-area:1/1;display:flex;flex-direction:column;width:var(--ancho);min-height:470px;padding:18px 20px 16px;
+  border-radius:24px;background:#f4f3ec;color:#121212;box-shadow:0 24px 50px rgba(0,0,0,.55);cursor:pointer;
+  transform:translateX(calc(var(--desfase) * var(--paso))) scale(calc(1 - var(--lejos) * .13));
+  filter:blur(calc(var(--lejos) * 1.6px)) brightness(calc(1 - var(--lejos) * .22));
+  opacity:calc(1 - var(--lejos) * .18);
+  transition:transform .55s cubic-bezier(.2,.8,.2,1),filter .55s ease,opacity .55s ease}
+.carta[data-oculta="true"]{opacity:0;pointer-events:none}
+.carta[data-activa="true"]{cursor:default;box-shadow:0 28px 60px rgba(0,0,0,.6),0 0 0 2px var(--destacado)}
+
+.cabeza{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,.14);
+  font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555}
+.pildora{padding:2px 10px;border:1.5px solid #121212;border-radius:999px;color:#121212;letter-spacing:.04em}
+.fecha{display:flex;align-items:baseline;gap:10px;margin:14px 0 2px}
+.fecha b{font-family:var(--font-display);font-weight:400;font-size:64px;line-height:.95;color:#121212}
+.fecha span{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8a6d00}
+.carta h3{margin:6px 0 6px;font-family:var(--font-display);font-weight:400;font-size:26px;line-height:1.05;text-transform:uppercase}
+.resumen{margin:0 0 12px;font-size:14px;line-height:1.45;color:#444}
+.actividades{list-style:none;margin:0 0 12px;padding:10px 0 0;border-top:1px solid rgba(0,0,0,.14);display:grid;gap:7px;font-size:13px}
+.actividades li{display:grid;grid-template-columns:104px 1fr;gap:8px;color:#555}
+.actividades time{font-family:var(--font-mono);font-size:11.5px}
+.actividades li[data-destacada="true"]{color:#121212;font-weight:700}
+.actividades li[data-destacada="true"] time{color:#8a6d00}
+.carrusel:not(.completo) .actividades li{grid-template-columns:1fr}
+.pie{margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,.14);font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#777}
+
+/* Botones de día */
+.dias{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:22px}
+.dias button{padding:8px 16px;border-radius:999px;border:1px solid var(--vidrio-borde);background:var(--vidrio);color:var(--texto);
+  font:inherit;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);transition:background-color .2s ease,color .2s ease}
+.dias button:hover{border-color:var(--destacado)}
+.dias button[aria-selected="true"]{background:var(--destacado);border-color:var(--destacado);color:#050505}
+
+@media (max-width:760px){
+  .carrusel,.completo{--ancho:min(78vw,320px);--paso:62%}
+}
+@media (prefers-reduced-motion:reduce){
+  .carta{transition:none}
+}
