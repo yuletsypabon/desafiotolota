@@ -17,6 +17,9 @@ import PrintIcon from '@mui/icons-material/Print';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
+import ViewWeekOutlinedIcon from '@mui/icons-material/ViewWeekOutlined';
 import { api, store, useClasificacion, useEquipos, useEvento, useSesion } from '@/lib/client';
 import { ordenEfectivo } from '@/lib/orden';
 import { intercambiarEnPistas, intercambiarEnSet } from '@/lib/intercambio';
@@ -41,8 +44,7 @@ import type { EquipoDTO, FilaPrueba } from '@/lib/types';
 import { COLORS, FONT_MONO } from '@/theme';
 import { RUTAS } from '@/lib/rutas';
 
-const KEYS_DET = 'QWERTYUI';
-const MAX_PISTAS = 8; // teclas 1–8 y Q…I
+const MAX_PISTAS = 8;
 const ESTADO_PISTA: Record<Lane['state'], string> = {
   idle: 'Libre', rdy: 'Lista para salir', run: 'En pista', det: 'Detenido', fin: 'Llegó a meta',
 };
@@ -266,19 +268,12 @@ export default function Cronometro() {
       if (k === h.pulsador.toUpperCase() && h.focus !== null) {
         e.preventDefault();
         h.accion(h.focus);
-        h.setFocus(null);
         return;
       }
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= h.numPistas) {
         e.preventDefault();
-        h.accion(n - 1);
-        return;
-      }
-      const d = KEYS_DET.indexOf(k);
-      if (d >= 0 && d < h.numPistas) {
-        e.preventDefault();
-        h.togDet(d);
+        h.setFocus(n - 1);
       }
     };
     document.addEventListener('keydown', onKey);
@@ -288,11 +283,10 @@ export default function Cronometro() {
   // Botón arcade / encoder USB (se ve como mando, no como teclado)
   useBotonesGamepad((boton) => {
     const h = handlers.current;
-    const a = accionDeBoton(boton, h.numPistas, h.focus);
+    const a = accionDeBoton(boton, h.focus);
     if (a?.tipo === 'accion') {
       h.accion(a.pista);
-      if (boton === 0) h.setFocus(null);
-    } else if (a?.tipo === 'detenido') h.togDet(a.pista);
+    }
   }, (msg) => toast(msg, 'info'));
 
   const borrarTiempo = async (f: FilaPrueba) => {
@@ -346,12 +340,12 @@ export default function Cronometro() {
     setCorregir([...enPistas, ...guardados]);
   };
 
-  const intercambiar = async (a: string, b: string) => {
+  const intercambiar = async (a: string, b: string, motivo: string) => {
     const enServidor = (id: string) =>
       filas.some((f) => f.equipoId === id) || lanes.some((l) => l.equipoId === id && l.state === 'fin' && l.guardado === 'si');
     try {
       if (enServidor(a) || enServidor(b)) {
-        await api(`/api/pruebas/${pruebaId}/resultados/intercambiar`, 'POST', { equipoA: a, equipoB: b });
+        await api(`/api/pruebas/${pruebaId}/resultados/intercambiar`, 'POST', { equipoA: a, equipoB: b, motivo });
       }
     } catch (e) {
       toast(`No se pudo intercambiar: ${(e as Error).message}`, 'error');
@@ -400,70 +394,106 @@ export default function Cronometro() {
     <Box>
       {/* Barra de prueba: va en la franja del evento, al lado del selector de evento */}
       <EnBarraEvento>
-        <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1, ml: { sm: 1 } }}>Prueba</Typography>
-        <TextField
-          select
-          value={pruebaId}
-          onChange={async (e) => {
-            const nueva = e.target.value;
-            if (
-              laneActiva &&
-              !(await dialog({
-                title: '¿Cambiar de prueba?',
-                message: 'Hay pistas ocupadas en esta prueba. Su estado se conserva en este equipo para cuando vuelvas.',
-                tone: 'warning',
-                confirmLabel: 'Cambiar',
-              }))
-            ) return;
-            setPruebaId(nueva);
-          }}
-          sx={{ minWidth: 220, maxWidth: 340 }}
-        >
-          {ev.pruebas.map((p, i) => (
-            <MenuItem key={p.id} value={p.id}>{i + 1}. {p.nombre} · {ESTADOS[p.estado].label}</MenuItem>
-          ))}
-        </TextField>
-        {prueba && <Chip size="small" color={ESTADOS[prueba.estado].color} label={ESTADOS[prueba.estado].label} />}
-        <Box sx={{ display: { xs: 'none', sm: 'block' }, flex: 1 }} />
-        {esAdmin && (
-          <Button size="small" color="inherit" startIcon={<DownloadIcon />} href={`/api/eventos/${eventoId}/exportar?tipo=prueba&pruebaId=${pruebaId}`}>CSV</Button>
-        )}
-        <Tooltip title="Corregir pista">
-          <IconButton size="small" aria-label="Corregir pista" color="info" onClick={abrirCorregir}>
-            <SwapHorizIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={`Asignación automática: ${auto ? 'activada' : 'desactivada'}`}>
-          <Switch
-            size="small"
-            checked={auto}
-            onChange={(e) => cambiarAuto(e.target.checked)}
-            inputProps={{ 'aria-label': 'Asignación automática' }}
-          />
-        </Tooltip>
-        <Tooltip title={prueba?.estado === 'FINALIZADA' ? 'Reabrir prueba' : 'Finalizar prueba'}>
-          <IconButton
-            size="small"
-            aria-label={prueba?.estado === 'FINALIZADA' ? 'Reabrir prueba' : 'Finalizar prueba'}
-            color="error"
-            onClick={finalizarPrueba}
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1, flexShrink: 0 }}>Prueba</Typography>
+          <TextField
+            select
+            value={pruebaId}
+            onChange={async (e) => {
+              const nueva = e.target.value;
+              if (
+                laneActiva &&
+                !(await dialog({
+                  title: '¿Cambiar de prueba?',
+                  message: 'Hay pistas ocupadas en esta prueba. Su estado se conserva en este equipo para cuando vuelvas.',
+                  tone: 'warning',
+                  confirmLabel: 'Cambiar',
+                }))
+              ) return;
+              setPruebaId(nueva);
+            }}
+            sx={{ width: { xs: 260, sm: 330, md: 380 }, '& .MuiSelect-select': { fontWeight: 700, textAlign: 'center', px: 5 } }}
           >
-            <FlagIcon />
-          </IconButton>
-        </Tooltip>
+            {ev.pruebas.map((p, i) => <MenuItem key={p.id} value={p.id}>{i + 1}. {p.nombre}</MenuItem>)}
+          </TextField>
+          {prueba && <Chip size="small" color={ESTADOS[prueba.estado].color} label={ESTADOS[prueba.estado].label} sx={{ fontWeight: 700, flexShrink: 0 }} />}
+        </Stack>
       </EnBarraEvento>
-
       {prueba?.estado === 'FINALIZADA' && (
         <Alert severity="info" sx={{ mb: 1.5 }}>Esta prueba está marcada como finalizada. Puedes seguir registrando tiempos si es necesario.</Alert>
       )}
 
+      <Paper sx={{ p: { xs: 2, sm: 2.5 }, mb: 2, borderColor: `${COLORS.acento}55` }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
+            <TimerOutlinedIcon sx={{ fontSize: 34, color: COLORS.acento, flexShrink: 0 }} />
+            <Box>
+              <Typography variant="h4">{prueba?.nombre ?? 'Cronometraje'}</Typography>
+              <Typography variant="body2" color="text.secondary">Control de salidas, llegadas y ajustes de esta prueba.</Typography>
+            </Box>
+          </Stack>
+          <Stack direction="row" spacing={{ xs: 1, sm: 2 }} alignItems="center" justifyContent={{ xs: 'space-between', md: 'flex-end' }}>
+            <Stack direction="row" spacing={.5} alignItems="center" color="text.secondary">
+              <ViewWeekOutlinedIcon sx={{ fontSize: 21, color: COLORS.acento }} />
+              <Typography variant="body2" fontWeight={700}>{numPistas}</Typography>
+              <Typography variant="body2">pistas</Typography>
+            </Stack>
+            <Stack direction="row" spacing={.5} alignItems="center" color="text.secondary">
+              <TimerOutlinedIcon sx={{ fontSize: 21, color: COLORS.green }} />
+              <Typography variant="body2" fontWeight={700}>{lanes.filter((lane) => lane.state === 'run' || lane.state === 'det').length}</Typography>
+              <Typography variant="body2">en pista</Typography>
+            </Stack>
+            <Stack direction="row" spacing={.5} alignItems="center" color="text.secondary">
+              <GroupsOutlinedIcon sx={{ fontSize: 21, color: COLORS.acento }} />
+              <Typography variant="body2" fontWeight={700}>{pendientes.length}</Typography>
+              <Typography variant="body2">pendientes</Typography>
+            </Stack>
+            <Stack direction="row" spacing={.25} alignItems="center" sx={{ pl: { sm: 1 }, borderLeft: { sm: `1px solid ${COLORS.border}` } }}>
+              {esAdmin && (
+                <Tooltip title="Exportar resultados de la prueba como CSV">
+                  <IconButton size="small" aria-label="Exportar CSV" color="inherit" href={`/api/eventos/${eventoId}/exportar?tipo=prueba&pruebaId=${pruebaId}`}>
+                    <DownloadIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Corregir pista">
+                <IconButton size="small" aria-label="Corregir pista" color="info" onClick={abrirCorregir}>
+                  <SwapHorizIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={`Asignación automática: ${auto ? 'activada' : 'desactivada'}`}>
+                <Switch
+                  size="small"
+                  checked={auto}
+                  onChange={(e) => cambiarAuto(e.target.checked)}
+                  inputProps={{ 'aria-label': 'Asignación automática' }}
+                />
+              </Tooltip>
+              <Tooltip title={prueba?.estado === 'FINALIZADA' ? 'Reabrir prueba' : 'Finalizar prueba'}>
+                <IconButton
+                  size="small"
+                  aria-label={prueba?.estado === 'FINALIZADA' ? 'Reabrir prueba' : 'Finalizar prueba'}
+                  color="error"
+                  onClick={finalizarPrueba}
+                >
+                  <FlagIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+        </Stack>
+      </Paper>
+
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) 300px' }, gap: 1.5, alignItems: 'start' }}>
         <Box>
-          {/* 3 pistas por fila; las demás bajan a la fila siguiente (en celular, de a una o dos) */}
+          {/* Con una o dos pistas se aprovecha todo el ancho; desde la tercera, son tres por fila. */}
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', md: 'repeat(3, minmax(0, 1fr))' },
+              gridTemplateColumns: {
+                xs: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))',
+                md: numPistas === 1 ? 'minmax(0, 1fr)' : numPistas === 2 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))',
+              },
               gap: 1.25,
               mb: 1.5,
             }}
@@ -476,10 +506,9 @@ export default function Cronometro() {
                 equipo={l.equipoId ? eqMap.get(l.equipoId) ?? null : null}
                 focused={focus === i}
                 dimmed={focus !== null && focus !== i}
-                keyAccion={String(i + 1)}
-                keyDet={KEYS_DET[i] ?? ''}
                 penMs={penDe(l.equipoId)}
                 candidatos={disponibles}
+                ancha={numPistas <= 2}
                 onFocus={() => setFocus((f) => (f === i ? null : i))}
                 onAccion={() => accion(i)}
                 onDet={() => togDet(i)}

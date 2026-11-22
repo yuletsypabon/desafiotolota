@@ -52,7 +52,7 @@ const BORDER: Record<LaneState, string> = {
 };
 
 export default function LaneCard({
-  n, lane, equipo, focused, dimmed, keyAccion, keyDet, penMs, candidatos,
+  n, lane, equipo, focused, dimmed, penMs, candidatos, ancha = false,
   onFocus, onAccion, onDet, onElegir, onQuitar, onCancelarSalida,
 }: {
   n: number;
@@ -60,10 +60,10 @@ export default function LaneCard({
   equipo: EquipoDTO | null;
   focused: boolean;
   dimmed: boolean;
-  keyAccion: string;
-  keyDet: string;
   penMs: number | null;
   candidatos: EquipoDTO[];
+  /** Con una o dos pistas hay más espacio: se amplía la cabecera del equipo. */
+  ancha?: boolean;
   onFocus: () => void;
   onAccion: () => void;
   onDet: () => void;
@@ -119,15 +119,11 @@ export default function LaneCard({
       <Typography sx={{ position: 'absolute', top: 6, right: 10, fontFamily: FONT_DISPLAY, letterSpacing: '0.15em', fontSize: 12, color: COLORS.muted, textAlign: 'right' }}>
         PISTA {n}
       </Typography>
-      <Box sx={{ position: 'absolute', top: 26, right: 8, display: 'flex', gap: 0.5 }}>
-        {focused ? (
+      {focused && (
+        <Box sx={{ position: 'absolute', top: 26, right: 8, display: 'flex', gap: 0.5 }}>
           <Chip size="small" label="SELECCIONADA" sx={{ height: 18, fontSize: 9, fontWeight: 700, color: COLORS.blue, bgcolor: alfa(COLORS.blue, .15) }} />
-        ) : (
-          <Typography variant="caption" sx={{ color: COLORS.muted, fontFamily: FONT_MONO, fontSize: 10 }}>
-            {keyAccion} · {keyDet}
-          </Typography>
-        )}
-      </Box>
+        </Box>
+      )}
 
       <Box
         sx={{
@@ -139,27 +135,35 @@ export default function LaneCard({
         {BADGE[st].t}
       </Box>
 
-      <EquipoAvatar nombre={equipo?.nombre ?? '?'} logo={equipo?.logo} size={58} />
-
-      {st === 'idle' || st === 'rdy' ? (
-        <TextField
-          select
-          value={lane.equipoId ?? ''}
-          onChange={(e) => onElegir(e.target.value)}
-          sx={{ '& .MuiSelect-select': { fontFamily: FONT_DISPLAY, fontSize: 16, letterSpacing: '0.05em', textAlign: 'center' } }}
-          slotProps={{ select: { displayEmpty: true } }}
-        >
-          <MenuItem value="" disabled>— Elegir equipo —</MenuItem>
-          {equipo && <MenuItem value={equipo.id}>{equipo.numero}. {equipo.nombre}</MenuItem>}
-          {candidatos.filter((c) => c.id !== equipo?.id).map((c) => (
-            <MenuItem key={c.id} value={c.id}>{c.numero}. {c.nombre}</MenuItem>
-          ))}
-        </TextField>
-      ) : (
-        <Typography sx={{ fontFamily: FONT_DISPLAY, fontSize: 17, letterSpacing: '0.05em', textAlign: 'center', minHeight: 24 }}>
-          {equipo?.nombre ?? '—'}
-        </Typography>
-      )}
+      <Box sx={{ width: '100%', minHeight: ancha ? 192 : 170, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+          {st === 'idle' || st === 'rdy' ? (
+            <TextField
+              select
+              fullWidth
+              value={lane.equipoId ?? ''}
+              onChange={(e) => onElegir(e.target.value)}
+              sx={{ '& .MuiSelect-select': { fontSize: 'clamp(20px, 2vw, 26px)', fontWeight: 700, textAlign: 'center', letterSpacing: '-.02em' } }}
+              slotProps={{ select: { displayEmpty: true } }}
+            >
+              <MenuItem value="" disabled>— Elegir equipo —</MenuItem>
+              {equipo && <MenuItem value={equipo.id}>{equipo.numero}. {equipo.nombre}</MenuItem>}
+              {candidatos.filter((c) => c.id !== equipo?.id).map((c) => (
+                <MenuItem key={c.id} value={c.id}>{c.numero}. {c.nombre}</MenuItem>
+              ))}
+            </TextField>
+          ) : (
+            <Typography sx={{ fontSize: 'clamp(24px, 2.3vw, 34px)', fontWeight: 700, letterSpacing: '-.03em', lineHeight: 1.05, textAlign: 'center', overflowWrap: 'anywhere' }}>
+              {equipo?.nombre ?? '—'}
+            </Typography>
+          )}
+        </Box>
+        {equipo?.logo ? (
+          <Box component="img" src={equipo.logo} alt={`Logo de ${equipo.nombre}`} sx={{ width: ancha ? 190 : 160, height: ancha ? 190 : 160, objectFit: 'contain', flexShrink: 0, transform: 'translateX(-14px)' }} />
+        ) : (
+          <Box sx={{ transform: 'translateX(-14px)' }}><EquipoAvatar nombre={equipo?.nombre ?? '?'} size={ancha ? 172 : 144} square /></Box>
+        )}
+      </Box>
 
       <Box sx={{ width: '100%' }}>
         <RelojDigital
