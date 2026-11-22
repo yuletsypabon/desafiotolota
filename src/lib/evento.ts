@@ -11,7 +11,7 @@ export const EVENTO = {
   sede: 'Finca El Faisán Dorado',
   lugar: 'Gámbita, Santander',
   lugarDetalle: 'Vía Vado Real – Gámbita, Santander',
-  mapa: 'https://www.google.com/maps?q=' + encodeURIComponent('Vado Real Gámbita Santander Colombia'),
+  mapa: 'https://maps.app.goo.gl/xN1kjE2onNKC7bwi8',
   diasCampamento: 6,
   /** Tema de la cartilla bíblica del año */
   tema: { nombre: "Ge'ullah", significado: 'redención', idioma: 'hebrea', versiculos: ['Lucas 21:28', '1 Corintios 1:30'] },
