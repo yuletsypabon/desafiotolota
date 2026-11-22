@@ -36,8 +36,9 @@ export const cajaVidrio = {
   borderRadius: VIDRIO_SISTEMA.radioChico,
 } as const;
 
-// Títulos: Anton en mayúsculas, como el sitio público (Anton tiene un solo grosor: 400)
-const display = { fontFamily: FONT_DISPLAY, fontWeight: 400, letterSpacing: '0.01em', textTransform: 'uppercase' as const, lineHeight: 1.05 };
+// Jerarquía: Anton se reserva para titulares de impacto; en el sistema, Space Grotesk evita pantallas recargadas.
+const display = { fontFamily: FONT_DISPLAY, fontWeight: 400, letterSpacing: '0.01em', lineHeight: 1.05 };
+const tituloSistema = { fontFamily: FUENTE_TEXTO, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.15, textTransform: 'none' as const };
 
 export const theme = createTheme({
   palette: {
@@ -58,9 +59,9 @@ export const theme = createTheme({
     h1: { ...display, fontSize: '2.6rem' },
     h2: { ...display, fontSize: '2.1rem' },
     h3: { ...display, fontSize: '1.7rem' },
-    h4: { ...display, fontSize: '1.45rem', color: COLORS.acento },
-    h5: { ...display, fontSize: '1.2rem' },
-    h6: { ...display, fontSize: '1.05rem' },
+    h4: { ...tituloSistema, fontSize: '1.45rem', color: COLORS.acento },
+    h5: { ...tituloSistema, fontSize: '1.2rem' },
+    h6: { ...tituloSistema, fontSize: '1.05rem' },
     button: { fontWeight: 500, textTransform: 'none' },
     overline: { fontWeight: 500, letterSpacing: '0.04em' },
   },

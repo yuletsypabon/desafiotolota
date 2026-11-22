@@ -3,15 +3,25 @@ import { createContext, useContext, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 /**
- * Espacio en la franja del evento (junto al selector de evento) donde cada sección puede poner sus controles.
- * El marco del evento ofrece el elemento; la sección lo llena con <EnBarraEvento>.
+ * Espacios de la franja del evento. La prueba activa se muestra centrada; las acciones operativas quedan a la derecha.
  */
-const BarraEventoContext = createContext<HTMLElement | null>(null);
+interface DestinosBarraEvento {
+  centro: HTMLElement | null;
+  acciones: HTMLElement | null;
+}
+
+const BarraEventoContext = createContext<DestinosBarraEvento>({ centro: null, acciones: null });
 
 export const BarraEventoProvider = BarraEventoContext.Provider;
 
-/** Muestra `children` en la franja del evento (si la sección está dentro del marco del evento). */
+/** Muestra el control principal de la sección en el centro de la franja del evento. */
 export function EnBarraEvento({ children }: { children: ReactNode }) {
-  const destino = useContext(BarraEventoContext);
-  return destino ? createPortal(children, destino) : null;
+  const { centro } = useContext(BarraEventoContext);
+  return centro ? createPortal(children, centro) : null;
+}
+
+/** Muestra acciones secundarias de la sección al extremo derecho de la franja del evento. */
+export function EnAccionesBarraEvento({ children }: { children: ReactNode }) {
+  const { acciones } = useContext(BarraEventoContext);
+  return acciones ? createPortal(children, acciones) : null;
 }
