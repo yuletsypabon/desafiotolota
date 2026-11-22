@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ANIO_INICIO } from '@/lib/evento';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import { ANIO_INICIO, EVENTO } from '@/lib/evento';
 import { REDES } from '@/lib/landing/redes';
-import { RUTAS, SECCIONES } from '@/lib/rutas';
+import { RUTAS, rutaEdicion } from '@/lib/rutas';
 import LogoTolota from './LogoTolota';
 import s from './pie.module.css';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -16,64 +17,103 @@ const ICONOS: Record<string, typeof InstagramIcon> = {
   WhatsApp: WhatsAppIcon,
 };
 
-const PARTICIPAR = [
-  { nombre: 'Inscribirse', ruta: `${RUTAS.inicio}#inscripciones` },
-  { nombre: 'Reglamento', ruta: '/recursos' },
-  { nombre: 'Mis fotos', ruta: '/galeria' },
-  // Sistema de cronometraje (sin sesión, abre el inicio de sesión)
-  { nombre: 'Cronómetro (organizadores)', ruta: RUTAS.cronometro },
-];
+const REDES_TODAS = [...REDES.principales, ...REDES.secundarias];
+const WHATSAPP = REDES_TODAS.find((red) => red.nombre === 'WhatsApp')?.url ?? '';
 
-/** Pie de página del sitio público: marca, redes, secciones y enlaces para participar. */
+const COLUMNAS = [
+  {
+    titulo: 'Conoce el desafío',
+    enlaces: [
+      { nombre: 'Historia', ruta: '/historia' },
+      { nombre: 'Ediciones', ruta: '/ediciones' },
+      { nombre: 'Espiritual', ruta: '/espiritual' },
+      { nombre: 'Galería', ruta: '/galeria' },
+    ],
+  },
+  {
+    titulo: `Evento ${EVENTO.inicio.getFullYear()}`,
+    enlaces: [
+      { nombre: 'Página del evento', ruta: rutaEdicion(EVENTO.inicio.getFullYear()) },
+      { nombre: 'El propósito', ruta: `${RUTAS.inicio}#experiencia` },
+      { nombre: 'Pruebas', ruta: `${RUTAS.inicio}#retos` },
+      { nombre: 'Recorrido', ruta: `${RUTAS.inicio}#programa` },
+    ],
+  },
+  {
+    titulo: 'Participa',
+    enlaces: [
+      { nombre: 'Inscríbete', ruta: `${RUTAS.inicio}#inscripciones` },
+      { nombre: 'Bases y reglamento', ruta: '/recursos#bases' },
+      { nombre: 'Cronograma', ruta: `${rutaEdicion(EVENTO.inicio.getFullYear())}#cronograma` },
+      { nombre: 'Cronómetro · organización', ruta: RUTAS.cronometro },
+    ],
+  },
+  {
+    titulo: '¿Necesitas ayuda?',
+    enlaces: [
+      { nombre: 'Contacto', ruta: '/contacto' },
+      { nombre: 'WhatsApp', ruta: WHATSAPP, externo: true },
+      { nombre: 'Ubicación', ruta: EVENTO.mapa, externo: true },
+    ],
+  },
+] as const;
+
+/** Footer del sitio público: marca, navegación agrupada, redes y sede. */
 export default function PieSitio() {
-  const redes = [...REDES.principales, ...REDES.secundarias];
   return (
     <footer className={s.pie}>
       <div className={s.columnas}>
-        <div>
-          <div className={s.marca}>
-            <LogoTolota tamano={44} />
+        <div className={s.presentacion}>
+          <Link className={s.marca} href={RUTAS.inicio} aria-label="Desafío Tolotá, inicio">
+            <LogoTolota tamano={46} />
             <b>Desafío Tolotá</b>
-          </div>
-          <p className={s.lema}>Deporte. Fe. Comunidad.</p>
+          </Link>
+          <p className={s.lema}>AVENTURA. ESPIRITUALIDAD. CONOCIMIENTO.</p>
           <p className={s.descripcion}>
-            Evento anual de obstáculos y campamento juvenil adventista. Corregimiento de Tolotá, Colombia.
+            Un reto de aventura, espiritualidad y conocimiento para crecer en equipo.
           </p>
-          <div className={s.redes}>
-            {redes.map((r) => {
-              const Icono = ICONOS[r.nombre];
-              const icono = (
-                <Icono sx={{ fontSize: 18 }} aria-hidden="true" />
-              );
-              return r.url ? (
-                <a key={r.nombre} className={s.red} href={r.url} target="_blank" rel="noopener noreferrer" aria-label={r.nombre}>{icono}</a>
-              ) : (
-                <span key={r.nombre} className={s.red} title={`${r.nombre} (enlace pendiente)`}>{icono}</span>
-              );
-            })}
-          </div>
+          <Link className={s.boton} href={`${RUTAS.inicio}#inscripciones`}>Inscribe a tu equipo</Link>
         </div>
-        <nav aria-label="Secciones">
-          <p className={s.titulo}>Secciones</p>
-          <ul className={s.lista}>
-            <li><Link href={RUTAS.inicio}>Inicio</Link></li>
-            {SECCIONES.map((x) => (
-              <li key={x.ruta}><Link href={x.ruta}>{x.nombre}</Link></li>
-            ))}
-          </ul>
-        </nav>
-        <nav aria-label="Participar">
-          <p className={s.titulo}>Participar</p>
-          <ul className={s.lista}>
-            {PARTICIPAR.map((x) => (
-              <li key={x.nombre}><Link href={x.ruta}>{x.nombre}</Link></li>
-            ))}
-          </ul>
-        </nav>
+
+        {COLUMNAS.map((columna) => (
+          <nav key={columna.titulo} className={s.grupo} aria-label={columna.titulo}>
+            <p className={s.titulo}>{columna.titulo}</p>
+            <ul className={s.lista}>
+              {columna.enlaces.map((enlace) => (
+                <li key={enlace.nombre}>
+                  {'externo' in enlace && enlace.externo ? (
+                    <a href={enlace.ruta} target="_blank" rel="noopener noreferrer">{enlace.nombre}</a>
+                  ) : (
+                    <Link href={enlace.ruta}>{enlace.nombre}</Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
       </div>
+
       <div className={s.base}>
-        <span>Hechos para ir más allá.</span>
-        <span>© {ANIO_INICIO}–{new Date().getFullYear()} Desafío Tolotá · Ministerio de apoyo adventista</span>
+        <div className={s.legal}>
+          <span>© {ANIO_INICIO}–{new Date().getFullYear()} Desafío Tolotá</span>
+          <span>Ministerio de apoyo adventista</span>
+        </div>
+
+        <div className={s.redes} aria-label="Redes sociales">
+          {REDES_TODAS.map((red) => {
+            const Icono = ICONOS[red.nombre];
+            return red.url ? (
+              <a key={red.nombre} className={s.red} href={red.url} target="_blank" rel="noopener noreferrer" aria-label={red.nombre}>
+                <Icono sx={{ fontSize: 18 }} aria-hidden="true" />
+              </a>
+            ) : null;
+          })}
+        </div>
+
+        <a className={s.ubicacion} href={EVENTO.mapa} target="_blank" rel="noopener noreferrer">
+          <PlaceOutlinedIcon aria-hidden="true" />
+          <span>{EVENTO.sede}<small>{EVENTO.lugar}</small></span>
+        </a>
       </div>
     </footer>
   );
