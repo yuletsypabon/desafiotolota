@@ -4,6 +4,7 @@ import PaginaSitio from '@/components/sitio/PaginaSitio';
 import PortadaEdicion from '@/components/sitio/edicion/PortadaEdicion';
 import EquiposEdicion from '@/components/sitio/edicion/EquiposEdicion';
 import PruebasEdicion from '@/components/sitio/edicion/PruebasEdicion';
+import CronogramaEdicion from '@/components/sitio/edicion/CronogramaEdicion';
 import ResultadosEnVivo from '@/components/sitio/edicion/ResultadosEnVivo';
 import { datosEdicion } from '@/lib/landing/edicion';
 import { EVENTO } from '@/lib/evento';
@@ -32,10 +33,12 @@ export default async function PaginaEdicion({ params }: Props) {
       etiqueta={`${edicion.anio} · Desafío ${edicion.codigo}`}
       titulo={edicion.nombre}
       intro={esActual
-        ? 'Todo sobre la edición de este año: los equipos que competirán, sus integrantes, las pruebas y los resultados en vivo.'
+        ? 'Todo sobre la edición de este año: el cronograma, los equipos que competirán, sus integrantes, las pruebas y los resultados en vivo.'
         : `La edición ${edicion.anio}: sus equipos, sus integrantes, las pruebas y los resultados.`}
     >
       {esActual && <PortadaEdicion logo={edicion.logo} nombre={edicion.nombre} equipos={edicion.equipos.length} />}
+
+      {esActual && <CronogramaEdicion />}
 
       <section className={s.bloque} aria-labelledby="equipos">
         <h2 id="equipos">Equipos</h2>

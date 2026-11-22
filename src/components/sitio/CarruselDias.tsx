@@ -6,16 +6,57 @@ import s from './carrusel.module.css';
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
+export function SelectorDias({
+  dias, activo, onSeleccion, enIntro = false,
+}: {
+  dias: DiaCronograma[];
+  activo: number;
+  onSeleccion: (indice: number) => void;
+  enIntro?: boolean;
+}) {
+  return (
+    <div className={`${s.dias} ${enIntro ? s.diasEnIntro : ''}`} role="tablist" aria-label="Elegir día">
+      {dias.map((d, i) => (
+        <button
+          key={d.num}
+          type="button"
+          role="tab"
+          aria-selected={i === activo}
+          aria-label={`${d.dia} ${d.num}`}
+          onClick={() => onSeleccion(i)}
+        >
+          <span>{d.dia}</span>
+          <strong>{d.num}</strong>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Cronograma en tarjetas giratorias: el día elegido al frente y los demás abiertos en abanico a los lados, más
  * pequeños y desenfocados. Se cambia de día tocando una tarjeta lateral, con los botones de día de abajo,
  * deslizando el dedo o con las teclas izquierda y derecha.
  * `completo` muestra todas las actividades con su hora; si no, solo las destacadas (para la portada).
  */
-export default function CarruselDias({ dias, completo = false }: { dias: DiaCronograma[]; completo?: boolean }) {
-  const [activo, setActivo] = useState(0);
+export default function CarruselDias({
+  dias, completo = false, activo: activoExterno, onSeleccion, mostrarSelector = true,
+}: {
+  dias: DiaCronograma[];
+  completo?: boolean;
+  activo?: number;
+  onSeleccion?: (indice: number) => void;
+  mostrarSelector?: boolean;
+}) {
+  const [activoInterno, setActivoInterno] = useState(0);
+  const activo = activoExterno ?? activoInterno;
   const inicioToque = useRef<number | null>(null);
-  const ir = (i: number) => setActivo(Math.max(0, Math.min(dias.length - 1, i)));
+  const ir = (i: number) => {
+    if (dias.length === 0) return;
+    const siguiente = ((i % dias.length) + dias.length) % dias.length;
+    if (activoExterno === undefined) setActivoInterno(siguiente);
+    onSeleccion?.(siguiente);
+  };
   const mes = MESES[EVENTO.inicio.getMonth()];
 
   return (
@@ -39,7 +80,12 @@ export default function CarruselDias({ dias, completo = false }: { dias: DiaCron
     >
       <div className={s.escena}>
         {dias.map((d, i) => {
-          const desfase = i - activo;
+          const distanciaDirecta = i - activo;
+          const desfase = distanciaDirecta > dias.length / 2
+            ? distanciaDirecta - dias.length
+            : distanciaDirecta < -dias.length / 2
+              ? distanciaDirecta + dias.length
+              : distanciaDirecta;
           const lejos = Math.abs(desfase);
           const actividades = completo ? d.actividades : d.actividades.filter((x) => x.destacada);
           return (
@@ -47,8 +93,13 @@ export default function CarruselDias({ dias, completo = false }: { dias: DiaCron
               key={d.num}
               className={s.carta}
               data-activa={desfase === 0}
-              data-oculta={lejos > 2}
-              style={{ '--desfase': desfase, '--lejos': Math.min(lejos, 3), zIndex: 20 - lejos } as CSSProperties}
+              data-oculta={lejos > (completo ? 1 : 2)}
+              style={{
+                '--desfase': desfase,
+                '--lejos': Math.min(lejos, 3),
+                '--elevacion': `${lejos * 14}px`,
+                zIndex: 40 - lejos,
+              } as CSSProperties}
               aria-hidden={desfase !== 0}
               onClick={() => desfase !== 0 && ir(i)}
             >
@@ -76,19 +127,7 @@ export default function CarruselDias({ dias, completo = false }: { dias: DiaCron
         })}
       </div>
 
-      <div className={s.dias} role="tablist" aria-label="Elegir día">
-        {dias.map((d, i) => (
-          <button
-            key={d.num}
-            type="button"
-            role="tab"
-            aria-selected={i === activo}
-            onClick={() => ir(i)}
-          >
-            {d.dia} {d.num}
-          </button>
-        ))}
-      </div>
+      {mostrarSelector && <SelectorDias dias={dias} activo={activo} onSeleccion={ir} />}
     </div>
   );
 }
