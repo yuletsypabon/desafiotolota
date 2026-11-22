@@ -1,17 +1,16 @@
 import type { Metadata } from 'next';
 import PaginaSitio from '@/components/sitio/PaginaSitio';
-import CarruselDias from '@/components/sitio/CarruselDias';
 import s from '@/components/sitio/pagina.module.css';
-import { CRONOGRAMA, DOCUMENTOS, INSCRIPCION } from '@/lib/contenido';
+import { DOCUMENTOS, INSCRIPCION } from '@/lib/contenido';
 
 export const metadata: Metadata = { title: 'Recursos' };
 
 export default function Recursos() {
   return (
     <PaginaSitio
-      etiqueta="Bases, cronograma e inscripciones"
+      etiqueta="Bases e inscripciones"
       titulo="Recursos"
-      intro="Todo lo que tu equipo necesita para prepararse: las bases oficiales, la agenda de los seis días y cómo inscribirse."
+      intro="Todo lo que tu equipo necesita para prepararse: las bases oficiales y cómo inscribirse."
     >
       <section id="bases" className={s.bloque} aria-labelledby="bases-titulo">
         <h2 id="bases-titulo">Bases y reglamento</h2>
@@ -29,12 +28,6 @@ export default function Recursos() {
             </article>
           ))}
         </div>
-      </section>
-
-      <section id="cronograma" className={s.bloque} aria-labelledby="cronograma-titulo">
-        <h2 id="cronograma-titulo">Cronograma · Seis días, una meta</h2>
-        <p>Agenda de los participantes. Puede tener ajustes menores; los capitanes reciben los cambios en el evento.</p>
-        <CarruselDias dias={CRONOGRAMA} completo />
       </section>
 
       <section id="inscripcion" className={s.bloque} aria-labelledby="inscripcion-titulo">
