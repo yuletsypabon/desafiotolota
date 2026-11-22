@@ -1,273 +1,102 @@
-# DESAFÍO Tolotá — Sitio web y sistema de cronometraje
+# DESAFÍO Tolotá
 
-Una sola aplicación con dos partes:
+Sitio público del evento y sistema de cronometraje para el equipo organizador. El día de las pruebas, un portátil con PostgreSQL sirve la aplicación a los dispositivos conectados a la misma red Wi-Fi. La operación local funciona sin internet. Con conexión, el administrador puede copiar los datos a Supabase para actualizar el sitio publicado.
 
-- **Sitio público** (sin sesión): portada, página de la edición de cada año (`/desafio-2026`: equipos con su
-  alineación, pruebas y resultados en vivo), ediciones, historia, espiritual, recursos, galería y contacto.
-- **Sistema de cronometraje** en `/cronometro` (con sesión de Administrador o Cronometrador): eventos, pruebas,
-  equipos con fichas médicas, cronómetro multipista con pulsador físico, disciplina, componente espiritual,
-  resultados por prueba, tabla general acumulada, respaldo y sincronización con la nube.
+## Qué se publica al crear un evento
 
-**Stack:** Next.js 15 (App Router) · React 19 + TypeScript · Material UI 7 · PostgreSQL + Prisma · SWR · Node.js 20+ · npm
-
----
-
-## Qué cambió respecto a la versión HTML
-
-| Antes (HTML único) | Ahora |
+| Dónde | Qué se actualiza |
 |---|---|
-| Datos en `localStorage` (solo ese navegador; se pierden al limpiar) | Base de datos PostgreSQL en la nube, accesible desde cualquier dispositivo |
-| "Año" como filtro global, equipos sueltos con campo `ano` | **Evento** como entidad: varios eventos por año, cada uno con sus pruebas, equipos y configuración |
-| 3 pistas fijas | **1 a 8 pistas** configurables por evento (teclas `1…8` y `Q W E R T Y U I`) |
-| Penalización calculada solo al momento de la llegada | Tiempo final **recalculado siempre**: si registras disciplina después, el resultado se actualiza |
-| Disciplina asignada a una prueba según la hora | Se elige la prueba explícitamente (por defecto la que está en curso) |
-| Integrantes como texto + fichas separadas | Integrantes = fichas de participante (datos, emergencia y ficha médica) |
-| Guardado manual "Guardar prueba" | Cada llegada se guarda sola al marcar LLEGADA; si falla la red, la pista avisa y permite reintentar |
-| Si se recargaba la página se perdían los cronómetros | El estado de las pistas se recupera al recargar (en ese mismo equipo) |
-| — | **Tabla general acumulada**, podios, exportación CSV (general, por prueba, fichas) |
-| — | **Respaldo JSON** completo + importación, y **migración** de los datos de la versión anterior |
-| — | Orden de salida guardado por prueba (arrastrar, flechas o patrones) |
-| — | Varios dispositivos a la vez: los resultados se refrescan cada pocos segundos |
-| PIN de administrador y cronometrador guardados en el navegador | **Inicio de sesión por rol** (Administrador / Cronometrador) validado en el servidor, contraseñas cifradas y cambiables en la app; el cronometrador ve las pruebas habilitadas y puede desbloquear el Histórico con una contraseña adicional |
+| Portada (`/`) | El nombre de la edición, el año y los nombres configurados para los retos X2 y X4 se leen de la base de datos. La portada prioriza el año en curso y luego el próximo año con evento. |
+| Página de la edición (por ejemplo, `/desafio-2026`) | Muestra equipos por número, capitán, integrantes, pruebas y clasificación. Si hay varios eventos en el mismo año, la página muestra el creado más recientemente. La edición actual también incluye el cronograma por día. |
+| Contenido editorial | Las fechas, la sede y el destino de la cuenta regresiva se mantienen en `src/lib/evento.ts`. El programa diario, los recursos y la información de inscripción se mantienen en `src/lib/contenido.ts`. Al preparar otra edición hay que revisar ambos archivos. |
+| Sitio publicado | Lee la base de datos configurada en el alojamiento. Si el evento se creó en el portátil, el administrador debe subir el respaldo a Supabase para que aparezca en la web que consulta esa base. |
 
----
+La portada y la página de la edición tienen un intervalo de revalidación de cinco minutos. Mientras la página de resultados públicos está abierta, consulta las posiciones cada diez segundos. En el sitio publicado, esa consulta muestra la última información disponible en la nube.
 
-## Estructura
+En **Recursos** están las bases y el acceso a la inscripción cuando se habilitan sus enlaces. **Historia**, **Espiritual** y **Galería** tienen páginas públicas de presentación con contenido pendiente. El módulo privado de puntuación espiritual sí está implementado.
 
-```
-prisma/
-  schema.prisma            Modelo de datos (eventos, pruebas, equipos, fichas, resultados, disciplina, espiritual, reservas)
-  migrations/              Migraciones SQL
-  seed.ts                  Datos de demostración
-scripts/                   Preparar la base, crear contraseñas y AUTH_SECRET, migrar la nube
-src/
-  app/
-    page.tsx               Portada del sitio público
-    desafio/[anio]/        Página de cada edición (se ve como /desafio-2026)
-    ediciones/ historia/ espiritual/ recursos/ galeria/ contacto/   Secciones del sitio
-    login/                 Inicio de sesión del sistema
-    cronometro/            Sistema de cronometraje (privado)
-      page.tsx             Lista de eventos y creación de eventos
-      respaldo/            Respaldo, importación, contraseñas y sincronización con la nube
-      eventos/[eventoId]/
-        page.tsx           Configuración: datos, pistas, pulsador, disciplina, pruebas y su habilitación
-        cronometro/        Cronómetro multipista, cola, orden de salida
-        equipos/           Equipos, logos, color del capitán, fichas e importación CSV
-        disciplina/        Puntos de disciplina (leve, media, grave, positivo)
-        espiritual/        Actividades por prueba, puntos por equipo y descuento de tiempo
-        resultados/        General acumulada, resultados por prueba y exportación
-    api/                   API REST (ver tabla abajo)
-  components/
-    landing/ sitio/        Portada y páginas públicas (sitio/edicion: franjas de equipos y alineación)
-    crono/                 Piezas del cronómetro (pista, reloj, diálogos)
-  lib/
-    scoring.ts             Cálculo de tiempos, posiciones y general (funciones puras, con pruebas)
-    sesion.ts auth.ts      Sesión firmada, roles, permisos y límite de intentos
-    validators.ts          Validación de entradas (zod)
-    respaldo.ts nube.ts    Respaldo JSON y sincronización con Supabase
-    contenido.ts evento.ts Textos del sitio y datos de la edición (fechas, lugar, ediciones)
-    marca.ts               Colores, letras y efecto vidrio (theme.ts los usa en el sistema)
-  middleware.ts            Exige sesión en /cronometro y /api; el cronometrador solo entra a lo suyo
-tests/                     Pruebas unitarias (npm test)
-```
+## Día del evento sin internet
 
-### API
+### Preparar el portátil con antelación
 
-| Método | Ruta | Uso |
-|---|---|---|
-| GET/POST | `/api/eventos` | Listar / crear evento (con pruebas iniciales y copia de equipos) |
-| GET/PATCH/DELETE | `/api/eventos/:id` | Ver / editar / borrar evento |
-| POST/PUT | `/api/eventos/:id/pruebas` | Agregar prueba / reordenar |
-| PATCH/DELETE | `/api/pruebas/:id` | Renombrar, estado, orden de salida / borrar |
-| GET/POST | `/api/eventos/:id/equipos` | Listar (con fichas) / crear equipo |
-| POST | `/api/eventos/:id/equipos/import` | Importar equipos (CSV) |
-| PATCH/DELETE | `/api/equipos/:id` | Editar / borrar equipo |
-| POST | `/api/equipos/:id/participantes` | Crear ficha |
-| PATCH/DELETE | `/api/participantes/:id` | Editar / borrar ficha |
-| GET/PUT | `/api/pruebas/:id/resultados` | Ver / guardar tiempo de un equipo |
-| DELETE | `/api/resultados/:id` | Borrar tiempo (repetir) |
-| GET/POST | `/api/eventos/:id/disciplina` | Listar / registrar punto |
-| DELETE | `/api/disciplina/:id` | Borrar punto |
-| GET | `/api/eventos/:id/clasificacion` | Resultados por prueba + general |
-| GET | `/api/eventos/:id/exportar?tipo=general\|prueba\|todas\|participantes` | CSV |
-| GET/POST | `/api/respaldo` | Descargar / importar respaldo JSON |
-| PUT | `/api/pruebas/:id/reservas` | Equipos cargados en las pistas de cada dispositivo |
-| GET/POST | `/api/sincronizar` | Estado / copia de todos los eventos a la nube |
-| GET | `/api/publico/resultados/:eventoId` | Resultados públicos de la página de la edición (sin sesión) |
+1. Instala Node.js 22 y PostgreSQL 16 en el portátil. Son las versiones que se utilizan en la integración continua del proyecto.
+2. Desde la raíz del repositorio, copia `.env.example` como `.env` si todavía no existe. Configura `DATABASE_URL` y `DIRECT_URL` para la base **local** del evento. Reserva `NUBE_DATABASE_URL` para el destino remoto si vas a sincronizar.
+3. Con internet disponible para la primera instalación y el servidor de desarrollo detenido, abre **Iniciar evento.bat**. El lanzador instala las dependencias que falten, genera el secreto de sesión, prepara la base, aplica las migraciones y solicita las contraseñas iniciales de Administrador y Cronometrador. También compila la aplicación cuando corresponde.
+4. Conecta los dispositivos al mismo Wi-Fi. En el portátil abre `http://localhost:3000`. En los demás dispositivos abre la dirección de red que muestra el lanzador. Mantén el portátil encendido y la ventana del servidor abierta durante la jornada.
 
----
+### Preparar equipos y pruebas
 
-## Día del evento sin internet (servidor local + nube)
+En `/cronometro`, el **Administrador** crea o selecciona el evento, configura entre una y ocho pistas, define las pruebas y habilita las que se van a correr. El **Cronometrador** trabaja con las pruebas habilitadas. La consulta del histórico desde ese rol requiere una clave adicional y la autorización dura dos horas.
 
-El día del evento la app corre en **un portátil** con PostgreSQL instalado. Los demás dispositivos
-(cronómetro, disciplina, pantalla de resultados) se conectan a ese portátil por **Wi-Fi local**:
-un router o el punto de acceso del propio portátil. **No hace falta internet.** Todos los tiempos quedan en la base
-de datos del portátil y, cuando haya conexión, se copian a la **nube (Supabase)**, donde queda el histórico.
+En **Equipos → Importar CSV**, descarga la plantilla y usa **una fila por participante**, repitiendo el nombre del equipo en sus filas. Las fichas existentes se identifican por nombre dentro del equipo y se completan con los campos que traen valor. La importación respeta el orden de los equipos del archivo y coloca al final los equipos que ya existían y quedaron fuera. Desde la ficha se puede editar el participante y añadir su foto.
 
-```
- Tablet / celular / PC ──Wi-Fi local──▶ Portátil: app + PostgreSQL ──(con internet)──▶ Supabase (histórico)
-                                                                     Respaldo → Sincronizar
+### Cronometrar una prueba
+
+1. Elige el evento y la prueba. Revisa el orden de salida y carga un equipo en una pista libre, o activa la asignación automática. Las reservas permiten coordinar la cola entre dispositivos.
+2. Selecciona la pista haciendo clic en ella o pulsando su número. El pulsador físico actúa sobre la pista seleccionada. Si el pulsador emula un teclado, utiliza la tecla configurada para el evento.
+3. Da la salida. Si hay una detención, márcala y registra la reanudación desde la tarjeta. El reloj muestra centésimas y su barra completa una vuelta cada quince minutos.
+4. Marca **Llegada**. El sistema intenta guardar el tiempo automáticamente. Espera la confirmación antes de liberar la pista. Si falla el guardado, usa la opción de reintento y comprueba que el equipo aparezca en **Resultados**.
+5. Si un tiempo quedó asignado al equipo equivocado, abre **Corregir pista**, elige los dos equipos y registra el motivo. Los intercambios de resultados guardados quedan en el historial de correcciones.
+
+### Interpretar los resultados
+
+- **Por prueba.** Al tiempo bruto se le restan las detenciones. Sobre ese tiempo neto se aplican penalizaciones, bonificaciones y descuentos espirituales. El mínimo es cero.
+- **Actividades espirituales.** Una actividad de **Tiempo** se vincula a una prueba. Alcanzar el puntaje máximo equivale a dos minutos de descuento en esa actividad. Una actividad **Plus** suma puntos que se consultan por separado.
+- **General acumulada.** Se ordena primero por cantidad de pruebas completadas y después por menor suma de tiempos finales. La clasificación refleja las correcciones de disciplina y de puntajes. Desde el sistema se pueden exportar los resultados a CSV.
+
+## Respaldo y sincronización
+
+| Objetivo | Acción del administrador |
+|---|---|
+| Conservar una copia de la jornada | En **Respaldo**, descarga el archivo JSON y guárdalo en un lugar privado. Incluye las fichas de participantes. |
+| Recuperar los eventos en otro portátil | Prepara el servidor y sus credenciales e importa el JSON desde **Respaldo**. La importación reemplaza los eventos que tengan el mismo identificador. |
+| Actualizar la web publicada | Con internet, abre **Respaldo → Subir respaldo a Supabase**, comprueba el destino, pulsa **Subir respaldo** y confirma. Revisa el resumen de eventos y tiempos transferidos. |
+
+La sincronización copia **todos los eventos locales** en una transacción. Reemplaza en la nube los eventos con el mismo identificador y conserva los que existen únicamente allí. Haz las correcciones en el portátil para que la siguiente subida incluya la versión correcta. Cuando haya migraciones pendientes en el destino, aplica primero `npm.cmd run nube:migrar` desde el portátil configurado.
+
+## Desarrollo local
+
+La aplicación usa Next.js 15 (App Router), React 19, TypeScript, Material UI 7, Prisma 6 y PostgreSQL. Desde PowerShell, en un clon nuevo con PostgreSQL en ejecución:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-### Preparar el portátil (una sola vez, con internet)
-1. Instala **Node.js LTS** (nodejs.org) y **PostgreSQL 16** (postgresql.org/download/windows).
-   En el instalador de PostgreSQL apunta la contraseña del usuario `postgres`.
-2. Descarga o clona este repositorio y copia `.env.example` como `.env`. En `.env`:
-   - `DATABASE_URL` y `DIRECT_URL`: cambia `postgres:postgres` por `postgres:TU_CONTRASEÑA`.
-   - `NUBE_DATABASE_URL`: la URL **Session pooler (puerto 5432)** de Supabase.
-3. Doble clic en **`Iniciar evento.bat`**. La primera vez instala dependencias, crea la base `desafio_tolota`,
-   crea las tablas, genera la clave de las sesiones (`AUTH_SECRET`) y compila (unos minutos).
-4. Crea las tablas en la nube (una vez, y de nuevo cada vez que cambie el modelo de datos):
-   ```bash
-   npm run nube:migrar
-   ```
-5. La primera vez que arranque, Windows preguntará si Node.js puede usar la red: permite **Redes privadas**.
+Edita las conexiones locales en `.env`. Después ejecuta estos comandos desde la raíz:
 
-### Durante el evento
-- **Roles:** el **Administrador** ve todo; el **Cronometrador** cronometra y ve resultados de las pruebas
-  que el administrador habilitó (Configuración del evento → candado de cada prueba). Para consultar el Histórico,
-  ingresa la contraseña adicional configurada por el administrador en **Respaldo → Contraseñas**; el acceso dura dos horas.
-  La primera vez, `Iniciar evento.bat` pide crear las dos contraseñas de rol en su ventana (o `npm run claves`).
-  Estas no se crean desde el navegador a propósito: así nadie en el Wi‑Fi puede adelantarse.
-- Doble clic en **`Iniciar evento.bat`**. La ventana muestra las direcciones para los otros dispositivos,
-  p. ej. `http://192.168.0.10:3000`. No cierres esa ventana mientras dure la jornada.
-- Los otros dispositivos deben estar en la misma red Wi-Fi y abrir esa dirección en el navegador.
-
-### Al terminar cada jornada (con internet)
-- **Respaldo → Sincronizar ahora.** Cada evento se copia completo a la nube en una sola operación:
-  si se corta la conexión, la nube queda como estaba y se puede repetir.
-- Los eventos que existen solo en la nube (años anteriores) **se conservan**: el histórico no se borra.
-- La nube es para **consultar**: lo que se edite directamente en el sitio en la nube se reemplaza en la próxima
-  sincronización de ese evento. Las correcciones se hacen en el portátil.
-- Si se cambia de portátil: en el sitio en la nube, **Respaldo → Descargar**, y en el portátil nuevo, **Importar**.
-
----
-
-## Instalación local (desarrollo)
-
-Requisitos: **Node.js 20.9+**, **npm**, y un PostgreSQL (local, Docker o en la nube).
-
-```bash
-# 1. Dependencias
-npm install
-
-# 2. Variables de entorno
-cp .env.example .env
-#    edita DATABASE_URL
-
-# (opcional) PostgreSQL con Docker:
-docker run -d --name tolota-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=desafio_tolota -p 5432:5432 postgres:16
-
-# 3. Crear tablas
-npx prisma migrate deploy
-# (opcional) datos de prueba
-npm run db:seed
-
-# 4. Arrancar
-npm run dev        # http://localhost:3000
+```powershell
+npm.cmd ci
+node scripts/asegurar-secreto.mjs
+npm.cmd run evento:preparar
+npm.cmd run claves
+npm.cmd run dev
 ```
 
-Otros comandos: `npm test` (lógica), `npm run typecheck`, `npm run lint`, `npm run build`, `npm run db:studio` (explorar la BD).
+Abre `http://localhost:3000` para la portada y `/cronometro` para el sistema. Para compilar, detén primero el servidor de desarrollo de esa carpeta. Ambos procesos utilizan `.next`.
 
-> Primera vez: después de `npm install` se genera `package-lock.json`. Súbelo a Git.
+| Comando | Uso |
+|---|---|
+| `npm.cmd test` | Ejecutar las pruebas de lógica, contenido e importación CSV. |
+| `npm.cmd run lint` y `npm.cmd run typecheck` | Revisar el código y comprobar los tipos. |
+| `npm.cmd run db:studio` | Consultar la base de datos configurada en el entorno. |
+| `npm.cmd run db:seed` | Cargar datos de demostración en una base de desarrollo. |
+| `npm.cmd run build` | Generar el cliente de Prisma y compilar la aplicación. |
+| `npm.cmd run evento:iniciar` | Servir la compilación de producción en la red local. |
 
----
+### Estructura del repositorio
 
-## Git / GitHub
+| Ubicación | Contenido |
+|---|---|
+| `src/app/`, `src/components/landing/`, `src/components/sitio/` | Rutas públicas, portada y vista anual de equipos, cronograma y resultados. |
+| `src/app/cronometro/`, `src/components/crono/` | Administración del evento, pistas, controles y diálogos. |
+| `src/app/api/` | Servicios del sistema y consulta pública de resultados. |
+| `src/lib/` | Clasificación, reglas espirituales, permisos, CSV, respaldos y sincronización. |
+| `prisma/`, `scripts/`, `tests/` | Esquema y migraciones, preparación del servidor y pruebas automatizadas. |
 
-```bash
-git init -b main          # (ya viene inicializado si descargaste el .zip con .git)
-git add . && git commit -m "Desafío Tolotá v2"
-git remote add origin https://github.com/TU_USUARIO/desafio-tolota.git
-git push -u origin main
-```
+### Ramas, integración y despliegue
 
-El workflow `.github/workflows/ci.yml` valida en cada push a `main` y en cada pull request: instalación,
-migraciones y seed contra un PostgreSQL 16 temporal, lint, typecheck, pruebas y build.
+Cada funcionalidad se trabaja en una rama `feature/` con un nombre descriptivo y se integra en `develop`. La integración continua se ejecuta en los pull requests y en los pushes a `develop` y `main`. Instala dependencias, aplica las migraciones en PostgreSQL temporal, carga el conjunto de demostración y ejecuta lint, comprobación de tipos, pruebas y compilación.
 
----
+Para desplegar en **Vercel**, configura `DATABASE_URL` para las consultas a la base remota, `DIRECT_URL` para las migraciones y `AUTH_SECRET` para firmar sesiones. El comando del proyecto es `npm run vercel-build`. En un entorno sin terminal, `ADMIN_PASSWORD` y `CRONO_PASSWORD` permiten configurar las contraseñas iniciales. `NUBE_DATABASE_URL` corresponde al portátil que envía las copias. Las opciones de conexión están descritas en `.env.example`.
 
-## Base de datos en Supabase
-
-1. En **supabase.com → New project**: nombre `desafio-tolota`, región cercana (p. ej. *South America (São Paulo)*),
-   y una **contraseña de base de datos** (guárdala; mejor sin `@ # / : ? &` para no tener que codificarla).
-2. Cuando el proyecto esté listo: botón **Connect** (arriba) → pestaña **ORMs → Prisma**. Copia las dos URLs:
-   - `DATABASE_URL` → *Transaction pooler* (puerto **6543**) — agrega `?pgbouncer=true&connection_limit=1`
-   - `DIRECT_URL` → *Session pooler* (puerto **5432**)
-3. Pégalas en el archivo `.env` (reemplaza `[YOUR-PASSWORD]` por tu contraseña).
-4. Crea las tablas:
-   ```bash
-   npx prisma migrate deploy
-   npm run db:seed      # opcional: evento de demostración
-   npm run dev
-   ```
-5. Comprueba en Supabase → **Table Editor** que aparecen las tablas `Evento`, `Prueba`, `Equipo`, etc.
-
-La segunda migración activa **RLS** (Row Level Security) en todas las tablas. Así la API pública de Supabase
-(clave *anon*) no puede leer las fichas médicas; la app sigue funcionando porque Prisma entra como usuario `postgres`.
-No uses las claves `anon`/`service_role` en este proyecto: no hacen falta.
-
-En **Vercel**, agrega las mismas dos variables (`DATABASE_URL` y `DIRECT_URL`) en *Settings → Environment Variables*.
-
----
-
-## Despliegue en Vercel (recomendado, el más rápido)
-
-1. Sube el repositorio a GitHub.
-2. En **vercel.com → Add New → Project**, importa el repo (framework: Next.js, se detecta solo).
-3. Base de datos: agrega `DATABASE_URL` y `DIRECT_URL` de Supabase (ver sección anterior) en
-   *Settings → Environment Variables*. (Alternativa: *Storage → Neon*; en ese caso usa la URL directa como `DIRECT_URL`.)
-4. *Settings → Build & Development → Build Command*: `npm run vercel-build`
-   (genera Prisma, **aplica migraciones** y compila).
-5. Agrega `AUTH_SECRET` (obligatoria; ver `.env.example` para generarla), `ADMIN_PASSWORD` y `CRONO_PASSWORD`
-   (contraseñas iniciales del sitio en la nube).
-   Región: `vercel.json` fija las funciones en `pdx1` (Portland), junto a la base de Supabase (us-west-2, Oregón). Si creas Supabase
-   en otra región, cambia `regions` por la región de Vercel más cercana (cada consulta cruza esa distancia).
-6. Deploy. Cada push a `main` vuelve a desplegar.
-
-> Límite de Vercel: los cuerpos de petición no pueden superar ~4.5 MB. Los logos se reducen a 512 px en el
-> navegador, así que solo afecta a importaciones de respaldos muy grandes (impórtalos en local apuntando a la misma BD).
-
-## Despliegue en Azure
-
-**Base de datos:** *Azure Database for PostgreSQL – Flexible Server*.
-- Crea el servidor (versión 16), una base `desafio_tolota`, y en *Networking* permite acceso desde servicios de Azure.
-- `DATABASE_URL` y `DIRECT_URL` (la misma): `postgresql://USUARIO:CLAVE@SERVIDOR.postgres.database.azure.com:5432/desafio_tolota?sslmode=require`
-
-**App:** *Azure App Service* (Linux, Node 20 LTS o 22 LTS).
-1. Variables en *Configuration → Application settings*: `DATABASE_URL`, `NEXT_OUTPUT=standalone`,
-   `AUTH_SECRET`, `ADMIN_PASSWORD` y `CRONO_PASSWORD` (contraseñas iniciales), `SCM_DO_BUILD_DURING_DEPLOYMENT=true`.
-2. Comando de inicio: `npx prisma migrate deploy && node .next/standalone/server.js`
-   (si usas build *standalone* copia `public` y `.next/static` dentro de `.next/standalone`, o usa simplemente
-   `npm run start` sin `NEXT_OUTPUT`).
-3. Despliegue: *Deployment Center → GitHub* (crea un workflow de GitHub Actions automáticamente).
-
-Alternativa: *Azure Static Web Apps* con soporte híbrido de Next.js, o *Azure Container Apps* con un Dockerfile.
-
----
-
-## Migrar los datos de la versión HTML anterior
-
-1. Abre el HTML antiguo en el **mismo navegador y computador** donde tienes los datos.
-2. `F12` → pestaña **Consola** → pega el código que aparece en la página **Respaldo** de la app nueva → Enter.
-   Se descarga `datos_version_anterior.json`.
-3. En la app nueva: **Respaldo → Importar** ese archivo.
-
-Se crea un evento por año, con sus pruebas (guardadas o configuradas), equipos, logos, fichas completas,
-integrantes, tiempos (con detenciones) y puntos de disciplina. Los puntos que en la versión anterior quedaron
-asignados a "Prueba actual" (sin prueba guardada) no se pueden ubicar y se reportan como *omitidos*.
-
----
-
-## Uso rápido el día del evento
-
-- **Cronometraje:** elige la prueba. Cada pista: *Cargar siguiente* → *Dar salida* → *Llegada*.
-  - Teclado: `1…N` salida/llegada, `Q W E…` detenido/arrancó.
-  - Pulsador físico (encoder USB que emite una tecla, por defecto `A`): haz clic en la pista para
-    seleccionarla y presiona el pulsador.
-  - *Salida en falso* reinicia la pista; en la tabla, *Borrar tiempo* deja repetir la prueba.
-  - Varias tablets pueden cronometrar la misma prueba: un equipo cargado en una no aparece en la cola de las otras.
-  - La pantalla no se apaga mientras haya equipos en pista (en navegadores compatibles).
-- **Disciplina** puede registrarse desde otro celular al mismo tiempo; el tiempo final se ajusta solo.
-- **Resultados** muestra la general acumulada y cada prueba, se actualiza cada 5 s y exporta a CSV.
-- Descarga un **respaldo** al terminar cada jornada.
+Mantén los valores reales en el archivo local `.env` o en las variables privadas del alojamiento. Los respaldos, las exportaciones de fichas y las fotos de perfil contienen información personal y deben permanecer fuera del repositorio y de los recursos públicos.
