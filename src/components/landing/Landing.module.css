@@ -2,6 +2,7 @@
 
 .landing{--margen:clamp(18px,4.5vw,88px);background:var(--fondo);color:var(--texto);font-family:var(--font-body);overflow-x:clip}
 .landing :focus-visible{outline:3px solid var(--destacado);outline-offset:3px}
+.landing :global(.carrusel):focus-visible{outline:none}
 .landing a{color:inherit}
 
 /* ---------- Tipografía y piezas comunes ---------- */
@@ -33,6 +34,9 @@
 /* ---------- Fotos (reales o provisionales) ---------- */
 .foto{position:absolute;inset:0;overflow:hidden;background-color:#0c0f0c}
 .fotoImg{object-fit:cover}
+.fotoHero{background:#070a08}
+.fotoEntrada{animation:cambioFondoHero .9s ease both}
+@keyframes cambioFondoHero{from{opacity:.3;transform:scale(1.035)}to{opacity:1;transform:scale(1)}}
 .tono_bosque{background:
   radial-gradient(ellipse at 72% 12%,rgba(220,232,210,.22),transparent 42%),
   repeating-linear-gradient(97deg,transparent 0 46px,rgba(0,0,0,.28) 46px 58px,transparent 58px 130px),
@@ -51,30 +55,49 @@
   linear-gradient(170deg,#36331f 0%,#1a1810 58%,#080806 100%)}
 
 /* ---------- 01 Hero ---------- */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
-  padding:130px var(--margen) 56px;isolation:isolate}
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;
+  column-gap:clamp(28px,4vw,72px);padding:130px var(--margen) 42px;isolation:isolate}
 .hero>.foto{z-index:-2}
+.hero>.foto .fotoImg{object-position:center 62%}
 .velo{position:absolute;inset:0;z-index:-1;background:
-  linear-gradient(90deg,rgba(5,5,5,.9) 0%,rgba(5,5,5,.6) 45%,rgba(5,5,5,.12) 75%),
-  linear-gradient(0deg,var(--fondo) 0%,transparent 30%)}
-.heroContenido{max-width:880px}
+  linear-gradient(90deg,rgba(5,5,5,.82) 0%,rgba(5,5,5,.62) 42%,rgba(5,5,5,.42) 100%),
+  linear-gradient(0deg,var(--fondo) 0%,rgba(5,5,5,.3) 45%,rgba(5,5,5,.12) 82%)}
+.heroContenido{position:relative;z-index:1;width:100%;max-width:760px;min-width:0}
 .chipEdicion{display:inline-flex;align-items:center;gap:12px;margin:0;padding:6px 18px 6px 6px;border:1px solid var(--vidrio-borde);
   border-radius:999px;background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);font-size:14px;font-weight:700}
 .chipEdicion b{padding:5px 14px;border-radius:999px;background:var(--primario);color:#0a0a0a}
 .heroTitulo{margin:22px 0 26px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
   font-size:clamp(64px,10.5vw,160px);line-height:.9;letter-spacing:.005em}
 .heroTexto{margin:0 0 28px;max-width:600px;font-size:clamp(16px,1.5vw,21px);line-height:1.5}
-.datos{display:flex;flex-wrap:wrap;gap:20px 44px;margin:0 0 32px}
-.datos div{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}
-.datos svg{grid-row:span 2;width:26px;height:26px;color:var(--destacado)}
-.datos dt{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--textoSuave)}
-.datos dd{margin:0;font-size:16px;font-weight:700}
+.datos{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 32px}
+.datos div{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center;flex:1 1 280px;min-width:0;padding:0}
+.datos svg{grid-row:span 2;width:30px;height:30px;color:var(--destacado)}
+.datos dt{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
+.datos dd{margin:2px 0 0;font-size:clamp(16px,1.45vw,20px);font-weight:700;line-height:1.25;color:var(--texto)}
 .acciones{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.relojHero{display:flex;gap:12px;margin-top:36px}
-.relojHero div{display:grid;place-items:center;width:84px;padding:14px 0 12px;border:1px solid var(--vidrio-borde);border-radius:16px;
-  background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);box-shadow:var(--vidrio-brillo)}
-.relojHero b{font-family:var(--font-display);font-weight:400;font-size:36px;line-height:1}
-.relojHero span{margin-top:6px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--textoSuave)}
+.galeriaHero{position:relative;z-index:1;display:flex;align-items:center;gap:clamp(8px,1.1vw,16px);width:100%;height:clamp(340px,56vh,560px);min-width:0}
+.tarjetaHero{position:relative;isolation:isolate;flex:.72 1 0;min-width:54px;height:82%;overflow:hidden;padding:0;border:1px solid rgba(255,255,255,.24);
+  border-radius:20px;background:#101512;box-shadow:0 18px 48px rgba(0,0,0,.34);color:var(--texto);text-align:left;cursor:pointer;
+  transition:flex .72s cubic-bezier(.2,.75,.25,1),height .72s,border-color .3s,transform .3s}
+.tarjetaHero:hover{transform:translateY(-5px)}
+.tarjetaHeroActiva{flex:2.8 1 0;height:100%;border-color:rgba(255,204,0,.72)}
+.imagenTarjetaHero{z-index:-2;object-fit:cover;transition:transform .8s cubic-bezier(.2,.75,.25,1),filter .4s}
+.tarjetaHero:not(.tarjetaHeroActiva) .imagenTarjetaHero{filter:brightness(.7)}
+.tarjetaHeroActiva .imagenTarjetaHero{transform:scale(1.035)}
+.tarjetaHero::after{position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08) 30%,rgba(0,0,0,.78) 100%);content:""}
+.textoTarjetaHero{position:absolute;right:18px;bottom:20px;left:18px;display:grid;gap:7px;opacity:0;transform:translateY(10px);
+  transition:opacity .3s .1s,transform .3s .1s}
+.tarjetaHeroActiva .textoTarjetaHero{opacity:1;transform:translateY(0)}
+.textoTarjetaHero small{color:var(--destacado);font-size:10px;font-weight:700;letter-spacing:.14em}
+.textoTarjetaHero strong{font-family:var(--font-display);font-size:clamp(24px,2.3vw,38px);font-weight:400;line-height:.98;text-transform:uppercase}
+.relojHero{grid-column:1 / -1;display:flex;justify-content:center;align-items:flex-start;gap:clamp(18px,5vw,64px);width:100%;margin:clamp(14px,2.5vh,28px) 0 0;padding:0;box-sizing:border-box}
+.relojHero div{position:relative;display:grid;justify-items:center;flex:0 1 auto;min-width:0;padding:0;overflow:visible}
+.relojHero div::after{position:absolute;top:0;right:calc(clamp(18px,5vw,64px) / -2 - .15em);display:grid;place-items:center;
+  height:clamp(56px,7.65vw,115px);color:var(--destacado);font-family:var(--font-body);font-size:clamp(32px,4vw,56px);
+  font-weight:500;line-height:1;opacity:.8;content:":"}
+.relojHero div:last-child::after{content:none}
+.relojHero b{font-family:var(--font-display);font-weight:400;font-size:clamp(62px,8.5vw,128px);line-height:.9;color:var(--texto)}
+.relojHero span{margin-top:11px;font-size:clamp(11px,1.2vw,15px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
 
 /* ---------- Manifiesto: franja amarilla que se desplaza hacia la derecha ---------- */
 .manifiesto{overflow:hidden;background:var(--primario);color:#0a0a0a;padding:18px 0}
@@ -99,10 +122,19 @@
 .figura{margin:0}
 .marco{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:var(--vidrio-radio)}
 .figura figcaption{margin-top:22px;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
-.cifras{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:clamp(56px,9vh,90px) 0 0}
-.cifras div{display:flex;flex-direction:column-reverse;gap:8px;padding:22px 24px}
-.cifras dt{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--textoSuave)}
-.cifras dd{margin:0;font-family:var(--font-display);font-size:clamp(34px,4vw,58px);line-height:1;color:var(--texto)}
+.cifras{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(14px,2.5vw,36px);margin:clamp(56px,9vh,90px) 0 0}
+.cifras div{position:relative;isolation:isolate;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:10px;min-height:132px;padding:16px 10px;
+  overflow:hidden;border:1px solid transparent;border-radius:20px;
+  background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.035)) padding-box,
+    linear-gradient(135deg,rgba(255,204,0,.62),rgba(255,255,255,.2) 36%,rgba(255,255,255,.09) 72%,rgba(255,204,0,.32)) border-box;
+  -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 16px 36px rgba(0,0,0,.22);
+  transition:transform .25s ease,box-shadow .25s ease}
+.cifras div::before{position:absolute;top:0;left:50%;width:44px;height:3px;transform:translateX(-50%);border-radius:0 0 5px 5px;
+  background:linear-gradient(90deg,transparent,var(--destacado),transparent);box-shadow:0 0 16px rgba(255,204,0,.32);content:""}
+.cifras div:hover{transform:translateY(-4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 20px 44px rgba(0,0,0,.3)}
+.cifras dt{font-size:clamp(10px,1vw,13px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
+.cifras dd{margin:0;font-family:var(--font-display);font-size:clamp(40px,5.2vw,78px);font-weight:400;line-height:.9;letter-spacing:0;color:var(--texto)}
 .cifras div:nth-child(2) dd{color:var(--destacado)}
 .cifras small{font-size:.5em;vertical-align:top}
 
@@ -150,8 +182,16 @@
 .versiculo cite{display:block;margin-top:14px;font-style:normal;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 
 /* 05 Recorrido */
-.recorridoIntro{display:flex;flex-direction:column;justify-content:space-between;gap:56px;height:100%}
-.nota p:not(.etiqueta){margin:12px 0 18px;max-width:340px;font-size:14px;line-height:1.5;color:var(--textoSuave)}
+.recorridoComposicion{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);align-items:center;gap:clamp(28px,5vw,80px)}
+.recorridoCabecera{grid-column:2;grid-row:1}
+.recorridoTexto{width:min(100%,760px);margin-left:auto;text-align:center}
+.recorridoTexto .titulo{text-align:center}
+.recorridoTexto .parrafo{max-width:600px;margin:0 auto;text-align:center;font-size:clamp(18px,1.6vw,21px);line-height:1.55}
+.recorridoCarrusel{grid-column:1;grid-row:1;width:100%;margin:0;position:relative;left:clamp(90px,8vw,140px)}
+.recorridoCabecera .nota{display:grid;justify-items:center;gap:9px;width:min(100%,560px);margin:24px auto 0;padding-top:16px;border-top:1px solid rgba(244,243,236,.18);text-align:center}
+.recorridoCabecera .nota .etiqueta{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.1em}
+.recorridoCabecera .nota p:not(.etiqueta){margin:0;max-width:460px;font-size:15.5px;line-height:1.55;color:var(--texto)}
+.recorridoCabecera .nota .enlaceFlecha{margin-top:2px;padding-bottom:3px;border-bottom:1px solid rgba(255,204,0,.55);font-size:13px;color:var(--texto)}
 
 /* Pilares */
 .escena{position:relative;padding:clamp(40px,6vw,80px) clamp(18px,4vw,64px);overflow:hidden;isolation:isolate;border-radius:calc(var(--vidrio-radio) + 8px)}
@@ -192,10 +232,10 @@
 .cierreEdicion{margin-top:auto;padding-top:48px}
 .cierreAccion{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:clamp(24px,3vw,36px)}
 .cierreAccion .tituloPanel{margin:0}
-.reloj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
-.reloj div{padding:14px 0;text-align:center;border:1px solid var(--vidrio-borde);border-radius:14px;background:rgba(255,255,255,.04)}
-.reloj b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,3.6vw,52px);line-height:1}
-.reloj span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--destacado)}
+.reloj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:100%}
+.reloj div{padding:20px 0 17px;text-align:center;border:1px solid var(--vidrio-borde);border-radius:18px;background:rgba(255,255,255,.04)}
+.reloj b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(44px,4.4vw,64px);line-height:1}
+.reloj span{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--destacado)}
 
 /* ---------- Aparición al hacer scroll ---------- */
 /* Solo con JavaScript activo (.animado) se oculta el contenido para animarlo; si falla, todo se ve */
@@ -207,6 +247,9 @@
 
 /* ---------- Pantallas medianas y celular ---------- */
 @media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr);row-gap:30px;padding-top:110px}
+  .heroContenido{max-width:720px}
+  .galeriaHero{height:clamp(300px,42vh,420px)}
   .dosColumnas,.cierre,.quees{grid-template-columns:minmax(0,1fr)}
   .modalidad{grid-template-columns:64px minmax(0,1fr);padding:22px}
   .retos{grid-template-columns:minmax(0,1fr)}
@@ -215,22 +258,38 @@
   .pilares{grid-template-columns:minmax(0,1fr)}
   .cifras{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cifras div:last-child{grid-column:1 / -1}
-  .velo{background:linear-gradient(0deg,rgba(5,5,5,.95) 0%,rgba(5,5,5,.55) 60%,rgba(5,5,5,.35) 100%)}
+  .cifras div{min-height:112px;padding:10px 4px}
+  .recorridoComposicion{grid-template-columns:minmax(0,1fr);gap:38px}
+  .recorridoCabecera{grid-column:1;grid-row:1}
+  .recorridoCarrusel{grid-column:1;grid-row:2;width:100%;left:0}
+  .velo{background:linear-gradient(0deg,rgba(5,5,5,.95) 0%,rgba(5,5,5,.64) 60%,rgba(5,5,5,.5) 100%)}
   .veloLateral{background:rgba(5,5,5,.72)}
   .veloQuees{background:rgba(5,5,5,.82)}
-  .recorridoIntro{gap:28px}
 }
 @media (max-width:560px){
   .hero{padding-top:110px}
+  .galeriaHero{height:clamp(245px,70vw,330px);gap:7px}
+  .tarjetaHero{min-width:35px;border-radius:15px}
+  .tarjetaHeroActiva{flex:2.5 1 0}
+  .textoTarjetaHero{right:12px;bottom:14px;left:12px;gap:5px}
+  .textoTarjetaHero strong{font-size:clamp(21px,7vw,30px)}
+  .datos{gap:10px;margin-bottom:26px}
+  .datos div{flex-basis:100%;padding:12px 14px}
   .boton,.botonContorno{width:100%;padding:16px 22px}
   .acciones{gap:22px}
-  .relojHero{gap:8px}
-  .relojHero div{width:auto;flex:1}
-  .relojHero b{font-size:30px}
-  .reloj b{font-size:30px}
+  .relojHero{gap:clamp(12px,3vw,18px);margin-top:10px}
+  .relojHero div::after{right:calc(clamp(12px,3vw,18px) / -2 - .15em);height:clamp(38px,9.9vw,56px);font-size:clamp(20px,6vw,30px)}
+  .relojHero b{font-size:clamp(42px,11vw,62px)}
+  .relojHero span{margin-top:8px;font-size:10px;letter-spacing:.1em}
+  .reloj{gap:8px}
+  .reloj div{padding:16px 0 14px;border-radius:14px}
+  .reloj b{font-size:clamp(36px,10vw,52px)}
+  .reloj span{font-size:10px}
 }
 @media (prefers-reduced-motion:reduce){
   .manifiestoPista{animation:none}
   .animado .reveal{opacity:1;transform:none;transition:none}
   .reto>.foto{transition:none}
+  .tarjetaHero,.imagenTarjetaHero,.textoTarjetaHero{transition:none}
+  .fotoEntrada{animation:none}
 }

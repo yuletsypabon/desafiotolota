@@ -1,0 +1,87 @@
+.logo{
+  position:absolute;
+  z-index:1;
+  top:50%;
+  left:75%;
+  width:clamp(230px,23vw,360px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  perspective:1000px;
+  pointer-events:none;
+  filter:drop-shadow(0 22px 44px rgba(0,0,0,.42));
+}
+
+.logo::before{
+  position:absolute;
+  z-index:0;
+  inset:-16%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,204,0,.24),rgba(255,138,61,.11) 38%,transparent 70%);
+  opacity:0;
+  animation:encenderHalo 1.3s ease-out .15s both;
+  content:"";
+}
+
+.pieza{
+  position:absolute;
+  z-index:1;
+  inset:0;
+  display:block;
+  background-image:url('/marca/logo-desafio-tolota.webp');
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:100% 100%;
+  opacity:1;
+  animation:armarLogo .9s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.pieza:nth-child(1){clip-path:inset(0 66.666% 66.666% 0);--x:-24px;--y:-24px;--giro:-4deg;--rx:12deg;--ry:-14deg}
+.pieza:nth-child(2){clip-path:inset(0 33.333% 66.666% 33.333%);--x:0;--y:-32px;--giro:2deg;--rx:16deg;--ry:0deg}
+.pieza:nth-child(3){clip-path:inset(0 0 66.666% 66.666%);--x:24px;--y:-24px;--giro:4deg;--rx:12deg;--ry:14deg}
+.pieza:nth-child(4){clip-path:inset(33.333% 66.666% 33.333% 0);--x:-32px;--y:0;--giro:-2deg;--rx:0deg;--ry:-17deg}
+.pieza:nth-child(5){clip-path:inset(33.333% 33.333% 33.333% 33.333%);--x:0;--y:0;--giro:0deg;--rx:0deg;--ry:0deg}
+.pieza:nth-child(6){clip-path:inset(33.333% 0 33.333% 66.666%);--x:32px;--y:0;--giro:2deg;--rx:0deg;--ry:17deg}
+.pieza:nth-child(7){clip-path:inset(66.666% 66.666% 0 0);--x:-24px;--y:24px;--giro:-3deg;--rx:-12deg;--ry:-14deg}
+.pieza:nth-child(8){clip-path:inset(66.666% 33.333% 0 33.333%);--x:0;--y:32px;--giro:2deg;--rx:-16deg;--ry:0deg}
+.pieza:nth-child(9){clip-path:inset(66.666% 0 0 66.666%);--x:24px;--y:24px;--giro:3deg;--rx:-12deg;--ry:14deg}
+
+.particulas{position:absolute;z-index:2;inset:0;pointer-events:none}
+.particulas span{position:absolute;width:clamp(3px,.42vw,6px);aspect-ratio:1;border-radius:50%;
+  background:#ffcc00;box-shadow:0 0 8px 2px rgba(255,204,0,.62),0 0 18px rgba(255,138,61,.42);
+  opacity:0;animation:destellar 1.35s ease-out both}
+.particulas span:nth-child(3n){background:#ff8a3d;box-shadow:0 0 8px 2px rgba(255,138,61,.58),0 0 18px rgba(255,204,0,.35)}
+
+@keyframes armarLogo{
+  0%{opacity:0;filter:blur(4px);transform:translate3d(var(--x),var(--y),60px) scale(.88) rotateX(var(--rx)) rotateY(var(--ry)) rotateZ(var(--giro))}
+  72%{opacity:1;filter:blur(0);transform:translate3d(0,0,0) scale(1.035) rotateX(0) rotateY(0) rotateZ(0)}
+  100%{opacity:1;filter:blur(0);transform:none}
+}
+
+@keyframes destellar{
+  0%{opacity:0;transform:translate(-50%,10px) scale(.25)}
+  34%{opacity:.9;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-26px) scale(.2)}
+}
+
+@keyframes encenderHalo{
+  0%{opacity:0;transform:scale(.72)}
+  45%{opacity:1;transform:scale(1.08)}
+  100%{opacity:.72;transform:scale(1)}
+}
+
+@media(max-width:1100px){
+  .logo{
+    position:relative;
+    top:auto;
+    left:auto;
+    right:auto;
+    width:clamp(160px,30vw,250px);
+    margin:30px auto 0;
+    transform:none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pieza{animation:none;opacity:1;transform:none;filter:none}
+  .logo::before,.particulas span{animation:none;opacity:0}
+}
