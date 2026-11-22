@@ -20,6 +20,11 @@ export function fmtMsPreciso(ms: number): string {
   return `${ms.toLocaleString('es-CO', { maximumFractionDigits: 3 })} ms`;
 }
 
+/** Segundos sin signo, para descuentos configurados en segundos. */
+export function fmtSegundos(ms: number): string {
+  return `${(ms / 1000).toLocaleString('es-CO', { maximumFractionDigits: 3 })} s`;
+}
+
 export function fHora(d?: string | number | Date | null): string {
   if (!d) return '—';
   return new Date(d).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });

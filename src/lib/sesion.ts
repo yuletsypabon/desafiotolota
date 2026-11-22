@@ -110,6 +110,9 @@ export function permitidoCrono(metodo: string, ruta: string, query: URLSearchPar
     if (/^\/api\/eventos\/[^/]+\/exportar$/.test(ruta)) {
       return m === 'GET' && historicoAutorizado && query.get('tipo') !== 'participantes';
     }
+    if (new RegExp(`^/api/pruebas/${ID}/correcciones$`).test(ruta)) {
+      return m === 'GET' && historicoAutorizado;
+    }
     return API_CRONO.some(([mm, re]) => mm === m && re.test(ruta));
   }
   return PAGINAS_CRONO.some((re) => re.test(ruta));

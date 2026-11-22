@@ -14,7 +14,6 @@ export async function getClasificacion(eventoId: string) {
       penMediaMs: true,
       penGraveMs: true,
       bonPositivoMs: true,
-      descuentoEspiritualPorPuntoMs: true,
       pruebas: { select: { id: true, nombre: true, estado: true, posicion: true } },
       equipos: { select: { id: true, numero: true, nombre: true } },
     },
@@ -28,8 +27,12 @@ export async function getClasificacion(eventoId: string) {
       select: { pruebaId: true, equipoId: true, tipo: true },
     }),
     prisma.puntajeEspiritual.findMany({
-      where: { actividad: { pruebaId: { in: pruebaIds } } },
-      select: { actividad: { select: { pruebaId: true } }, equipoId: true, puntos: true },
+      where: { actividad: { eventoId } },
+      select: {
+        actividad: { select: { id: true, nombre: true, pruebaId: true, tipo: true, puntosMaximos: true } },
+        equipoId: true,
+        puntos: true,
+      },
     }),
   ]);
   return calcularClasificacion({
@@ -42,6 +45,10 @@ export async function getClasificacion(eventoId: string) {
       pruebaId: p.actividad.pruebaId,
       equipoId: p.equipoId,
       puntos: p.puntos,
+      tipo: p.actividad.tipo,
+      puntosMaximos: p.actividad.puntosMaximos,
+      actividadId: p.actividad.id,
+      actividadNombre: p.actividad.nombre,
     })),
   });
 }

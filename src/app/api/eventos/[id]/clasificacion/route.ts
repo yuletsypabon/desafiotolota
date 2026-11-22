@@ -17,6 +17,7 @@ function sinDatosHistoricos(clasificacion: Clasificacion): Clasificacion {
   return {
     ...clasificacion,
     general: [],
+    puntosPlus: [],
     pruebas: clasificacion.pruebas.map((prueba) => ({
       ...prueba,
       filas: prueba.filas.map((fila) => ({
@@ -30,6 +31,7 @@ function sinDatosHistoricos(clasificacion: Clasificacion): Clasificacion {
         detenciones: [],
         puntosEspirituales: 0,
         descuentoEspiritualMs: 0,
+        descuentosEspirituales: [],
         netoMs: 0,
         finalMs: 0,
       })),

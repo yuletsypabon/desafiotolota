@@ -45,8 +45,19 @@ export const eventoCreate = z.object({
 export const eventoUpdate = eventoCreate.omit({ pruebas: true, copiarEquiposDe: true }).partial();
 
 export const pruebaCreate = z.object({ nombre: z.string().trim().min(1).max(200) });
-export const actividadEspiritualCreate = z.object({ nombre: z.string().trim().min(1, 'Nombre obligatorio').max(200) });
-export const actividadEspiritualUpdate = actividadEspiritualCreate.partial();
+const actividadEspiritualBase = z.object({
+  nombre: z.string().trim().min(1, 'Nombre obligatorio').max(200),
+  tipo: z.enum(['PLUS', 'TIEMPO']),
+  pruebaId: z.string().min(1).nullable().optional(),
+  puntosMaximos: z.number().int().min(1, 'El máximo de puntos debe ser mayor que cero').max(1_000_000),
+});
+
+export const actividadEspiritualCreate = actividadEspiritualBase.superRefine((data, ctx) => {
+  if (data.tipo === 'TIEMPO' && !data.pruebaId) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['pruebaId'], message: 'Selecciona la prueba que recibirá el descuento' });
+  }
+});
+export const actividadEspiritualUpdate = actividadEspiritualBase.partial();
 export const puntajesEspiritualesUpdate = z.object({
   puntajes: z.array(z.object({
     equipoId: z.string().min(1),
@@ -137,7 +148,11 @@ export const reservasSync = z.object({
 
 /** Corregir pista: los tiempos de A pasan a B y los de B a A */
 export const resultadoIntercambio = z
-  .object({ equipoA: z.string().min(1), equipoB: z.string().min(1) })
+  .object({
+    equipoA: z.string().min(1),
+    equipoB: z.string().min(1),
+    motivo: z.string().trim().min(3, 'Describe brevemente la corrección').max(500),
+  })
   .refine((d) => d.equipoA !== d.equipoB, { message: 'Elige dos equipos distintos' });
 
 export const puntoCreate = z.object({

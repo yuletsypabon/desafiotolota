@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import {
-  Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography,
+  Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography,
 } from '@mui/material';
 import EquipoAvatar from '@/components/EquipoAvatar';
 import { fmt } from '@/lib/format';
@@ -27,9 +27,10 @@ export default function CorregirDialog({
 }: {
   opciones: OpcionCorregir[];
   onClose: () => void;
-  onConfirm: (a: string, b: string) => Promise<void> | void;
+  onConfirm: (a: string, b: string, motivo: string) => Promise<void> | void;
 }) {
   const [sel, setSel] = useState<string[]>([]);
+  const [motivo, setMotivo] = useState('');
   const [enviando, setEnviando] = useState(false);
 
   const toggle = (id: string) =>
@@ -41,7 +42,7 @@ export default function CorregirDialog({
     if (!a || !b) return;
     setEnviando(true);
     try {
-      await onConfirm(a.equipoId, b.equipoId);
+    await onConfirm(a.equipoId, b.equipoId, motivo.trim());
     } finally {
       setEnviando(false);
     }
@@ -49,7 +50,7 @@ export default function CorregirDialog({
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
-      <DialogTitle sx={{ color: COLORS.gold }}>CORREGIR PISTA</DialogTitle>
+      <DialogTitle sx={{ color: COLORS.gold }}>Corregir pista</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Si cronometraste al equipo equivocado, elige los dos equipos para intercambiarlos. Cada tiempo se queda
@@ -96,16 +97,23 @@ export default function CorregirDialog({
         </Stack>
 
         {a && b && (
-          <Alert severity="warning" sx={{ mt: 1.5 }}>
-            <b>{a.nombre}</b> ({a.donde}{a.ms != null ? ` · ${fmt(a.ms)}` : ''}) se intercambia con <b>{b.nombre}</b> ({b.donde}
-            {b.ms != null ? ` · ${fmt(b.ms)}` : ''}).<br />
-            Quedará: <b>{b.nombre}</b> con el tiempo de {a.donde.toLowerCase()} y <b>{a.nombre}</b> con el de {b.donde.toLowerCase()}.
-          </Alert>
+          <>
+            <Alert severity="warning" sx={{ mt: 1.5 }}>
+              <b>{a.nombre}</b> ({a.donde}{a.ms != null ? ` · ${fmt(a.ms)}` : ''}) se intercambia con <b>{b.nombre}</b> ({b.donde}
+              {b.ms != null ? ` · ${fmt(b.ms)}` : ''}).<br />
+              Quedará: <b>{b.nombre}</b> con el tiempo de {a.donde.toLowerCase()} y <b>{a.nombre}</b> con el de {b.donde.toLowerCase()}.
+            </Alert>
+            <TextField
+              fullWidth multiline minRows={2} sx={{ mt: 1.5 }} label="Motivo de la corrección"
+              value={motivo} onChange={(e) => setMotivo(e.target.value)}
+              placeholder="Ej.: se dio salida al equipo equivocado" slotProps={{ htmlInput: { maxLength: 500 } }}
+            />
+          </>
         )}
       </DialogContent>
       <DialogActions>
         <Button color="inherit" onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" disabled={!a || !b || enviando} onClick={confirmar}>
+        <Button variant="contained" disabled={!a || !b || motivo.trim().length < 3 || enviando} onClick={confirmar}>
           {enviando ? 'Intercambiando…' : 'Intercambiar'}
         </Button>
       </DialogActions>

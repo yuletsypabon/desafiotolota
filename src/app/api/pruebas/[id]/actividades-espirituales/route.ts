@@ -27,9 +27,17 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
 export const POST = handler(async (req: Request, { params }: Ctx) => {
   exigirAdmin(req);
   const { id } = await params;
-  const { nombre } = await parseBody(req, actividadEspiritualCreate);
-  const prueba = await prisma.prueba.findUnique({ where: { id }, select: { id: true } });
+  const data = await parseBody(req, actividadEspiritualCreate);
+  const prueba = await prisma.prueba.findUnique({ where: { id }, select: { id: true, eventoId: true } });
   if (!prueba) notFound('Prueba');
 
-  return ok(await prisma.actividadEspiritual.create({ data: { pruebaId: id, nombre } }), 201);
+  return ok(await prisma.actividadEspiritual.create({
+    data: {
+      eventoId: prueba.eventoId,
+      nombre: data.nombre,
+      tipo: data.tipo,
+      puntosMaximos: data.puntosMaximos,
+      pruebaId: data.tipo === 'TIEMPO' ? id : null,
+    },
+  }), 201);
 });
