@@ -7,6 +7,8 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -18,7 +20,7 @@ import MedicalServicesOutlinedIcon from '@mui/icons-material/MedicalServicesOutl
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { api, descargarTexto, useEquipos, useEvento } from '@/lib/client';
 import { decodificarCSV, parseEquiposCSV, PLANTILLA_EQUIPOS, type FilaEquipoCSV } from '@/lib/csv';
-import { edad } from '@/lib/format';
+import { edad, iniciales, nombreYApellido } from '@/lib/format';
 import { useRun, useToast } from '@/components/Toast';
 import { useAppDialog } from '@/components/AppDialog';
 import MarcoLogo from '@/components/MarcoLogo';
@@ -38,6 +40,7 @@ export default function EquiposPage() {
   const [q, setQ] = useState('');
   const [eqEdit, setEqEdit] = useState<EquipoDTO | 'nuevo' | null>(null);
   const [ficha, setFicha] = useState<{ equipo: EquipoDTO; p: ParticipanteDTO | null } | null>(null);
+  const [integrantes, setIntegrantes] = useState<EquipoDTO | null>(null);
   const [csvOpen, setCsvOpen] = useState(false);
 
   const recargar = async () => {
@@ -71,8 +74,32 @@ export default function EquiposPage() {
 
   return (
     <Box>
-      <Stack spacing={1.5} sx={{ mb: 2 }}>
-        <Stack direction="row" justifyContent="flex-end">
+      <Paper sx={{ p: { xs: 2, sm: 2.5 }, mb: 2, borderColor: `${COLORS.acento}55` }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
+            <GroupsOutlinedIcon sx={{ fontSize: 34, color: COLORS.acento, flexShrink: 0 }} />
+            <Box>
+              <Typography variant="h4">Equipos</Typography>
+              <Typography variant="body2" color="text.secondary">Administra los equipos, sus integrantes y las fichas del evento.</Typography>
+            </Box>
+          </Stack>
+          <Stack direction="row" spacing={{ xs: 1, sm: 2 }} alignItems="center" justifyContent={{ xs: 'space-between', md: 'flex-end' }}>
+            <Stack direction="row" spacing={.5} alignItems="center" color="text.secondary">
+              <GroupsOutlinedIcon sx={{ fontSize: 21, color: COLORS.acento }} />
+              <Typography variant="body2" fontWeight={700}>{equipos?.length ?? 0}</Typography>
+              <Typography variant="body2">equipos</Typography>
+            </Stack>
+            <Stack direction="row" spacing={.5} alignItems="center" color="text.secondary">
+              <PersonOutlineIcon sx={{ fontSize: 21, color: COLORS.acento }} />
+              <Typography variant="body2" fontWeight={700}>{totalPart}</Typography>
+              <Typography variant="body2">participantes</Typography>
+            </Stack>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEqEdit('nuevo')}>Agregar equipo</Button>
+          </Stack>
+        </Stack>
+      </Paper>
+
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mb: 2 }}>
           <TextField
             placeholder="Buscar equipo o persona"
             value={q}
@@ -80,24 +107,20 @@ export default function EquiposPage() {
             sx={{ width: { xs: '100%', sm: 300 } }}
             slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> } }}
           />
-        </Stack>
+        <Box sx={{ flex: 1 }} />
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, justifyContent: 'flex-end' }}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEqEdit('nuevo')}>Agregar equipo</Button>
           <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={() => setCsvOpen(true)}>Importar CSV</Button>
           <Button color="inherit" startIcon={<DownloadIcon />} href={`/api/eventos/${eventoId}/exportar?tipo=participantes`}>
             Fichas (CSV)
           </Button>
         </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', sm: 'center' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-            {equipos?.length ?? 0} equipos · {totalPart} participantes
-          </Typography>
-        </Stack>
       </Stack>
 
       {equipos && !equipos.length && <Vacio icono={<ShieldOutlinedIcon />}>Sin equipos. Agrega el primero o importa desde CSV.</Vacio>}
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 440px), 1fr))', gap: 2 }}>
+      <Box sx={{
+        display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2,
+      }}>
         {filtrados.map((e) => (
           <Paper
             component="article"
@@ -105,7 +128,7 @@ export default function EquiposPage() {
             sx={{
               p: 1.25,
               display: 'grid',
-              gridTemplateColumns: { xs: 'minmax(96px, .78fr) minmax(0, 1.22fr)', sm: 'minmax(120px, .9fr) minmax(0, 1.1fr)' },
+              gridTemplateColumns: { xs: 'minmax(112px, .82fr) minmax(0, 1.18fr)', sm: 'minmax(190px, 230px) minmax(0, 1fr)' },
               alignItems: 'stretch',
               gap: { xs: 1.25, sm: 2 },
               ...superficieVidrio,
@@ -114,8 +137,8 @@ export default function EquiposPage() {
               '&:hover': { transform: 'translateY(-4px)', borderColor: alfa(COLORS.acento, .45) },
             }}
           >
-            <MarcoLogo logo={e.logo} nombre={e.nombre} tamanoAvatar={88} sx={{ aspectRatio: '1 / 1', alignSelf: 'center', width: '100%' }} />
-            <Stack spacing={1} justifyContent="space-between" sx={{ minWidth: 0, py: 0.25 }}>
+            <MarcoLogo logo={e.logo} nombre={e.nombre} tamanoAvatar={96} sx={{ aspectRatio: '1 / 1', alignSelf: 'center', width: '100%' }} />
+            <Stack spacing={1.25} justifyContent="space-between" sx={{ minWidth: 0, py: 0.25 }}>
               <Box sx={{ minWidth: 0 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 0.75 }}>
                   <Typography variant="h5" sx={{ color: COLORS.acento, lineHeight: 1.1, overflowWrap: 'anywhere', textTransform: 'none', flex: 1 }}>
@@ -123,36 +146,69 @@ export default function EquiposPage() {
                   </Typography>
                   <Chip size="small" label={`N.º ${e.numero}`} color="primary" variant="outlined" sx={{ flexShrink: 0 }} />
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>Capitán</Typography>
-                <Typography variant="body2" sx={{ overflowWrap: 'anywhere', fontWeight: 600 }}>{e.capitan || 'Sin asignar'}</Typography>
-              </Box>
-
-              <Box sx={{ minWidth: 0, borderTop: `1px solid ${COLORS.border}`, pt: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                  Participantes · {e.participantes.length}
+                <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>
+                  Capitán · <Box component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>{e.capitan || 'Sin asignar'}</Box>
                 </Typography>
-                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5, maxHeight: 72, overflowY: 'auto' }}>
-                  {e.participantes.map((p) => (
-                    <Tooltip key={p.id} title={tieneAlerta(p) ? 'Tiene información médica relevante' : 'Ver / editar ficha'}>
-                      <Chip
-                        size="small"
-                        label={p.nombre}
-                        onClick={() => setFicha({ equipo: e, p })}
-                        color={tieneAlerta(p) ? 'warning' : 'default'}
-                        variant={tieneAlerta(p) ? 'outlined' : 'filled'}
-                        sx={{ maxWidth: '100%' }}
-                      />
-                    </Tooltip>
-                  ))}
-                  {!e.participantes.length && <Typography variant="caption" color="text.secondary">Aún no hay fichas.</Typography>}
-                </Stack>
               </Box>
 
-              <Stack direction="row" alignItems="center" flexWrap="wrap" gap={0.5}>
-                <Button size="small" variant="contained" startIcon={<PersonAddIcon />} onClick={() => setFicha({ equipo: e, p: null })} sx={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap' }}>
-                  Añadir
-                </Button>
-                <Button size="small" variant="outlined" onClick={() => setEqEdit(e)}>Editar</Button>
+              <Box sx={{ ...cajaVidrio, p: .75 }}>
+                <Stack direction="row" alignItems="center" sx={{ mb: .65 }}>
+                  <Stack direction="row" spacing={.5} alignItems="center" sx={{ flex: 1 }}>
+                    <GroupsOutlinedIcon sx={{ fontSize: 18, color: COLORS.acento }} />
+                    <Typography variant="caption" fontWeight={800}>{e.participantes.length} integrantes</Typography>
+                  </Stack>
+                  <Tooltip title="Añadir integrante">
+                    <IconButton size="small" aria-label={`Añadir integrante a ${e.nombre}`} onClick={() => setFicha({ equipo: e, p: null })} sx={{ color: COLORS.acento }}><PersonAddIcon fontSize="small" /></IconButton>
+                  </Tooltip>
+                  <Button size="small" color="inherit" onClick={() => setIntegrantes(e)} sx={{ minWidth: 0, px: .5, color: COLORS.acento }}>Ver todos</Button>
+                </Stack>
+                {!e.participantes.length ? (
+                  <Button fullWidth size="small" color="inherit" startIcon={<PersonAddIcon />} onClick={() => setFicha({ equipo: e, p: null })}>Añadir el primero</Button>
+                ) : (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(e.participantes.length, 6)}, minmax(0, 1fr))`, gap: .5 }}>
+                    {e.participantes.slice(0, e.participantes.length > 6 ? 5 : 6).map((participante) => {
+                      const corto = nombreYApellido(participante.nombre);
+                      const esCapitan = e.capitan?.trim().toLocaleLowerCase('es') === participante.nombre.trim().toLocaleLowerCase('es');
+                      const colorFranja = esCapitan ? COLORS.blue : COLORS.acento;
+                      const imagenFondo = participante.foto ?? e.logo;
+                      return (
+                        <Tooltip key={participante.id} title={tieneAlerta(participante) ? `${participante.nombre} · revisión médica` : participante.nombre}>
+                          <Button
+                            color="inherit" onClick={() => setFicha({ equipo: e, p: participante })}
+                            aria-label={`Editar ficha de ${participante.nombre}`}
+                            sx={{ minWidth: 0, minHeight: 132, p: 0, position: 'relative', overflow: 'hidden', borderRadius: '8px', justifyContent: 'flex-start', bgcolor: 'rgba(255,255,255,.025)', border: `1px solid ${COLORS.border}`, '&:hover': { borderColor: colorFranja, transform: 'translateY(-2px)' } }}
+                          >
+                            {imagenFondo ? (
+                              <Box component="img" src={imagenFondo} alt="" sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: participante.foto ? 'cover' : 'contain', opacity: participante.foto ? .62 : .24, filter: 'grayscale(.2) brightness(.55)' }} />
+                            ) : (
+                              <PersonOutlineIcon sx={{ position: 'absolute', inset: 0, m: 'auto', fontSize: 34, color: 'text.secondary' }} />
+                            )}
+                            <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(5,8,11,.22), rgba(5,8,11,.84))' }} />
+                            <Typography variant="caption" noWrap sx={{ position: 'absolute', top: 6, left: 6, right: 22, color: 'rgba(255,255,255,.68)', fontSize: 8, fontWeight: 800, textAlign: 'left', textTransform: 'uppercase' }}>
+                              {participante.residencia || 'Integrante'}
+                            </Typography>
+                            <Typography sx={{ position: 'absolute', left: 7, bottom: 5, color: esCapitan ? COLORS.blue : COLORS.text, fontFamily: FONT_MONO, fontSize: 25, fontWeight: 800, lineHeight: 1 }}>
+                              {iniciales(participante.nombre)}
+                            </Typography>
+                            <Box sx={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: colorFranja, color: COLORS.bg }}>
+                              <Typography component="span" sx={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: 8, fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap' }}>
+                                {corto.nombre ? `${corto.nombre} ${corto.apellido}` : participante.nombre}
+                              </Typography>
+                            </Box>
+                            {tieneAlerta(participante) && <Box sx={{ position: 'absolute', top: 5, right: 23, width: 6, height: 6, borderRadius: '50%', bgcolor: COLORS.detenido }} />}
+                          </Button>
+                        </Tooltip>
+                      );
+                    })}
+                    {e.participantes.length > 6 && (
+                      <Button color="inherit" onClick={() => setIntegrantes(e)} sx={{ minWidth: 0, minHeight: 108, borderRadius: '8px', color: COLORS.acento }}>+{e.participantes.length - 5}</Button>
+                    )}
+                  </Box>
+                )}
+              </Box>
+
+              <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={.5}>
+                <Tooltip title="Editar equipo"><IconButton size="small" aria-label={`Editar ${e.nombre}`} onClick={() => setEqEdit(e)}><EditOutlinedIcon fontSize="small" /></IconButton></Tooltip>
                 <Tooltip title="Eliminar equipo">
                   <IconButton size="small" aria-label={`Eliminar ${e.nombre}`} onClick={() => borrar(e)}><DeleteIcon fontSize="small" /></IconButton>
                 </Tooltip>
@@ -171,8 +227,54 @@ export default function EquiposPage() {
         />
       )}
       {ficha && <FichaDialog equipo={ficha.equipo} p={ficha.p} equipos={equipos ?? []} onClose={() => setFicha(null)} onSaved={recargar} />}
+      {integrantes && (
+        <IntegrantesDialog
+          equipo={integrantes}
+          onClose={() => setIntegrantes(null)}
+          onAbrirFicha={(p) => { setIntegrantes(null); setFicha({ equipo: integrantes, p }); }}
+          onAgregar={() => { setIntegrantes(null); setFicha({ equipo: integrantes, p: null }); }}
+        />
+      )}
       {csvOpen && <CsvDialog eventoId={eventoId} onClose={() => setCsvOpen(false)} onSaved={recargar} />}
     </Box>
+  );
+}
+
+/** Lista completa fuera de la tarjeta: conserva acceso a cada ficha sin saturar la vista de equipos. */
+function IntegrantesDialog({
+  equipo, onClose, onAbrirFicha, onAgregar,
+}: {
+  equipo: EquipoDTO;
+  onClose: () => void;
+  onAbrirFicha: (participante: ParticipanteDTO) => void;
+  onAgregar: () => void;
+}) {
+  return (
+    <Dialog open onClose={onClose} maxWidth="sm">
+      <DialogTitle>{equipo.nombre} · Integrantes</DialogTitle>
+      <DialogContent dividers>
+        {!equipo.participantes.length ? (
+          <Vacio icono={<PersonOutlineIcon />}>Aún no hay integrantes registrados.</Vacio>
+        ) : (
+          <Stack spacing={.75}>
+            {equipo.participantes.map((participante) => (
+              <Button
+                key={participante.id} fullWidth color="inherit" onClick={() => onAbrirFicha(participante)}
+                sx={{ ...cajaVidrio, justifyContent: 'flex-start', px: 1.25, py: 1, textAlign: 'left', '&:hover': { borderColor: COLORS.acento, bgcolor: alfa(COLORS.acento, .08) } }}
+              >
+                <PersonOutlineIcon sx={{ color: COLORS.acento, mr: 1.25 }} />
+                <Typography variant="body2" fontWeight={700} sx={{ flex: 1 }}>{participante.nombre}</Typography>
+                {tieneAlerta(participante) && <Chip size="small" color="warning" label="Revisión médica" />}
+              </Button>
+            ))}
+          </Stack>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" startIcon={<PersonAddIcon />} onClick={onAgregar}>Añadir integrante</Button>
+        <Button color="inherit" onClick={onClose}>Cerrar</Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
@@ -324,6 +426,13 @@ function FichaDialog({ equipo, p, equipos, onClose, onSaved }: {
       </DialogTitle>
       <DialogContent>
         <Stack spacing={1.5} sx={{ mt: 1 }}>
+          <LogoUpload
+            label="Foto del participante"
+            tipo="foto"
+            value={f.foto || null}
+            nombre={f.nombre}
+            onChange={(foto) => setF((actual) => ({ ...actual, foto: foto ?? '' }))}
+          />
           <Seccion t={<Stack direction="row" spacing={1} alignItems="center"><PersonOutlineIcon />Datos personales</Stack>}>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
               {CAMPOS_PERSONALES.map(([k, label, type]) => (

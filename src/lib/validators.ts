@@ -8,8 +8,8 @@ const optStr = z
   .nullable()
   .transform((v) => (v ? v : null));
 
-// Logos: data URL de imagen (máx ~1.5 MB en texto)
-const logo = z
+// Imágenes: data URL de imagen (máx ~1.5 MB en texto). No se admite SVG porque puede llevar código.
+const imagen = z
   .string()
   .max(1_500_000, 'El logo es demasiado grande')
   // Solo imágenes PNG, JPEG, WebP o GIF (no SVG: puede llevar código) o un enlace https
@@ -17,6 +17,8 @@ const logo = z
   .optional()
   .nullable()
   .transform((v) => (v ? v : null));
+
+const logo = imagen;
 
 const ms = z.number().int().min(0).max(600_000);
 
@@ -97,6 +99,7 @@ export const equiposImport = z.object({
 
 export const participanteFields = z.object({
   nombre: z.string().trim().min(1, 'Nombre obligatorio').max(200),
+  foto: imagen,
   fechaNacimiento: optStr,
   telefono: optStr,
   email: optStr,

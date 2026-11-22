@@ -104,6 +104,8 @@ model Participante {
   id                 String   @id @default(cuid())
   equipoId           String
   nombre             String
+  /// Foto de perfil redimensionada en el navegador (data URL WebP)
+  foto               String?
   fechaNacimiento    String? /// YYYY-MM-DD
   telefono           String?
   email              String?

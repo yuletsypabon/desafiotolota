@@ -40,6 +40,7 @@ export interface ParticipanteDTO {
   id: string;
   equipoId: string;
   nombre: string;
+  foto: string | null;
   fechaNacimiento: string | null;
   telefono: string | null;
   email: string | null;

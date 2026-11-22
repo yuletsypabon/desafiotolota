@@ -11,11 +11,14 @@ export default function LogoUpload({
   onChange,
   label = 'Logo',
   nombre,
+  tipo = 'logo',
 }: {
   value: string | null;
   onChange: (v: string | null) => void;
   label?: string;
   nombre?: string;
+  /** Las fotos llenan el retrato; los logos se conservan completos. */
+  tipo?: 'logo' | 'foto';
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -38,19 +41,18 @@ export default function LogoUpload({
             alt={nombre || 'Imagen'}
             sx={{
               width: 56,
-              height: 56,
-              p: 0.5,
+              height: tipo === 'foto' ? 72 : 56,
+              p: tipo === 'foto' ? 0 : 0.5,
               flexShrink: 0,
-              objectFit: 'contain',
+              objectFit: tipo === 'foto' ? 'cover' : 'contain',
               borderRadius: 1,
-              backgroundColor: '#fff',
-              backgroundImage: `linear-gradient(45deg, rgba(15,23,42,0.08) 25%, transparent 25%, transparent 75%, rgba(15,23,42,0.08) 75%), linear-gradient(45deg, rgba(15,23,42,0.08) 25%, transparent 25%, transparent 75%, rgba(15,23,42,0.08) 75%)`,
-              backgroundSize: '12px 12px',
-              backgroundPosition: '0 0, 6px 6px',
+              backgroundColor: tipo === 'foto' ? 'transparent' : '#fff',
+              backgroundImage: tipo === 'foto' ? 'none' : `linear-gradient(45deg, rgba(15,23,42,0.08) 25%, transparent 25%, transparent 75%, rgba(15,23,42,0.08) 75%), linear-gradient(45deg, rgba(15,23,42,0.08) 25%, transparent 25%, transparent 75%, rgba(15,23,42,0.08) 75%)`,
+              backgroundSize: '12px 12px', backgroundPosition: '0 0, 6px 6px',
             }}
           />
         ) : (
-          <Box sx={{ width: 56, height: 56, display: 'grid', placeItems: 'center', borderRadius: 1, bgcolor: VIDRIO_SISTEMA.fondoSuave }}>
+          <Box sx={{ width: 56, height: tipo === 'foto' ? 72 : 56, display: 'grid', placeItems: 'center', borderRadius: 1, bgcolor: VIDRIO_SISTEMA.fondoSuave }}>
             <ImageOutlinedIcon color="disabled" />
           </Box>
         )}
@@ -80,7 +82,7 @@ export default function LogoUpload({
           e.target.value = '';
           if (!f) return;
           try {
-            onChange(await resizeImage(f));
+            onChange(await resizeImage(f, tipo === 'foto' ? 800 : 512));
           } catch (err) {
             toast((err as Error).message, 'error');
           }
