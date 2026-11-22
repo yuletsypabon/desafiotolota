@@ -52,14 +52,14 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
     const rows: (string | number)[][] = [
       [
         'Pos', 'N°', 'Equipo', 'Pruebas completadas', ...c.pruebas.map((p) => p.nombre),
-        'Disciplina (s)', 'Descuento espiritual (ms)', 'Total', 'Total (ms)',
+        'Disciplina (s)', 'Descuento espiritual (s)', 'Puntos Plus', 'Total', 'Total (ms)',
       ],
     ];
     for (const g of c.general)
       rows.push([
         g.pos, g.numero, g.nombre, `${g.completadas}/${c.totalPruebas}`,
         ...c.pruebas.map((p) => (g.porPrueba[p.id] ? fmt(g.porPrueba[p.id].finalMs) : '—')),
-        (g.penMs / 1000).toFixed(1), g.descuentoEspiritualMs, fmt(g.totalMs), g.totalMs,
+        (g.penMs / 1000).toFixed(1), (g.descuentoEspiritualMs / 1000).toFixed(3), g.puntosPlus, fmt(g.totalMs), g.totalMs,
       ]);
     return csvResponse(`General_${c.evento.nombre}`, toCSV(rows));
   }
@@ -70,14 +70,14 @@ export const GET = handler(async (req: Request, { params }: Ctx) => {
   const rows: (string | number | null)[][] = [
     [
       'Prueba', 'Pos', 'N°', 'Equipo', 'Pista', 'Salida', 'Llegada', 'Bruto', 'Detenciones', 'Neto',
-      'Disciplina (s)', 'Puntos espirituales', 'Descuento espiritual (ms)', 'Final', 'Final (ms)',
+      'Disciplina (s)', 'Puntos espirituales', 'Descuento espiritual (s)', 'Final', 'Final (ms)',
     ],
   ];
   for (const p of pruebas)
     for (const f of p.filas)
       rows.push([p.nombre, f.pos, f.numero, f.nombre, f.pista, fHora(f.salidaAt), fHora(f.llegadaAt), fmt(f.brutoMs),
         fmt(f.detencionesMs), fmt(f.netoMs), (f.penMs / 1000).toFixed(1), f.puntosEspirituales,
-        f.descuentoEspiritualMs, fmt(f.finalMs), f.finalMs]);
+        (f.descuentoEspiritualMs / 1000).toFixed(3), fmt(f.finalMs), f.finalMs]);
   const nombre = tipo === 'prueba' ? `${c.evento.nombre}_${pruebas[0].nombre}` : `Pruebas_${c.evento.nombre}`;
   return csvResponse(nombre, toCSV(rows));
 });

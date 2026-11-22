@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handler, notFound, ok, parseBody, type Ctx } from '@/lib/api';
 import { resultadoIntercambio } from '@/lib/validators';
-import { exigirPruebaHabilitada } from '@/lib/auth';
+import { exigirPruebaHabilitada, rolDe } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,9 @@ export const dynamic = 'force-dynamic';
 export const POST = handler(async (req: Request, { params }: Ctx) => {
   const { id } = await params;
   await exigirPruebaHabilitada(req, id);
-  const { equipoA, equipoB } = await parseBody(req, resultadoIntercambio);
+  const rol = rolDe(req);
+  if (!rol) throw new HttpError(401, 'Sesión requerida');
+  const { equipoA, equipoB, motivo } = await parseBody(req, resultadoIntercambio);
 
   const prueba = await prisma.prueba.findUnique({ where: { id }, select: { eventoId: true } });
   if (!prueba) notFound('Prueba');
@@ -30,6 +32,19 @@ export const POST = handler(async (req: Request, { params }: Ctx) => {
     ]);
     if (!ra && !rb) return { movidos: 0 };
 
+    const instantanea = (r: typeof ra) => r ? ({
+      resultadoId: r.id,
+      equipoId: r.equipoId,
+      pista: r.pista,
+      salidaAt: r.salidaAt.toISOString(),
+      llegadaAt: r.llegadaAt.toISOString(),
+      brutoMs: r.brutoMs,
+      detencionesMs: r.detencionesMs,
+      detenciones: r.detenciones,
+    }) : null;
+    const antes = { equipoA: instantanea(ra), equipoB: instantanea(rb) };
+    let despues: { equipoA: ReturnType<typeof instantanea>; equipoB: ReturnType<typeof instantanea> };
+
     if (ra && rb) {
       const tiempo = (r: typeof ra) => ({
         pista: r.pista,
@@ -41,13 +56,33 @@ export const POST = handler(async (req: Request, { params }: Ctx) => {
       });
       await tx.resultado.update({ where: { id: ra.id }, data: tiempo(rb) });
       await tx.resultado.update({ where: { id: rb.id }, data: tiempo(ra) });
-      return { movidos: 2 };
+      despues = {
+        equipoA: { ...instantanea(rb)!, resultadoId: ra.id, equipoId: equipoA },
+        equipoB: { ...instantanea(ra)!, resultadoId: rb.id, equipoId: equipoB },
+      };
+    } else {
+      // Solo uno tiene tiempo: se reasigna al otro equipo (no hay choque con la restricción única)
+      const r = (ra ?? rb)!;
+      const destino = r.equipoId === equipoA ? equipoB : equipoA;
+      await tx.resultado.update({ where: { id: r.id }, data: { equipoId: destino } });
+      despues = {
+        equipoA: destino === equipoA ? { ...instantanea(r)!, equipoId: equipoA } : null,
+        equipoB: destino === equipoB ? { ...instantanea(r)!, equipoId: equipoB } : null,
+      };
     }
 
-    // Solo uno tiene tiempo: se reasigna al otro equipo (no hay choque con la restricción única)
-    const r = (ra ?? rb)!;
-    await tx.resultado.update({ where: { id: r.id }, data: { equipoId: r.equipoId === equipoA ? equipoB : equipoA } });
-    return { movidos: 1 };
+    await tx.resultadoCorreccion.create({
+      data: {
+        pruebaId: id,
+        equipoAId: equipoA,
+        equipoBId: equipoB,
+        motivo,
+        antes: antes as unknown as Prisma.InputJsonValue,
+        despues: despues as unknown as Prisma.InputJsonValue,
+        rol,
+      },
+    });
+    return { movidos: ra && rb ? 2 : 1 };
   });
 
   return ok(resumen);

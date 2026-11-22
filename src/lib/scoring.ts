@@ -6,8 +6,10 @@ import type {
   FilaGeneral,
   FilaPrueba,
   PenalizacionCfg,
+  PuntosPlusEquipo,
   TipoPunto,
 } from './types';
+import { descuentoEspiritualMs, type TipoActividadEspiritual } from './espiritual';
 
 export function valorPunto(tipo: TipoPunto, cfg: PenalizacionCfg): number {
   switch (tipo) {
@@ -36,7 +38,7 @@ function posiciones<T>(lista: T[], clave: (x: T) => string): number[] {
 }
 
 interface Input {
-  evento: { id: string; nombre: string; anio: number; descuentoEspiritualPorPuntoMs?: number } & PenalizacionCfg;
+  evento: { id: string; nombre: string; anio: number } & PenalizacionCfg;
   pruebas: { id: string; nombre: string; estado: EstadoPrueba; posicion: number }[];
   equipos: { id: string; numero: number; nombre: string }[];
   resultados: {
@@ -51,7 +53,15 @@ interface Input {
     detenciones: unknown;
   }[];
   puntos: { pruebaId: string; equipoId: string; tipo: TipoPunto }[];
-  puntajesEspirituales?: { pruebaId: string; equipoId: string; puntos: number }[];
+  puntajesEspirituales?: {
+    pruebaId: string | null;
+    equipoId: string;
+    puntos: number;
+    tipo?: TipoActividadEspiritual;
+    puntosMaximos?: number;
+    actividadId?: string;
+    actividadNombre?: string;
+  }[];
 }
 
 export function calcularClasificacion(input: Input): Clasificacion {
@@ -65,11 +75,24 @@ export function calcularClasificacion(input: Input): Clasificacion {
     pen.set(k, (pen.get(k) || 0) + valorPunto(p.tipo, evento));
   }
   const puntosEspirituales = new Map<string, number>();
+  const puntosPlus = new Map<string, number>();
+  const descuentosEspirituales = new Map<string, number>();
+  const detalleEspiritual = new Map<string, { actividadId: string; nombre: string; puntos: number; descuentoMs: number }[]>();
   for (const p of input.puntajesEspirituales ?? []) {
+    if ((p.tipo ?? 'TIEMPO') === 'PLUS') {
+      puntosPlus.set(p.equipoId, (puntosPlus.get(p.equipoId) || 0) + p.puntos);
+      continue;
+    }
+    if (!p.pruebaId || (p.tipo ?? 'TIEMPO') !== 'TIEMPO') continue;
     const k = `${p.pruebaId}|${p.equipoId}`;
     puntosEspirituales.set(k, (puntosEspirituales.get(k) || 0) + p.puntos);
+    const descuentoMs = descuentoEspiritualMs(p.tipo ?? 'TIEMPO', p.puntos, p.puntosMaximos ?? 100);
+    descuentosEspirituales.set(k, (descuentosEspirituales.get(k) || 0) + descuentoMs);
+    detalleEspiritual.set(k, [
+      ...(detalleEspiritual.get(k) ?? []),
+      { actividadId: p.actividadId ?? '', nombre: p.actividadNombre ?? 'Actividad espiritual', puntos: p.puntos, descuentoMs },
+    ]);
   }
-  const descuentoPorPunto = input.evento.descuentoEspiritualPorPuntoMs ?? 0.02;
 
   const pruebasOrd = [...input.pruebas].sort((a, b) => a.posicion - b.posicion);
 
@@ -82,7 +105,7 @@ export function calcularClasificacion(input: Input): Clasificacion {
         const netoMs = Math.max(0, r.brutoMs - r.detencionesMs);
         const penMs = pen.get(`${pr.id}|${r.equipoId}`) || 0;
         const puntosEspiritualesEquipo = puntosEspirituales.get(`${pr.id}|${r.equipoId}`) || 0;
-        const descuentoEspiritualMs = Math.round(puntosEspiritualesEquipo * descuentoPorPunto * 1000) / 1000;
+        const descuentoEspiritualMs = descuentosEspirituales.get(`${pr.id}|${r.equipoId}`) || 0;
         return {
           pos: 0,
           equipoId: r.equipoId,
@@ -98,6 +121,7 @@ export function calcularClasificacion(input: Input): Clasificacion {
           penMs,
           puntosEspirituales: puntosEspiritualesEquipo,
           descuentoEspiritualMs,
+          descuentosEspirituales: detalleEspiritual.get(`${pr.id}|${r.equipoId}`) ?? [],
           netoMs,
           finalMs: Math.max(0, Math.round((netoMs + penMs - descuentoEspiritualMs) * 1000) / 1000),
         };
@@ -116,7 +140,7 @@ export function calcularClasificacion(input: Input): Clasificacion {
       if (!g) {
         g = {
           pos: 0, equipoId: f.equipoId, numero: f.numero, nombre: f.nombre,
-          completadas: 0, totalMs: 0, penMs: 0, descuentoEspiritualMs: 0, porPrueba: {},
+          completadas: 0, totalMs: 0, penMs: 0, descuentoEspiritualMs: 0, puntosPlus: puntosPlus.get(f.equipoId) || 0, porPrueba: {},
         };
         acc.set(f.equipoId, g);
       }
@@ -132,11 +156,16 @@ export function calcularClasificacion(input: Input): Clasificacion {
   );
   const gpos = posiciones(general, (g) => `${g.completadas}|${g.totalMs}`);
   general.forEach((g, i) => (g.pos = gpos[i]));
+  const resumenPlus: PuntosPlusEquipo[] = input.equipos
+    .map((equipo) => ({ equipoId: equipo.id, numero: equipo.numero, nombre: equipo.nombre, puntos: puntosPlus.get(equipo.id) || 0 }))
+    .filter((equipo) => equipo.puntos > 0)
+    .sort((a, b) => b.puntos - a.puntos || a.numero - b.numero);
 
   return {
     evento: { id: evento.id, nombre: evento.nombre, anio: evento.anio },
     totalPruebas: pruebas.length,
     pruebas,
     general,
+    puntosPlus: resumenPlus,
   };
 }

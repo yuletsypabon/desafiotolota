@@ -15,10 +15,11 @@ import { BLOQUEO_MS, MAX_FALLOS, crearLimite } from '../src/lib/limiteIntentos';
 import { esPeticionAjena } from '../src/lib/seguridad';
 import { toCSV } from '../src/lib/csv';
 import { claveCorrecta, hashAnticuado, hashClave } from '../src/lib/clave';
+import { descuentoPorPuntoSegundos, descuentoEspiritualMs } from '../src/lib/espiritual';
 import { EDICIONES, EVENTO, codigoEdicion, cuentaRegresiva, tituloCategoria, tituloEdicion } from '../src/lib/evento';
 
 const cfg = { penLeveMs: 300, penMediaMs: 500, penGraveMs: 1000, bonPositivoMs: 100 };
-const evento = { id: 'ev', nombre: 'Desafío', anio: 2026, descuentoEspiritualPorPuntoMs: 0.02, ...cfg };
+const evento = { id: 'ev', nombre: 'Desafío', anio: 2026, ...cfg };
 const equipos = [
   { id: 'a', numero: 1, nombre: 'Águila' },
   { id: 'b', numero: 2, nombre: 'Toro' },
@@ -114,39 +115,51 @@ test('el tiempo final nunca es negativo', () => {
   assert.equal(c.pruebas[0].filas[0].finalMs, 0);
 });
 
-test('puntos espirituales descuentan el tiempo configurado solo al equipo y prueba asignados', () => {
+test('actividades espirituales de tiempo descuentan hasta dos minutos solo en su prueba', () => {
   const c = calcularClasificacion({
     evento, pruebas, equipos,
     resultados: [r('1', 'p1', 'a', 10_000), r('2', 'p1', 'b', 10_000), r('3', 'p2', 'a', 20_000)],
     puntos: [],
     puntajesEspirituales: [
-      { pruebaId: 'p1', equipoId: 'a', puntos: 8 },
-      { pruebaId: 'p1', equipoId: 'b', puntos: 3 },
-      { pruebaId: 'p2', equipoId: 'a', puntos: 100 },
+      { pruebaId: 'p1', equipoId: 'a', puntos: 8, tipo: 'TIEMPO', puntosMaximos: 100 },
+      { pruebaId: 'p1', equipoId: 'b', puntos: 3, tipo: 'TIEMPO', puntosMaximos: 100 },
+      { pruebaId: 'p2', equipoId: 'a', puntos: 100, tipo: 'TIEMPO', puntosMaximos: 100 },
     ],
   });
   const primera = c.pruebas.find((p) => p.id === 'p1')!;
   const segunda = c.pruebas.find((p) => p.id === 'p2')!;
   assert.deepEqual(primera.filas.map((f) => [f.equipoId, f.puntosEspirituales, f.descuentoEspiritualMs, f.finalMs]), [
-    ['a', 8, 0.16, 9_999.84],
-    ['b', 3, 0.06, 9_999.94],
+    ['a', 8, 9_600, 400],
+    ['b', 3, 3_600, 6_400],
   ]);
   assert.deepEqual([segunda.filas[0].puntosEspirituales, segunda.filas[0].descuentoEspiritualMs, segunda.filas[0].finalMs], [
-    100, 2, 19_998,
+    100, 120_000, 0,
   ]);
-  assert.equal(c.general.find((f) => f.equipoId === 'a')?.descuentoEspiritualMs, 2.16);
+  assert.equal(c.general.find((f) => f.equipoId === 'a')?.descuentoEspiritualMs, 129_600);
 });
 
-test('descuento espiritual configurable también limita el resultado a cero', () => {
+test('descuento espiritual: la configuración se expresa en segundos y se guarda con precisión', () => {
+  assert.equal(descuentoPorPuntoSegundos(12), 10);
+  assert.equal(descuentoEspiritualMs('TIEMPO', 12, 12), 120_000);
+  assert.equal(descuentoEspiritualMs('TIEMPO', 1, 12), 10_000);
+});
+
+test('una actividad Plus no modifica el tiempo y el descuento final nunca es negativo', () => {
   const c = calcularClasificacion({
-    evento: { ...evento, descuentoEspiritualPorPuntoMs: 1 },
+    evento,
     pruebas, equipos,
     resultados: [r('1', 'p1', 'a', 50)],
     puntos: [],
-    puntajesEspirituales: [{ pruebaId: 'p1', equipoId: 'a', puntos: 100 }],
+    puntajesEspirituales: [
+      { pruebaId: null, equipoId: 'a', puntos: 100, tipo: 'PLUS', puntosMaximos: 100 },
+      { pruebaId: 'p1', equipoId: 'a', puntos: 1, tipo: 'TIEMPO', puntosMaximos: 1 },
+    ],
   });
-  assert.equal(c.pruebas[0].filas[0].descuentoEspiritualMs, 100);
+  assert.equal(c.pruebas[0].filas[0].puntosEspirituales, 1);
+  assert.equal(c.pruebas[0].filas[0].descuentoEspiritualMs, 120_000);
   assert.equal(c.pruebas[0].filas[0].finalMs, 0);
+  assert.equal(c.general[0].puntosPlus, 100);
+  assert.deepEqual(c.puntosPlus.map((equipo) => [equipo.equipoId, equipo.puntos]), [['a', 100]]);
 });
 
 test('patrones de orden de salida', () => {

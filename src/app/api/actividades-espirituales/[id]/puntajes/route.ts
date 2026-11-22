@@ -11,12 +11,12 @@ export const PUT = handler(async (req: Request, { params }: Ctx) => {
   const { puntajes } = await parseBody(req, puntajesEspiritualesUpdate);
   const actividad = await prisma.actividadEspiritual.findUnique({
     where: { id },
-    select: { id: true, prueba: { select: { eventoId: true } } },
+    select: { id: true, eventoId: true },
   });
   if (!actividad) notFound('Actividad');
 
   const equipos = await prisma.equipo.findMany({
-    where: { eventoId: actividad.prueba.eventoId, id: { in: puntajes.map((p) => p.equipoId) } },
+    where: { eventoId: actividad.eventoId, id: { in: puntajes.map((p) => p.equipoId) } },
     select: { id: true },
   });
   if (equipos.length !== puntajes.length) {

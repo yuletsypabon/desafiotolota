@@ -1,6 +1,6 @@
 'use client';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography } from '@mui/material';
-import { fFecha, fHora, fmt, fmtMsPreciso, fmtSeg } from '@/lib/format';
+import { fFecha, fHora, fmt, fmtSeg, fmtSegundos } from '@/lib/format';
 import type { FilaPrueba } from '@/lib/types';
 import { COLORS, FONT_MONO } from '@/theme';
 
@@ -33,15 +33,23 @@ export default function DetalleDialog({ fila, onClose }: { fila: FilaPrueba; onC
             <Fila l="Disciplina" v={fmtSeg(fila.penMs)} color={fila.penMs > 0 ? COLORS.red : COLORS.green} bold />
           </>
         )}
-        {fila.puntosEspirituales > 0 && (
+        {fila.descuentosEspirituales.length > 0 && (
           <>
             <Divider />
-            <Fila l={`Puntos espirituales (${fila.puntosEspirituales})`} v={`− ${fmtMsPreciso(fila.descuentoEspiritualMs)}`} color={COLORS.purple} bold />
+            {fila.descuentosEspirituales.map((descuento, indice) => (
+              <Fila
+                key={`${descuento.actividadId}-${indice}`}
+                l={`${descuento.nombre} (${descuento.puntos} pts)`}
+                v={`− ${fmtSegundos(descuento.descuentoMs)}`}
+                color={COLORS.purple}
+              />
+            ))}
+            <Fila l="Total espiritual" v={`− ${fmtSegundos(fila.descuentoEspiritualMs)}`} color={COLORS.purple} bold />
           </>
         )}
         <Divider sx={{ borderColor: COLORS.gold, my: 0.5 }} />
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography sx={{ color: COLORS.gold, fontWeight: 700 }}>TIEMPO FINAL</Typography>
+          <Typography sx={{ color: COLORS.gold, fontWeight: 700 }}>Tiempo final</Typography>
           <Typography sx={{ fontFamily: FONT_MONO, fontSize: 22, color: COLORS.gold }}>{fmt(fila.finalMs)}</Typography>
         </Stack>
         <Box sx={{ mt: 1 }}>

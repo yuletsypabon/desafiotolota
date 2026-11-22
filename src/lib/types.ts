@@ -2,6 +2,7 @@
 
 export type EstadoPrueba = 'PENDIENTE' | 'EN_CURSO' | 'FINALIZADA';
 export type TipoPunto = 'LEVE' | 'MEDIA' | 'GRAVE' | 'POSITIVO';
+export type TipoActividadEspiritual = 'PLUS' | 'TIEMPO';
 
 export interface PruebaDTO {
   id: string;
@@ -79,8 +80,11 @@ export interface PuntajeEspiritualDTO {
 
 export interface ActividadEspiritualDTO {
   id: string;
-  pruebaId: string;
+  eventoId: string;
+  pruebaId: string | null;
   nombre: string;
+  tipo: TipoActividadEspiritual;
+  puntosMaximos: number;
   puntajes: PuntajeEspiritualDTO[];
 }
 
@@ -115,6 +119,7 @@ export interface FilaPrueba {
   penMs: number;
   puntosEspirituales: number;
   descuentoEspiritualMs: number;
+  descuentosEspirituales: { actividadId: string; nombre: string; puntos: number; descuentoMs: number }[];
   netoMs: number; // bruto − detenciones
   finalMs: number; // neto ± disciplina
 }
@@ -128,7 +133,16 @@ export interface FilaGeneral {
   totalMs: number;
   penMs: number;
   descuentoEspiritualMs: number;
+  /** Puntos de actividades Plus: se muestran en histórico, pero jamás modifican un tiempo. */
+  puntosPlus: number;
   porPrueba: Record<string, { finalMs: number; pos: number }>;
+}
+
+export interface PuntosPlusEquipo {
+  equipoId: string;
+  numero: number;
+  nombre: string;
+  puntos: number;
 }
 
 export interface ClasificacionPrueba {
@@ -144,4 +158,5 @@ export interface Clasificacion {
   totalPruebas: number;
   pruebas: ClasificacionPrueba[];
   general: FilaGeneral[];
+  puntosPlus: PuntosPlusEquipo[];
 }

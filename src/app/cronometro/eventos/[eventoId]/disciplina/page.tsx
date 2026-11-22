@@ -13,7 +13,7 @@ import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { api, useClasificacion, useEquipos, useEvento, usePuntos } from '@/lib/client';
-import { horaActual, fmtSeg } from '@/lib/format';
+import { fmtSeg } from '@/lib/format';
 import { TIPOS } from '@/lib/estados';
 import { valorPunto } from '@/lib/scoring';
 import { useRun } from '@/components/Toast';
@@ -42,7 +42,6 @@ export default function Disciplina() {
   const [pruebaId, setPruebaId] = useState('');
   const [equipoId, setEquipoId] = useState('');
   const [participanteId, setParticipanteId] = useState('');
-  const [hora, setHora] = useState(horaActual());
   const [desc, setDesc] = useState('');
   const [filtro, setFiltro] = useState('');
 
@@ -65,11 +64,10 @@ export default function Disciplina() {
       if (!pruebaId) throw new Error('Selecciona la prueba');
       if (!equipoId) throw new Error('Selecciona el equipo');
       await api(`/api/eventos/${eventoId}/disciplina`, 'POST', {
-        tipo, pruebaId, equipoId, participanteId: participanteId || null, hora, descripcion: desc,
+        tipo, pruebaId, equipoId, participanteId: participanteId || null, descripcion: desc,
       });
       setDesc('');
       setParticipanteId('');
-      setHora(horaActual());
       await Promise.all([mutate(), mutClas()]);
     }, `Punto registrado: ${prMap.get(pruebaId) ?? ''}`);
 
@@ -91,22 +89,58 @@ export default function Disciplina() {
   lista.forEach((p) => resumen.set(p.equipoId, (resumen.get(p.equipoId) ?? 0) + valorPunto(p.tipo, ev)));
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(300px, 0.8fr) minmax(0, 1.6fr)' }, gap: 2, alignItems: 'start' }}>
-      <Paper sx={{ p: { xs: 2, sm: 2.5 } }}>
-        <Typography variant="h4" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}><GavelOutlinedIcon />Registrar punto</Typography>
+    <Box>
+      <Paper component="aside" aria-label="Valores de los puntos de disciplina" sx={{ mb: 2, p: { xs: 2, sm: 2.5 }, borderColor: `${COLORS.acento}55` }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 440px' }, gap: { xs: 1.75, lg: 2 } }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
+            <GavelOutlinedIcon sx={{ fontSize: 34, color: COLORS.acento, flexShrink: 0 }} />
+            <Box>
+              <Typography variant="h4">Puntos de disciplina</Typography>
+              <Typography variant="body2" color="text.secondary">Consulta el efecto de cada punto antes de registrarlo para un equipo.</Typography>
+            </Box>
+          </Stack>
+          <Box sx={{
+            display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', alignItems: 'stretch',
+            borderLeft: { lg: `1px solid ${COLORS.border}` }, borderTop: { xs: `1px solid ${COLORS.border}`, lg: 0 },
+            pt: { xs: 1.25, lg: 0 },
+          }}>
+            {(Object.keys(TIPOS) as TipoPunto[]).map((t, indice) => {
+            const Icono = ICONO_TIPO[t];
+            return (
+              <Stack key={t} alignItems="center" justifyContent="center" spacing={.3} sx={{ px: .5, borderLeft: indice > 0 ? `1px solid ${COLORS.border}` : 0 }}>
+                <Icono sx={{ fontSize: 24, color: TIPOS[t].color }} />
+                <Typography variant="body2" fontWeight={700} lineHeight={1.1}>{TIPOS[t].label}</Typography>
+              </Stack>
+            );
+          })}
+          </Box>
+        </Box>
+      </Paper>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(300px, 0.8fr) minmax(0, 1.6fr)' }, gap: 2, alignItems: 'start' }}>
+        <Paper sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Typography variant="h4" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}><GavelOutlinedIcon sx={{ fontSize: 28, color: COLORS.acento }} />Registrar punto</Typography>
         <Stack spacing={1.5}>
           <ToggleButtonGroup exclusive value={tipo} onChange={(_, v) => v && setTipo(v)} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
             {(Object.keys(TIPOS) as TipoPunto[]).map((t) => (
               (() => {
                 const Icono = ICONO_TIPO[t];
+                const seleccionado = tipo === t;
                 return (
-                  <ToggleButton key={t} value={t} sx={{
-                    flexDirection: 'column', border: `2px solid ${COLORS.border} !important`, borderRadius: '8px !important', py: 0.75,
-                    '&.Mui-selected': { borderColor: `${TIPOS[t].color} !important`, color: TIPOS[t].color, bgcolor: `${TIPOS[t].color}14` },
+                  <ToggleButton key={t} value={t} aria-label={`Punto ${TIPOS[t].label}`} sx={{
+                    flexDirection: 'column', justifyContent: 'center', gap: .25, minHeight: 84,
+                    border: `1px solid ${COLORS.border} !important`, borderRadius: '10px !important', py: 1,
+                    color: 'text.primary', bgcolor: 'rgba(255,255,255,.02)',
+                    transition: 'transform .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,.06)', borderColor: 'rgba(255,255,255,.32) !important', transform: 'translateY(-1px)' },
+                    '&.Mui-selected': {
+                      borderColor: `${TIPOS[t].color} !important`, color: 'text.primary',
+                      bgcolor: alfa(TIPOS[t].color, .22), boxShadow: `inset 0 0 0 1px ${alfa(TIPOS[t].color, .36)}, 0 6px 18px ${alfa(TIPOS[t].color, .14)}`,
+                    },
                   }}>
-                    <Icono fontSize="small" />
-                    <span style={{ fontWeight: 700, fontSize: 12 }}>{TIPOS[t].label}</span>
-                    <small>{fmtSeg(valorPunto(t, ev))}</small>
+                    <Icono sx={{ fontSize: 29, color: seleccionado ? TIPOS[t].color : 'text.secondary' }} />
+                    <span style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.1 }}>{TIPOS[t].label}</span>
+                    <small style={{ color: seleccionado ? TIPOS[t].color : COLORS.dim, fontWeight: 700, fontSize: 12 }}>{fmtSeg(valorPunto(t, ev))}</small>
                   </ToggleButton>
                 );
               })()
@@ -123,13 +157,12 @@ export default function Disciplina() {
             <MenuItem value="">Todo el equipo</MenuItem>
             {equipo?.participantes.map((p) => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
           </TextField>
-          <TextField label="Hora" type="time" value={hora} onChange={(e) => setHora(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
           <TextField label="Descripción (opcional)" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Ej: Llegaron tarde al culto" />
           <Button variant="contained" size="large" onClick={registrar}>Registrar punto</Button>
         </Stack>
       </Paper>
 
-      <Paper sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Paper sx={{ p: { xs: 2, sm: 2.5 } }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1} sx={{ mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
           <Typography variant="h4" sx={{ flex: 1 }}>Registro</Typography>
           <TextField select size="small" label="Filtrar prueba" value={filtro} onChange={(e) => setFiltro(e.target.value)} sx={{ width: { xs: '100%', sm: 260 } }}
@@ -156,15 +189,16 @@ export default function Disciplina() {
               <IconButton size="small" onClick={() => borrar(p.id)}><CloseIcon fontSize="small" /></IconButton>
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              {p.participanteId ? `Integrante: ${partMap.get(p.participanteId) ?? '—'}` : 'Todo el equipo'}
-              {p.hora ? ` · ${p.hora}` : ''}{p.descripcion ? ` · ${p.descripcion}` : ''}
+              {p.participanteId ? `Integrante señalado: ${partMap.get(p.participanteId) ?? '—'} · sanción para todo el equipo` : 'Todo el equipo'}
+              {p.descripcion ? ` · ${p.descripcion}` : ''}
             </Typography>
             <Typography variant="caption" sx={{ color: COLORS.blue, display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <PushPinOutlinedIcon sx={{ fontSize: 14 }} />{prMap.get(p.pruebaId)}
             </Typography>
           </Box>
         ))}
-      </Paper>
+        </Paper>
+      </Box>
     </Box>
   );
 }

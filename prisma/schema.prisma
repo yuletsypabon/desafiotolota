@@ -28,6 +28,12 @@ enum TipoPunto {
   POSITIVO
 }
 
+/// Las actividades Plus se registran y suman puntos; las de Tiempo descuentan hasta dos minutos.
+enum TipoActividadEspiritual {
+  PLUS
+  TIEMPO
+}
+
 /// Un evento (edición) del desafío. Puede haber varios por año.
 model Evento {
   id            String   @id @default(cuid())
@@ -50,6 +56,7 @@ model Evento {
 
   pruebas Prueba[]
   equipos Equipo[]
+  actividadesEspirituales ActividadEspiritual[]
 
   @@index([anio])
 }
@@ -72,6 +79,7 @@ model Prueba {
   puntos     PuntoDisciplina[]
   actividadesEspirituales ActividadEspiritual[]
   reservas   Reserva[]
+  correcciones ResultadoCorreccion[]
 
   @@index([eventoId])
 }
@@ -170,15 +178,22 @@ model PuntoDisciplina {
 }
 
 model ActividadEspiritual {
-  id        String   @id @default(cuid())
-  pruebaId  String
-  nombre    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String                    @id @default(cuid())
+  eventoId       String
+  /// Solo las actividades de Tiempo se vinculan a una prueba.
+  pruebaId       String?
+  nombre         String
+  tipo           TipoActividadEspiritual   @default(TIEMPO)
+  /// Puntaje que equivale a los dos minutos máximos de descuento de esta actividad.
+  puntosMaximos  Int                       @default(100)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
 
-  prueba   Prueba             @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+  evento   Evento             @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  prueba   Prueba?            @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
   puntajes PuntajeEspiritual[]
 
+  @@index([eventoId])
   @@index([pruebaId])
 }
 
@@ -195,6 +210,23 @@ model PuntajeEspiritual {
 
   @@unique([actividadId, equipoId])
   @@index([equipoId])
+}
+
+/// Bitácora inmutable de una corrección: el tiempo cambia de equipo, nunca se borra la evidencia.
+model ResultadoCorreccion {
+  id        String   @id @default(cuid())
+  pruebaId  String
+  equipoAId String
+  equipoBId String
+  motivo    String
+  antes     Json
+  despues   Json
+  rol       Rol
+  createdAt DateTime @default(now())
+
+  prueba Prueba @relation(fields: [pruebaId], references: [id], onDelete: Cascade)
+
+  @@index([pruebaId])
 }
 
 /// Contraseña de cada rol (hash scrypt). Solo en la base local: no se sincroniza a la nube.
