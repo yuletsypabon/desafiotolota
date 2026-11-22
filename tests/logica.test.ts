@@ -310,21 +310,12 @@ test('asignación automática: llena las pistas libres en orden', () => {
   assert.deepEqual(asignacionesLibres([{ equipoId: 'a', state: 'rdy' }], ['b']), []);
 });
 
-test('encoder: cada botón hace lo mismo que en la versión HTML', () => {
-  // Botón 1: la pista seleccionada; sin selección, la pista 1
-  assert.deepEqual(accionDeBoton(0, 3, 2), { tipo: 'accion', pista: 2 });
-  assert.deepEqual(accionDeBoton(0, 3, null), { tipo: 'accion', pista: 0 });
-  // Botones 2 y 3: pistas 2 y 3
-  assert.deepEqual(accionDeBoton(1, 3, null), { tipo: 'accion', pista: 1 });
-  assert.deepEqual(accionDeBoton(2, 3, null), { tipo: 'accion', pista: 2 });
-  // Botón 4 solo si hay 4 pistas
-  assert.equal(accionDeBoton(3, 3, null), null);
-  assert.deepEqual(accionDeBoton(3, 4, null), { tipo: 'accion', pista: 3 });
-  // Botones 5–7: detenido en pistas 1–3
-  assert.deepEqual(accionDeBoton(4, 3, null), { tipo: 'detenido', pista: 0 });
-  assert.deepEqual(accionDeBoton(6, 3, null), { tipo: 'detenido', pista: 2 });
-  assert.equal(accionDeBoton(5, 1, null), null);
-  assert.equal(accionDeBoton(9, 3, null), null);
+test('pulsador rojo: solo altera una pista seleccionada explícitamente', () => {
+  assert.deepEqual(accionDeBoton(0, 2), { tipo: 'accion', pista: 2 });
+  assert.equal(accionDeBoton(0, null), null);
+  // Los otros botones físicos se ignoran; los controles de tarjeta son manuales.
+  assert.equal(accionDeBoton(1, 1), null);
+  assert.equal(accionDeBoton(6, 2), null);
 });
 
 test('rutas: el sitio es público y el sistema privado', () => {
@@ -360,7 +351,7 @@ test('evento: cuenta regresiva y ediciones', () => {
 });
 
 
-test('reloj: vueltas de 30 min', () => {
+test('reloj: vueltas de 15 min', () => {
   // 15 min = media vuelta; 45 min = media vuelta de la segunda
   assert.equal(progresoVuelta(VUELTA_MS / 2), 0.5);
   assert.equal(progresoVuelta(VUELTA_MS * 1.5), 0.5);

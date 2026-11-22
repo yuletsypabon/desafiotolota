@@ -1,7 +1,7 @@
-// Vueltas del reloj del cronómetro: la barra de cada pista se llena cada 30 minutos.
+// Vueltas del reloj del cronómetro: la barra de cada pista se llena cada 15 minutos.
 
-/** Una vuelta completa de la barra (30 minutos). */
-export const VUELTA_MS = 30 * 60 * 1000;
+/** Una vuelta completa de la barra (15 minutos). */
+export const VUELTA_MS = 15 * 60 * 1000;
 
 /** Fracción de la vuelta actual (0 a 1) para un tiempo en ms. */
 export const progresoVuelta = (ms: number) => (Math.max(0, ms) % VUELTA_MS) / VUELTA_MS;

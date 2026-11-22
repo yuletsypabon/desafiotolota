@@ -1,20 +1,17 @@
 // Botón arcade / encoder USB ("Zero Delay"): Windows lo ve como un mando (gamepad), no como teclado.
 import { useEffect, useRef } from 'react';
 
-export type AccionBoton = { tipo: 'accion' | 'detenido'; pista: number } | null;
+export type AccionBoton = { tipo: 'accion'; pista: number } | null;
 
 /**
- * Qué hace cada botón del encoder (igual que la versión HTML). Pistas desde 0.
- * - Botón 1 (índice 0): la pista seleccionada (clic en la pista); si no hay, la pista 1.
- * - Botones 2–4 (índices 1–3): salida/llegada en las pistas 2–4.
- * - Botones 5–7 (índices 4–6): marcar detenido en las pistas 1–3.
+ * El pulsador rojo (botón 1 / índice 0) solo acciona la pista seleccionada.
+ * No hay una pista predeterminada deliberadamente: una pulsación sin selección no puede
+ * iniciar, detener ni finalizar un tiempo por error. Los demás controles son manuales
+ * dentro de la tarjeta de cada pista.
  */
-export function accionDeBoton(boton: number, numPistas: number, seleccionada: number | null): AccionBoton {
-  if (boton === 0) return { tipo: 'accion', pista: seleccionada ?? 0 };
-  if (boton < Math.min(numPistas, 4)) return { tipo: 'accion', pista: boton };
-  const det = boton - 4;
-  if (det >= 0 && det < Math.min(numPistas, 3)) return { tipo: 'detenido', pista: det };
-  return null;
+export function accionDeBoton(boton: number, seleccionada: number | null): AccionBoton {
+  if (boton !== 0 || seleccionada === null) return null;
+  return { tipo: 'accion', pista: seleccionada };
 }
 
 /**
