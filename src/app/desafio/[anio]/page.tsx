@@ -5,13 +5,14 @@ import PortadaEdicion from '@/components/sitio/edicion/PortadaEdicion';
 import EquiposEdicion from '@/components/sitio/edicion/EquiposEdicion';
 import PruebasEdicion from '@/components/sitio/edicion/PruebasEdicion';
 import CronogramaEdicion from '@/components/sitio/edicion/CronogramaEdicion';
-import ResultadosEnVivo from '@/components/sitio/edicion/ResultadosEnVivo';
-import { datosEdicion } from '@/lib/landing/edicion';
+import ResultadosPublicos from '@/components/sitio/edicion/ResultadosPublicos';
+import { datosEdicion, resultadosPublicosDisponibles } from '@/lib/landing/edicion';
 import { EVENTO } from '@/lib/evento';
 import s from '@/components/sitio/pagina.module.css';
+import estilosEdicion from '@/components/sitio/edicion/edicion.module.css';
 
-// Equipos y pruebas se leen de la base y se regeneran cada 5 minutos; los resultados se actualizan en vivo aparte
-export const revalidate = 300;
+// Refresca la disponibilidad pública poco después de la fecha de cierre del evento.
+export const revalidate = 60;
 
 type Props = { params: Promise<{ anio: string }> };
 
@@ -27,13 +28,14 @@ export default async function PaginaEdicion({ params }: Props) {
   const edicion = anio ? await datosEdicion(anio) : null;
   if (!edicion) notFound();
   const esActual = edicion.anio === EVENTO.inicio.getFullYear();
+  const mostrarResultados = await resultadosPublicosDisponibles(edicion.eventoId);
 
   return (
     <PaginaSitio
       etiqueta={`${edicion.anio} · Desafío ${edicion.codigo}`}
       titulo={edicion.nombre}
       intro={esActual
-        ? 'Todo sobre la edición de este año: el cronograma, los equipos que competirán, sus integrantes, las pruebas y los resultados en vivo.'
+        ? 'Todo sobre la edición de este año: el cronograma, los equipos, sus integrantes y las pruebas. Los resultados se publicarán al finalizar el evento.'
         : `La edición ${edicion.anio}: sus equipos, sus integrantes, las pruebas y los resultados.`}
     >
       {esActual && <PortadaEdicion logo={edicion.logo} nombre={edicion.nombre} equipos={edicion.equipos.length} />}
@@ -56,8 +58,14 @@ export default async function PaginaEdicion({ params }: Props) {
 
       <section className={s.bloque} aria-labelledby="resultados" style={{ paddingBottom: 80 }}>
         <h2 id="resultados">Resultados</h2>
-        <p>Tabla general y resultados de cada prueba, con el tiempo final de cada equipo.</p>
-        <ResultadosEnVivo eventoId={edicion.eventoId} logos={Object.fromEntries(edicion.equipos.map((e) => [e.id, e.logo]))} />
+        {mostrarResultados ? (
+          <>
+            <p>Tabla general y resultados de cada prueba, con el tiempo final de cada equipo.</p>
+            <ResultadosPublicos eventoId={edicion.eventoId} logos={Object.fromEntries(edicion.equipos.map((e) => [e.id, e.logo]))} />
+          </>
+        ) : (
+          <p className={estilosEdicion.vacio}>Los resultados se publicarán cuando finalice el evento. La clasificación en vivo está disponible dentro del sistema de cronometraje.</p>
+        )}
       </section>
     </PaginaSitio>
   );

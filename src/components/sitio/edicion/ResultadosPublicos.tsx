@@ -11,16 +11,16 @@ const leer = (url: string) => fetch(url, { cache: 'no-store' }).then((r) => {
 });
 
 /**
- * Tabla general y resultados por prueba, que se actualizan solos cada 10 s mientras se cronometra.
+ * Resultados finales públicos: tabla general y resultados por prueba.
  * Los tres primeros van en un podio con su logo.
  */
-export default function ResultadosEnVivo({ eventoId, logos }: { eventoId: string; logos: Record<string, string | null> }) {
-  const { data, error } = useSWR(`/api/publico/resultados/${eventoId}`, leer, { refreshInterval: 10_000 });
+export default function ResultadosPublicos({ eventoId, logos }: { eventoId: string; logos: Record<string, string | null> }) {
+  const { data, error } = useSWR(`/api/publico/resultados/${eventoId}`, leer);
   const [vista, setVista] = useState('general');
 
   if (error && !data) return <p className={s.vacio}>No se pudieron cargar los resultados. Se volverá a intentar en unos segundos.</p>;
   if (!data) return <p className={s.vacio}>Cargando resultados…</p>;
-  if (!data.general.length) return <p className={s.vacio}>Los resultados aparecerán aquí en cuanto los equipos empiecen a competir.</p>;
+  if (!data.general.length) return <p className={s.vacio}>Aún no hay resultados registrados para esta edición.</p>;
 
   const prueba = data.pruebas.find((p) => p.id === vista);
   const filas = prueba
@@ -60,7 +60,6 @@ export default function ResultadosEnVivo({ eventoId, logos }: { eventoId: string
           </tbody>
         </table>
       )}
-      <p className={s.nota}>Se actualiza solo cada 10 segundos.</p>
     </div>
   );
 }
