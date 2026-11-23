@@ -18,7 +18,6 @@ export default function Cierre() {
         <Foto id="cierre" />
         <div className={s.veloOscuro} aria-hidden="true" />
         <div className={`${s.cierreTexto} ${s.reveal}`}>
-          <p className={s.etiqueta}>07 / Tu historia empieza aquí</p>
           <h2 id="cierre-titulo" className={s.titulo}>El siguiente<br />paso lo das tú.</h2>
           <p className={s.parrafo}>No esperes a no tener miedo.<br />Atrévete a avanzar con fe.</p>
           <p className={`${s.etiqueta} ${s.cierreEdicion}`}>Desafío {EVENTO.edicion} · {EVENTO.fechas}</p>

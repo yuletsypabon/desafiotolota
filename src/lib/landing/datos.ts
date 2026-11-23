@@ -30,7 +30,11 @@ export async function datosPortada() {
     const edicion: EdicionPortada = ev
       ? { anio: ev.anio, codigo: codigoEdicion(ev.anio, anios.map((a) => a.anio)), nombre: ev.nombre.trim() || null }
       : EDICION_PROXIMA;
-    return { edicion, nombreX2: categoria('X2', ev?.nombreX2), nombreX4: categoria('X4', ev?.nombreX4) };
+    return {
+      edicion,
+      nombreX2: categoria('X2', ev?.nombreX2),
+      nombreX4: categoria('X4', ev?.nombreX4),
+    };
   } catch (e) {
     console.error('Portada: no se pudieron leer los datos del evento', e);
     return { edicion: EDICION_PROXIMA as EdicionPortada, nombreX2: null, nombreX4: null };

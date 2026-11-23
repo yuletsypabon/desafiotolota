@@ -57,17 +57,17 @@
 /* ---------- 01 Hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;
   column-gap:clamp(28px,4vw,72px);padding:130px var(--margen) 42px;isolation:isolate}
-.hero>.foto{z-index:-2}
+.hero>.foto{z-index:-2;inset:0;width:auto;transform:none}
 .hero>.foto .fotoImg{object-position:center 62%}
 .velo{position:absolute;inset:0;z-index:-1;background:
   linear-gradient(90deg,rgba(5,5,5,.82) 0%,rgba(5,5,5,.62) 42%,rgba(5,5,5,.42) 100%),
   linear-gradient(0deg,var(--fondo) 0%,rgba(5,5,5,.3) 45%,rgba(5,5,5,.12) 82%)}
 .heroContenido{position:relative;z-index:1;width:100%;max-width:760px;min-width:0}
-.chipEdicion{display:inline-flex;align-items:center;gap:12px;margin:0;padding:6px 18px 6px 6px;border:1px solid var(--vidrio-borde);
-  border-radius:999px;background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);font-size:14px;font-weight:700}
-.chipEdicion b{padding:5px 14px;border-radius:999px;background:var(--primario);color:#0a0a0a}
+.chipEdicion{display:inline-flex;align-items:center;gap:14px;margin:0;padding:7px 20px 7px 7px;border:1px solid var(--vidrio-borde);
+  border-radius:999px;background:var(--vidrio);-webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);font-size:16px;font-weight:700}
+.chipEdicion b{padding:6px 16px;border-radius:999px;background:var(--primario);color:#0a0a0a;font-size:15px}
 .heroTitulo{margin:22px 0 26px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(64px,10.5vw,160px);line-height:.9;letter-spacing:.005em}
+  font-size:clamp(74px,12.5vw,190px);line-height:.88;letter-spacing:.005em}
 .heroTexto{margin:0 0 28px;max-width:600px;font-size:clamp(16px,1.5vw,21px);line-height:1.5}
 .datos{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 32px}
 .datos div{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center;flex:1 1 280px;min-width:0;padding:0}
@@ -153,8 +153,10 @@
 
 /* 03 Retos */
 .retos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-.reto{position:relative;min-height:clamp(420px,62vh,560px);display:flex;flex-direction:column;justify-content:flex-end;
-  padding:14px;overflow:hidden;isolation:isolate;border-radius:var(--vidrio-radio);background:#0b0b0a}
+.reto{position:relative;min-height:clamp(620px,85vh,820px);display:flex;flex-direction:column;justify-content:flex-end;
+  padding:14px;overflow:hidden;isolation:isolate;border:1px solid transparent;border-bottom-color:rgba(255,204,0,.48);border-radius:var(--vidrio-radio);background:#0b0b0a}
+.reto::before{content:"";position:absolute;z-index:1;right:12%;bottom:0;left:12%;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--destacado) 18%,var(--destacado) 82%,transparent);box-shadow:0 0 14px rgba(255,204,0,.42)}
 /* La foto ocupa la parte de arriba de la tarjeta; abajo queda el texto sobre su continuación difuminada */
 .reto>.foto{z-index:-2;bottom:26%;transition:transform .8s cubic-bezier(.2,.8,.15,1)}
 /* El borde de abajo de la foto se desenfoca y se funde con el fondo oscuro, sin línea: ahí va el texto */
@@ -172,7 +174,7 @@
 
 /* 04 Espiritual */
 .panoramica{padding-left:0;padding-right:0}
-.panoramicaFoto{position:relative;min-height:clamp(520px,80vh,720px);display:flex;align-items:center;isolation:isolate}
+.panoramicaFoto{position:relative;width:100%;margin-left:0;min-height:clamp(520px,80vh,720px);display:flex;align-items:center;isolation:isolate}
 .panoramicaFoto>.foto{z-index:-2}
 .veloLateral{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(5,5,5,.9) 0%,rgba(5,5,5,.6) 40%,transparent 75%)}
 .panoramicaTexto{margin:60px var(--margen);padding:clamp(28px,4vw,52px);max-width:720px}
@@ -196,18 +198,22 @@
 }
 
 /* Pilares */
-.escena{position:relative;padding:clamp(40px,6vw,80px) clamp(18px,4vw,64px);overflow:hidden;isolation:isolate;border-radius:calc(var(--vidrio-radio) + 8px)}
+.escena{position:relative;box-sizing:border-box;width:calc(100% + var(--margen) + var(--margen));margin-left:calc(0px - var(--margen));padding:clamp(40px,6vw,80px) var(--margen);overflow:hidden;isolation:isolate}
 .escena>.foto{z-index:-2}
 .tituloPanel{margin:0 0 40px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(32px,3.2vw,46px);line-height:1}
 .pilares{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.pilar{padding:26px 28px 30px}
+.pilaresEscena{box-sizing:border-box;width:100vw;margin-left:calc(50% - 50vw);min-height:clamp(560px,70vh,760px);display:flex;flex-direction:column;justify-content:center}
+.pilaresEscena>.tituloPanel{margin-bottom:clamp(36px,5vw,64px);font-size:clamp(42px,4.3vw,64px)}
+.pilaresEscena .pilares{width:100%;gap:24px}
+.pilar{min-height:300px;padding:34px 36px 38px;display:flex;flex-direction:column}
 /* El número acompaña (pequeño y solo en contorno); el que manda es el título */
-.pilarNumero{display:block;margin-bottom:14px;font-family:var(--font-display);font-size:clamp(30px,2.6vw,40px);line-height:1;
+.pilarNumero{display:block;margin-bottom:18px;font-family:var(--font-display);font-size:clamp(38px,3vw,48px);line-height:1;
   color:transparent;-webkit-text-stroke:1px rgba(244,243,236,.4)}
-.pilares .etiqueta{font-size:clamp(15px,1.2vw,18px);font-weight:700;letter-spacing:.12em}
+.pilares .etiqueta{font-size:clamp(16px,1.35vw,20px);font-weight:700;letter-spacing:.12em}
 .pilares h3{margin:10px 0 14px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(28px,2.6vw,40px);line-height:1.02;color:var(--texto)}
-.pilares p:not(.etiqueta){margin:0 0 20px;font-size:15px;line-height:1.5;color:rgba(244,243,236,.82)}
+  font-size:clamp(32px,3vw,46px);line-height:1.02;color:var(--texto)}
+.pilares p:not(.etiqueta){margin:0 0 20px;font-size:17px;line-height:1.6;color:rgba(244,243,236,.9)}
+.pilares .enlaceFlecha{margin-top:auto;padding-top:18px;font-size:13px}
 
 /* 06 Preguntas */
 .acordeon{display:grid;gap:12px}
@@ -224,8 +230,8 @@
 .acordeon details p{margin:-4px 0 24px;max-width:520px;font-size:16px;line-height:1.55;color:var(--textoSuave)}
 
 /* 07 Cierre */
-.cierre{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,6vw,100px);
-  padding:clamp(32px,6vw,80px);isolation:isolate;overflow:hidden;border-radius:calc(var(--vidrio-radio) + 8px)}
+.cierre{position:relative;box-sizing:border-box;width:calc(100% + var(--margen) + var(--margen));margin-left:calc(0px - var(--margen));display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,6vw,100px);
+  padding:clamp(32px,6vw,80px) var(--margen);isolation:isolate;overflow:hidden}
 .cierre>.foto{z-index:-2}
 .veloOscuro{position:absolute;inset:0;z-index:-1;background:rgba(5,5,5,.72)}
 /* ¿Qué es?: más oscuro detrás del texto (izquierda) que detrás de las tarjetas, para que se lea sobre cualquier foto */
@@ -256,8 +262,12 @@
   .modalidad{grid-template-columns:64px minmax(0,1fr);padding:22px}
   .retos{grid-template-columns:minmax(0,1fr)}
   .tituloLinea{white-space:normal}
-  .reto{min-height:400px}
+  .reto{min-height:clamp(560px,80svh,720px)}
   .pilares{grid-template-columns:minmax(0,1fr)}
+  .pilaresEscena{min-height:0;gap:0}
+  .pilaresEscena>.tituloPanel{margin-bottom:30px}
+  .pilaresEscena .pilares{gap:18px}
+  .pilar{min-height:260px;padding:28px}
   .cifras{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cifras div:last-child{grid-column:1 / -1}
   .cifras div{min-height:112px;padding:10px 4px}
