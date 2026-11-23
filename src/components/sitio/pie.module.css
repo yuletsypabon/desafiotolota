@@ -14,6 +14,7 @@
 .boton{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:999px;
   background:var(--destacado);color:#111;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
   transition:background .2s,transform .2s}
+.pie a.boton{color:#111}
 .boton:hover{transform:translateY(-2px);background:#ffd633}
 .titulo{margin:6px 0 20px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
 .lista{list-style:none;margin:0;padding:0;display:grid;gap:13px}
@@ -24,9 +25,9 @@
 .legal span:first-child{font-weight:700;color:var(--texto)}
 .legal span:last-child{color:var(--textoSuave)}
 .redes{display:flex;align-items:center;justify-content:center;gap:12px}
-.red{display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(244,243,236,.64);border-radius:50%;
+.red{display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(255,204,0,.72);border-radius:50%;
   background:rgba(255,255,255,.025);color:var(--texto);transition:color .2s,border-color .2s,background .2s,transform .2s}
-.red:hover{transform:translateY(-2px);border-color:var(--destacado);background:rgba(255,204,0,.1);color:var(--destacado)}
+.red:hover{transform:translateY(-2px);border-color:var(--destacado);background:rgba(255,204,0,.1);color:var(--destacado);box-shadow:0 0 16px rgba(255,204,0,.2)}
 .ubicacion{display:flex;justify-self:end;align-items:center;gap:9px;color:var(--texto);text-align:left;text-decoration:none;font-size:12px;font-weight:700}
 .ubicacion svg{flex:none;color:var(--destacado);font-size:20px}
 .ubicacion small{display:block;margin-top:3px;color:var(--textoSuave);font-size:11px;font-weight:400}
