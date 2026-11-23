@@ -182,16 +182,18 @@
 .versiculo cite{display:block;margin-top:14px;font-style:normal;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 
 /* 05 Recorrido */
-.recorridoComposicion{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);align-items:center;gap:clamp(28px,5vw,80px)}
-.recorridoCabecera{grid-column:2;grid-row:1}
-.recorridoTexto{width:min(100%,760px);margin-left:auto;text-align:center}
-.recorridoTexto .titulo{text-align:center}
-.recorridoTexto .parrafo{max-width:600px;margin:0 auto;text-align:center;font-size:clamp(18px,1.6vw,21px);line-height:1.55}
-.recorridoCarrusel{grid-column:1;grid-row:1;width:100%;margin:0;position:relative;left:clamp(90px,8vw,140px)}
-.recorridoCabecera .nota{display:grid;justify-items:center;gap:9px;width:min(100%,560px);margin:24px auto 0;padding-top:16px;border-top:1px solid rgba(244,243,236,.18);text-align:center}
-.recorridoCabecera .nota .etiqueta{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.1em}
-.recorridoCabecera .nota p:not(.etiqueta){margin:0;max-width:460px;font-size:15.5px;line-height:1.55;color:var(--texto)}
-.recorridoCabecera .nota .enlaceFlecha{margin-top:2px;padding-bottom:3px;border-bottom:1px solid rgba(255,204,0,.55);font-size:13px;color:var(--texto)}
+.recorridoComposicion{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:start;column-gap:clamp(18px,2vw,36px);row-gap:clamp(28px,4vw,54px)}
+.recorridoTitulo{grid-column:1 / -1;grid-row:1;margin:0;text-align:center;white-space:nowrap}
+.recorridoCabecera{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-self:center;justify-content:center;align-items:center}
+.recorridoCabecera [role="tablist"]{margin:0 auto}
+.recorridoCabecera [role="tablist"] button{text-align:center}
+.recorridoCarrusel{grid-column:1;grid-row:2;width:100%;min-width:0;margin:0;position:relative;left:0;overflow:visible}
+.recorridoEnlace{margin-top:18px;padding-bottom:4px;border-bottom:1px solid rgba(255,204,0,.55);font-size:14px;color:var(--texto)}
+
+@media (min-width:901px){
+  .recorridoCabecera [role="tablist"]{width:fit-content;max-width:none;gap:6px;padding:6px}
+  .recorridoCabecera [role="tablist"] button{width:128px;min-width:0;min-height:96px;padding:8px 4px;white-space:nowrap}
+}
 
 /* Pilares */
 .escena{position:relative;padding:clamp(40px,6vw,80px) clamp(18px,4vw,64px);overflow:hidden;isolation:isolate;border-radius:calc(var(--vidrio-radio) + 8px)}
@@ -260,8 +262,9 @@
   .cifras div:last-child{grid-column:1 / -1}
   .cifras div{min-height:112px;padding:10px 4px}
   .recorridoComposicion{grid-template-columns:minmax(0,1fr);gap:38px}
-  .recorridoCabecera{grid-column:1;grid-row:1}
-  .recorridoCarrusel{grid-column:1;grid-row:2;width:100%;left:0}
+  .recorridoTitulo{grid-column:1;grid-row:1;text-align:center;white-space:normal}
+  .recorridoCabecera{grid-column:1;grid-row:2;justify-content:center}
+  .recorridoCarrusel{grid-column:1;grid-row:3;width:100%;left:0}
   .velo{background:linear-gradient(0deg,rgba(5,5,5,.95) 0%,rgba(5,5,5,.64) 60%,rgba(5,5,5,.5) 100%)}
   .veloLateral{background:rgba(5,5,5,.72)}
   .veloQuees{background:rgba(5,5,5,.82)}

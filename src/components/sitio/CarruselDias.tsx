@@ -5,6 +5,9 @@ import { EVENTO } from '@/lib/evento';
 import s from './carrusel.module.css';
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DIAS_COMPLETOS: Record<string, string> = {
+  Mar: 'Martes', Mié: 'Miércoles', Jue: 'Jueves', Vie: 'Viernes', Sáb: 'Sábado', Dom: 'Domingo',
+};
 
 export function SelectorDias({
   dias, activo, onSeleccion, enIntro = false,
@@ -22,10 +25,11 @@ export function SelectorDias({
           type="button"
           role="tab"
           aria-selected={i === activo}
-          aria-label={`${d.dia} ${d.num}`}
+          aria-label={`${DIAS_COMPLETOS[d.dia] ?? d.dia} ${d.num}`}
           onClick={() => onSeleccion(i)}
         >
-          <span>{d.dia}</span>
+          <span className={s.diaAbreviado} aria-hidden={enIntro}>{d.dia}</span>
+          {enIntro && <span className={s.diaCompleto} aria-hidden="true">{DIAS_COMPLETOS[d.dia] ?? d.dia}</span>}
           <strong>{d.num}</strong>
         </button>
       ))}
@@ -87,13 +91,15 @@ export default function CarruselDias({
               ? distanciaDirecta + dias.length
               : distanciaDirecta;
           const lejos = Math.abs(desfase);
-          const actividades = completo ? d.actividades : d.actividades.filter((x) => x.destacada);
+          const actividades = completo && desfase === 0
+            ? d.actividades
+            : d.actividades.filter((x) => x.destacada);
           return (
             <article
               key={d.num}
               className={s.carta}
               data-activa={desfase === 0}
-              data-oculta={lejos > (completo ? 1 : 2)}
+              data-oculta={lejos > 2}
               style={{
                 '--desfase': desfase,
                 '--lejos': Math.min(lejos, 3),
