@@ -1,6 +1,6 @@
 import 'server-only';
 import { prisma } from '@/lib/prisma';
-import { codigoEdicion } from '@/lib/evento';
+import { codigoEdicion, EVENTO } from '@/lib/evento';
 import { nombrePropio, nombreYApellido } from '@/lib/format';
 import { getClasificacion } from '@/lib/data';
 import type { EdicionPublica, ResultadosPublicos } from './tiposEdicion';
@@ -65,4 +65,15 @@ export async function resultadosPublicos(eventoId: string): Promise<ResultadosPu
       filas: p.filas.map((f) => ({ pos: f.pos, equipoId: f.equipoId, nombre: f.nombre, finalMs: f.finalMs })),
     })),
   };
+}
+
+/** Solo publica la edición actual cuando ya pasó su cierre; las ediciones anteriores quedan como archivo. */
+export async function resultadosPublicosDisponibles(eventoId: string): Promise<boolean> {
+  const evento = await prisma.evento.findUnique({ where: { id: eventoId }, select: { anio: true } });
+  if (!evento) return false;
+
+  const anioActual = EVENTO.inicio.getFullYear();
+  if (evento.anio < anioActual) return true;
+  if (evento.anio > anioActual) return false;
+  return Date.now() >= EVENTO.fin.getTime();
 }
