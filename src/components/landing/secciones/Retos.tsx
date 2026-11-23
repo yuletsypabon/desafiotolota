@@ -10,7 +10,6 @@ export default function Retos({ nombreX2, nombreX4 }: { nombreX2: string | null;
     <section id="retos" className={s.seccion} aria-labelledby="retos-titulo">
       <div className={`${s.cabeceraFila} ${s.reveal}`}>
         <div>
-          <p className={s.etiqueta}>03 / Los retos</p>
           {/* En una sola línea en pantallas anchas; en celular se parte donde haga falta */}
           <h2 id="retos-titulo" className={`${s.titulo} ${s.tituloLinea}`}>Sal de tu zona. Entra en el reto.</h2>
         </div>

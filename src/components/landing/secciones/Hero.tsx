@@ -30,8 +30,8 @@ export default function Hero({ edicion }: { edicion: EdicionPortada }) {
           <em>Tolotá.</em>
         </h1>
         <p className={s.heroTexto}>
-          Pista de obstáculos, conocimiento bíblico y campamento juvenil adventista. Iglesias que compiten, se esfuerzan y
-          crecen juntas.
+          Pon a prueba tu destreza en la pista de obstáculos y tus conocimientos bíblicos. Vive un campamento juvenil adventista
+          para superar retos en equipo y crecer juntos en la fe.
         </p>
         <dl className={s.datos}>
           <div>

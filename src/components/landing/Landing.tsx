@@ -27,7 +27,7 @@ export interface DatosLanding {
 
 /**
  * Portada: secciones numeradas con fotos de fondo (diseño de Figma).
- * 01 Hero · Manifiesto · 02 Propósito · ¿Qué es? · 03 Retos · 04 Espiritual · 05 Recorrido · Pilares · 06 Preguntas · 07 Cierre.
+ * Hero · Manifiesto · Propósito · Pilares · ¿Qué es? · Retos · Espiritual · Recorrido · Preguntas · Cierre.
  */
 export default function Landing({ edicion, nombreX2, nombreX4 }: DatosLanding) {
   const raiz = useRef<HTMLDivElement>(null);
@@ -40,11 +40,11 @@ export default function Landing({ edicion, nombreX2, nombreX4 }: DatosLanding) {
         <Hero edicion={edicion} />
         <Manifiesto />
         <Proposito />
+        <Pilares />
         <QueEs />
         <Retos nombreX2={nombreX2} nombreX4={nombreX4} />
         <Espiritual />
         <Recorrido />
-        <Pilares />
         <Preguntas />
         <Cierre />
       </main>

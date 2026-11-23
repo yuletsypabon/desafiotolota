@@ -18,7 +18,6 @@ export default function Proposito() {
     <section id="experiencia" className={s.seccion} aria-labelledby="proposito-titulo">
       <div className={s.dosColumnas}>
         <div className={s.reveal}>
-          <p className={s.etiqueta}>02 / El propósito</p>
           <h2 id="proposito-titulo" className={s.titulo}>
             No es solo<br />llegar más lejos.<br />
             <em>Es descubrir<br />quién va contigo.</em>

@@ -7,7 +7,6 @@ export default function Preguntas() {
     <section className={s.seccion} aria-labelledby="preguntas-titulo">
       <div className={s.dosColumnas}>
         <div className={s.reveal}>
-          <p className={s.etiqueta}>06 / Antes de dar el paso</p>
           <h2 id="preguntas-titulo" className={s.titulo}>Las dudas,<br />fuera.</h2>
         </div>
         <div className={`${s.acordeon} ${s.reveal} ${s.d1}`}>

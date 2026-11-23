@@ -17,7 +17,6 @@ export default function Espiritual() {
         <Foto id="fogata" />
         <div className={s.veloLateral} aria-hidden="true" />
         <div className={`${s.vidrio} ${s.panoramicaTexto} ${s.reveal}`}>
-          <p className={s.etiqueta}>04 / Algo más grande que tú</p>
           <h2 id="espiritual-titulo" className={s.titulo}>Fuertes por fuera.<br />Firmes por dentro.</h2>
           <p className={s.parrafo}>
             Más allá del esfuerzo hay un propósito. Devocionales, alabanza y un sábado de reposo con una comunidad que te

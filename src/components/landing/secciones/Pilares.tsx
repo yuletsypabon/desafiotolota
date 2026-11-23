@@ -7,7 +7,7 @@ import s from '../Landing.module.css';
 export default function Pilares() {
   return (
     <section className={s.seccion} aria-labelledby="pilares-titulo">
-      <div className={s.escena}>
+      <div className={`${s.escena} ${s.pilaresEscena}`}>
         <Foto id="pilares" />
         <div className={s.veloOscuro} aria-hidden="true" />
         <h2 id="pilares-titulo" className={`${s.tituloPanel} ${s.reveal}`}>Mucho más que un reto</h2>
