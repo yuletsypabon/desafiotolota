@@ -33,7 +33,7 @@ export default function FilaEquipo({ equipo: e, abierto, onAlternar }: Props) {
           }
         }}
         sx={{
-          position: 'relative', cursor: 'pointer', mt: { xs: 3.5, sm: 6.5, md: 10.5 }, height: { xs: 116, sm: 140, md: 164 },
+          position: 'relative', cursor: 'pointer', mt: { xs: 2.5, sm: 4, md: 6 }, height: { xs: 102, sm: 116, md: 128 },
           display: 'grid', alignItems: 'center', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) auto' }, columnGap: 2,
           px: { xs: 2, md: 4 }, borderRadius: '14px',
           outline: `1px solid ${abierto ? alfa(COLORS.acento, .7) : COLORS.border}`,
@@ -62,8 +62,8 @@ export default function FilaEquipo({ equipo: e, abierto, onAlternar }: Props) {
           className="logoEquipo"
           aria-hidden="true"
           sx={{
-            position: 'absolute', zIndex: 1, bottom: { xs: 12, md: 22 }, right: { xs: 4, sm: 'auto' }, left: { sm: '58%' }, transform: { sm: 'translateX(-50%)' },
-            height: { xs: 116, sm: 170, md: 224 }, width: { xs: 116, sm: 170, md: 224 }, display: 'grid', placeItems: 'end center',
+            position: 'absolute', zIndex: 1, bottom: { xs: 8, md: 12 }, right: { xs: 4, sm: 'auto' }, left: { sm: '52%' }, transform: { sm: 'translateX(-50%)' },
+            height: { xs: 96, sm: 128, md: 156 }, width: { xs: 96, sm: 128, md: 156 }, display: 'grid', placeItems: 'end center',
             transition: 'transform .25s ease', pointerEvents: 'none',
           }}
         >
@@ -78,13 +78,13 @@ export default function FilaEquipo({ equipo: e, abierto, onAlternar }: Props) {
         </Box>
 
         {/* Izquierda: número y nombre del equipo */}
-        <Box sx={{ position: 'relative', zIndex: 2, minWidth: 0, pr: { xs: '120px', sm: '24%', md: 0 }, maxWidth: { md: '47%' } }}>
-          <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 20 }, lineHeight: 1.1, color: 'rgba(244,243,236,.85)' }}>
+        <Box sx={{ position: 'relative', zIndex: 2, minWidth: 0, pr: { xs: '104px', sm: '22%', md: 0 }, maxWidth: { md: '39%' } }}>
+          <Typography sx={{ fontWeight: 700, fontSize: { xs: 12, md: 15 }, lineHeight: 1.1, color: 'rgba(244,243,236,.85)' }}>
             Equipo {e.numero}
           </Typography>
           <Typography sx={{
             fontFamily: FONT_DISPLAY, textTransform: 'uppercase', lineHeight: 1.08, letterSpacing: '.01em', pt: '2px',
-            fontSize: { xs: 34, sm: 54, md: 'clamp(56px, 5.6vw, 84px)' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            fontSize: { xs: 30, sm: 40, md: 'clamp(38px, 3.1vw, 56px)' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             textShadow: '0 2px 12px rgba(0,0,0,.4)',
           }}>
             {e.nombre}
@@ -99,12 +99,12 @@ export default function FilaEquipo({ equipo: e, abierto, onAlternar }: Props) {
         {/* Derecha: capitán y acceso a los integrantes */}
         <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'right', display: { xs: 'none', sm: 'flex' }, minWidth: 0, maxWidth: { sm: 220, md: 320 }, flexDirection: 'column', alignItems: 'flex-end', gap: 0.75 }}>
           <Box sx={{ minWidth: 0, maxWidth: '100%' }}>
-            <Typography sx={{ fontSize: { sm: 13, md: 16 }, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(244,243,236,.75)' }}>
+            <Typography sx={{ fontSize: { sm: 11, md: 13 }, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(244,243,236,.75)' }}>
               Capitán
             </Typography>
             {/* Solo primer nombre y primer apellido, del mismo tamaño */}
             <Typography
-              sx={{ fontWeight: 700, fontSize: { sm: 22, md: 30 }, lineHeight: 1.1, textTransform: 'uppercase', color: e.capitan ? 'text.primary' : 'rgba(244,243,236,.7)' }}
+              sx={{ fontWeight: 700, fontSize: { sm: 18, md: 22 }, lineHeight: 1.1, textTransform: 'uppercase', color: e.capitan ? 'text.primary' : 'rgba(244,243,236,.7)' }}
               noWrap
             >
               {e.capitan ?? 'Sin asignar'}
