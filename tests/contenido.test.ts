@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { CRONOGRAMA, DOCUMENTOS, EQUIPOS_EDICION, GRUPOS, INSCRIPCION, MODALIDADES, PILARES, PREGUNTAS, RETOS } from '../src/lib/contenido';
 import { FOTOS } from '../src/lib/landing/fotos';
 import { EVENTO } from '../src/lib/evento';
@@ -23,7 +24,12 @@ test('contenido: cronograma de 6 días seguidos desde el inicio del evento', () 
 
 test('contenido: modalidades, documentos e inscripción', () => {
   assert.deepEqual(MODALIDADES.slice(0, 2).map((m) => m.codigo), ['X2', 'X4']);
-  assert.equal(DOCUMENTOS.length, 3);
+  assert.equal(DOCUMENTOS.length, 4);
+  for (const titulo of ['Cartilla de estudio', 'Reglamento del participante']) {
+    const documento = DOCUMENTOS.find((item) => item.titulo.startsWith(titulo));
+    assert.ok(documento && documento.url.startsWith('/documentos/'), titulo);
+    assert.ok(existsSync(new URL(`../public${documento.url}`, import.meta.url)), documento.url);
+  }
   assert.equal(INSCRIPCION.pasos.length, 4);
 });
 

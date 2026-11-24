@@ -2,6 +2,7 @@
 // Un solo lugar para editar la información del sitio. Los campos vacíos ('') se muestran como "pronto".
 
 import { EVENTO } from './evento';
+import { rutaEdicion } from './rutas';
 
 /** Modalidades de participación. */
 export const MODALIDADES = [
@@ -57,9 +58,12 @@ export const EQUIPOS_EDICION: { nombre: string; grupo: IdGrupo; iglesia?: string
   { nombre: 'Derbe', grupo: 'inquebrantable' },
 ];
 
+export const REGLAMENTO_PARTICIPANTE = '/documentos/reglamento-del-participante.pdf';
+
 /** Bases y reglamento. `url` = enlace al PDF (vacío = "disponible pronto"). */
 export const DOCUMENTOS = [
-  { titulo: 'Manual del participante', desc: 'Agenda, requisitos de llegada, menaje, normas de campamento y convivencia.', url: '' },
+  { titulo: 'Cartilla de estudio · Las 7 iglesias en la línea del tiempo', desc: `Tema ${EVENTO.tema.nombre} y estaciones espirituales de la edición ${EVENTO.inicio.getFullYear()}.`, url: '/documentos/cartilla-2026-7-iglesias.pdf' },
+  { titulo: 'Reglamento del participante', desc: 'Requisitos de participación, zona de camping, convivencia y reglas de las pruebas.', url: REGLAMENTO_PARTICIPANTE },
   { titulo: 'Manual de retos', desc: 'Reglamento de las pruebas físicas, obstáculos, penalizaciones y puntuación.', url: '' },
   { titulo: 'Guía de ruta', desc: 'Cómo llegar a la sede, horarios de recepción y recomendaciones de viaje.', url: '' },
 ];
@@ -69,7 +73,7 @@ export const INSCRIPCION = {
   url: '', // formulario oficial (Tally, Google Forms…); vacío = "formulario disponible pronto"
   cierre: '', // ej. "22 de noviembre de 2026"; vacío = no se muestra
   pasos: [
-    'Lee las bases y el manual del participante con tu equipo.',
+    'Lee las bases y el reglamento del participante con tu equipo.',
     'Elige la modalidad: Desafío X2 (parejas) o Desafío X4 (equipos de 4).',
     'El capitán llena el formulario con los datos de todos los integrantes.',
     'Espera la confirmación de la organización con los siguientes pasos.',
@@ -81,7 +85,7 @@ export const CONTACTO = {
   organizador: 'Diana Salazar',
   cargo: 'Coordinación general',
   whatsapp: '', // solo números con indicativo, ej. "573001234567"
-  email: '',
+  email: 'desafiotolota@gmail.com',
 };
 
 type Actividad = { hora: string; que: string; destacada?: boolean };
@@ -144,18 +148,24 @@ export const RETOS = [
     etiqueta: 'Pista de obstáculos',
     titulo: 'Rompe tus límites',
     texto: 'Circuitos rústicos de palos, lazos y cuerdas. Fuerza, equilibrio y decisión, prueba tras prueba.',
+    accion: 'Ver pruebas y reglamento',
+    href: `${rutaEdicion(EVENTO.inicio.getFullYear())}#pruebas`,
   },
   {
     foto: 'equipo',
     etiqueta: 'Desafío X2 · X4',
     titulo: 'Avanza en equipo',
     texto: 'En parejas o en equipos de 4, representando a tu iglesia. Nadie cruza la meta solo.',
+    accion: 'Conocer modalidades X2 y X4',
+    href: `${rutaEdicion(EVENTO.inicio.getFullYear())}#pruebas`,
   },
   {
     foto: 'camino',
     etiqueta: 'Desafío bíblico',
     titulo: 'Prepara la mente',
     texto: 'Las iglesias estudian la cartilla del año y compiten en conocimiento. Estos puntos también cuentan.',
+    accion: 'Ver recursos de estudio',
+    href: '/recursos#bases',
   },
 ] as const;
 
@@ -184,7 +194,7 @@ export const PILARES = [
   },
 ] as const;
 
-/** Preguntas frecuentes de la portada. */
+/** Preguntas generales de la portada. */
 export const PREGUNTAS = [
   {
     pregunta: '¿Necesito experiencia deportiva?',
@@ -195,12 +205,37 @@ export const PREGUNTAS = [
     respuesta: 'Cada equipo representa a una iglesia local. El capitán elige la modalidad (X2 o X4) y llena el formulario con los datos de todos los integrantes.',
   },
   {
-    pregunta: '¿Cuándo y dónde será el encuentro?',
-    respuesta: `Del 15 al 21 de diciembre de ${EVENTO.inicio.getFullYear()} en la ${EVENTO.sede}, ${EVENTO.lugarDetalle}. La recepción empieza el martes 15 a las 12:00 m.`,
+    pregunta: '¿Qué distingue al Desafío Tolotá?',
+    respuesta: 'Tolotá une aventura, espiritualidad y conocimiento en un campamento donde los equipos representan a su iglesia, superan retos juntos y crecen en la fe.',
+  },
+] as const;
+
+/** Preguntas prácticas de preparación, ubicadas en la página de la edición vigente. */
+export const PREGUNTAS_EDICION = [
+  {
+    pregunta: '¿Cuándo debo llegar y dónde será el campamento?',
+    respuesta: `El evento será del ${EVENTO.fechasLargas} de ${EVENTO.inicio.getFullYear()} en ${EVENTO.sede}, ${EVENTO.lugarDetalle}. La recepción de equipos es el martes 15 de diciembre, de 12:00 m. a 4:00 p. m.`,
+    enlace: { texto: 'Abrir ubicación en Maps', href: EVENTO.mapa, externo: true },
   },
   {
-    pregunta: '¿Qué debo llevar?',
-    respuesta: 'El manual del participante trae la lista de menaje, los requisitos de llegada y las normas de campamento.',
+    pregunta: '¿Qué documentos debo presentar al llegar?',
+    respuesta: 'Consulta los requisitos de participación y la autorización para menores en el reglamento antes de viajar.',
+    enlace: { texto: 'Abrir reglamento del participante', href: REGLAMENTO_PARTICIPANTE, externo: true },
+  },
+  {
+    pregunta: '¿Qué debo llevar al campamento?',
+    respuesta: 'Revisa las indicaciones de equipamiento y zona de camping en el reglamento del participante.',
+    enlace: { texto: 'Abrir reglamento del participante', href: REGLAMENTO_PARTICIPANTE, externo: true },
+  },
+  {
+    pregunta: '¿Qué tema debemos estudiar?',
+    respuesta: `La cartilla de estudio se titula “Las 7 iglesias en la línea del tiempo” y corresponde al tema ${EVENTO.tema.nombre.toLocaleUpperCase('es-CO')}. Ya puedes abrirla o descargarla.`,
+    enlace: { texto: 'Abrir cartilla', href: '/documentos/cartilla-2026-7-iglesias.pdf', externo: false },
+  },
+  {
+    pregunta: '¿Con quién puedo comunicarme si tengo otra duda?',
+    respuesta: 'Escríbenos por el canal oficial de WhatsApp para consultar con la organización.',
+    enlace: { texto: 'Contactar por WhatsApp', href: 'https://w.app/ykhizo', externo: true },
   },
 ] as const;
 

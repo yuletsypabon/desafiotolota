@@ -6,8 +6,9 @@ export const EVENTO = {
   numero: 9,
   /** Recepción de equipos: 15 de diciembre a las 12:00 m. (hora de Colombia) */
   inicio: new Date('2026-12-15T12:00:00-05:00'),
-  fin: new Date('2026-12-21T23:59:59-05:00'),
-  fechas: '15 – 21 DIC 2026',
+  fin: new Date('2026-12-20T23:59:59-05:00'),
+  fechas: '15 – 20 DIC 2026',
+  fechasLargas: '15 al 20 de diciembre',
   sede: 'Finca El Faisán Dorado',
   lugar: 'Gámbita, Santander',
   lugarDetalle: 'Vía Vado Real – Gámbita, Santander',
