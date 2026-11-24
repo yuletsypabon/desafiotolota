@@ -1,4 +1,6 @@
 import { RETOS } from '@/lib/contenido';
+import Link from 'next/link';
+import FlechaAccion from '@/components/sitio/FlechaAccion';
 import Foto from '../Foto';
 import s from '../Landing.module.css';
 
@@ -24,6 +26,7 @@ export default function Retos({ nombreX2, nombreX4 }: { nombreX2: string | null;
               <h3>{r.titulo}</h3>
               <p>{r.texto}</p>
               {r.foto === 'equipo' && categorias && <p className={s.retoCategorias}>{categorias}</p>}
+              <Link href={r.href} className={s.retoAccion}>{r.accion}<FlechaAccion /></Link>
             </div>
           </article>
         ))}

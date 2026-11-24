@@ -1,7 +1,7 @@
 import { PREGUNTAS } from '@/lib/contenido';
 import s from '../Landing.module.css';
 
-/** 06 · Antes de dar el paso: preguntas frecuentes (acordeón nativo, funciona sin JavaScript). */
+/** Preguntas generales para quienes descubren el Desafío desde Inicio. */
 export default function Preguntas() {
   return (
     <section className={s.seccion} aria-labelledby="preguntas-titulo">

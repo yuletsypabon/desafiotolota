@@ -8,7 +8,7 @@ import s from '../Landing.module.css';
 export default function QueEs() {
   const { tema } = EVENTO;
   return (
-    <section className={s.seccion} aria-labelledby="quees-titulo">
+    <section id="que-es" className={s.seccion} aria-labelledby="quees-titulo">
       <div className={`${s.escena} ${s.quees}`}>
         <Foto id="evento" />
         <div className={s.veloQuees} aria-hidden="true" />
