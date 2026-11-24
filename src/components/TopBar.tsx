@@ -9,6 +9,7 @@ import s from './topbar.module.css';
 
 /** Secciones de un evento; las de administrador no las ve el cronometrador. */
 const SECCIONES_EVENTO = [
+  { segmento: 'preparacion', nombre: 'Preparar', soloAdmin: true },
   { segmento: 'cronometro', nombre: 'Cronometraje', soloAdmin: false },
   { segmento: 'equipos', nombre: 'Equipos', soloAdmin: true },
   { segmento: 'disciplina', nombre: 'Disciplina', soloAdmin: true },
@@ -42,6 +43,16 @@ export default function TopBar() {
         <Link href={RUTAS.cronometro} className={s.enlace} aria-current={pathname === RUTAS.cronometro ? 'page' : undefined}>
           Eventos
         </Link>
+        {rol === 'ADMIN' && (
+          <>
+            <Link href={RUTAS.oracionesAdmin} className={s.enlace} aria-current={pathname === RUTAS.oracionesAdmin ? 'page' : undefined}>
+              Peticiones
+            </Link>
+            <Link href={RUTAS.testimoniosAdmin} className={s.enlace} aria-current={pathname === RUTAS.testimoniosAdmin ? 'page' : undefined}>
+              Testimonios
+            </Link>
+          </>
+        )}
         {secciones.map((x) =>
           destino ? (
             <Link
