@@ -28,6 +28,23 @@ enum TipoPunto {
   POSITIVO
 }
 
+enum EstadoTestimonio {
+  PENDIENTE
+  PUBLICADO
+  RECHAZADO
+}
+
+enum EstadoPeticionOracion {
+  PENDIENTE
+  PUBLICADA
+  RECHAZADA
+}
+
+enum VisibilidadPeticionOracion {
+  PRIVADA
+  PUBLICA
+}
+
 /// Las actividades Plus se registran y suman puntos; las de Tiempo descuentan hasta dos minutos.
 enum TipoActividadEspiritual {
   PLUS
@@ -257,4 +274,34 @@ model Reserva {
   equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
 
   @@unique([pruebaId, equipoId])
+}
+
+/// Experiencia enviada desde la página pública; solo se muestra tras aprobación administrativa.
+model Testimonio {
+  id                String           @id @default(cuid())
+  nombre            String           @db.VarChar(60)
+  anio              Int
+  comentario        String           @db.VarChar(600)
+  estado            EstadoTestimonio @default(PENDIENTE)
+  consentimientoAt  DateTime
+  createdAt         DateTime         @default(now())
+  revisadoAt        DateTime?
+
+  @@index([estado, createdAt])
+}
+
+/// Peticiones de oración: las públicas requieren aprobación, las privadas solo son visibles para la organización.
+model PeticionOracion {
+  id               String                     @id @default(cuid())
+  nombre           String?                    @db.VarChar(60)
+  peticion         String                     @db.VarChar(600)
+  visibilidad      VisibilidadPeticionOracion
+  estado           EstadoPeticionOracion      @default(PENDIENTE)
+  consentimientoAt DateTime?
+  oraciones        Int                        @default(0)
+  createdAt        DateTime                   @default(now())
+  revisadoAt       DateTime?
+
+  @@index([estado, createdAt])
+  @@index([visibilidad, estado, createdAt])
 }
