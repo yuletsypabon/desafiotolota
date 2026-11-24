@@ -74,6 +74,9 @@
 .datos svg{grid-row:span 2;width:30px;height:30px;color:var(--destacado)}
 .datos dt{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
 .datos dd{margin:2px 0 0;font-size:clamp(16px,1.45vw,20px);font-weight:700;line-height:1.25;color:var(--texto)}
+.datos dd small{display:block;margin-top:6px;font-size:13px;font-weight:500;line-height:1.4;color:rgba(244,243,236,.88)}
+.datos dd a{text-decoration-color:rgba(255,204,0,.55);text-underline-offset:3px}
+.datos dd a:hover{color:var(--destacado)}
 .acciones{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .galeriaHero{position:relative;z-index:1;display:flex;align-items:center;gap:clamp(8px,1.1vw,16px);width:100%;height:clamp(340px,56vh,560px);min-width:0}
 .tarjetaHero{position:relative;isolation:isolate;flex:.72 1 0;min-width:54px;height:82%;overflow:hidden;padding:0;border:1px solid rgba(255,255,255,.24);
@@ -99,6 +102,38 @@
 .relojHero b{font-family:var(--font-display);font-weight:400;font-size:clamp(62px,8.5vw,128px);line-height:.9;color:var(--texto)}
 .relojHero span{margin-top:11px;font-size:clamp(11px,1.2vw,15px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--destacado)}
 
+/* Accesos prácticos para preparar la llegada al campamento */
+.preparacion{padding:clamp(42px,7vw,84px) var(--margen) 0}
+.preparacionEdicion{padding:0}
+.preparacionCabecera{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 24px}
+.preparacionCabecera .etiqueta{flex:none}
+.preparacionCabecera h2{margin:8px 0 0;font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:400;line-height:1;text-transform:uppercase}
+.accesosPreparacion{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.accesoPreparacion{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto 1fr auto;column-gap:14px;min-height:190px;padding:24px;
+  overflow:hidden;border:1px solid transparent;border-radius:20px;color:var(--texto);text-decoration:none;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)) padding-box,
+    linear-gradient(135deg,rgba(255,204,0,.56),rgba(255,255,255,.17) 40%,rgba(255,255,255,.08) 75%,rgba(255,204,0,.26)) border-box;
+  -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 14px 32px rgba(0,0,0,.18);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.accesoPreparacion:hover{transform:translateY(-4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 20px 38px rgba(0,0,0,.28)}
+.numeroPreparacion{grid-column:1;grid-row:1/4;font-family:var(--font-display);font-size:32px;line-height:1;color:var(--destacado)}
+.iconoPreparacion{grid-column:2;grid-row:1;width:24px;height:24px;margin-bottom:12px;color:var(--destacado)}
+.accesoPreparacion h3{grid-column:2;grid-row:2;margin:0 0 8px;font-family:var(--font-display);font-size:25px;font-weight:400;line-height:1.05;text-transform:uppercase}
+.accesoPreparacion p{grid-column:2;grid-row:3;margin:0;color:rgba(244,243,236,.86);font-size:15px;line-height:1.5}
+.accionPreparacion{grid-column:2;grid-row:4;display:flex;align-items:center;gap:8px;margin-top:18px;color:var(--destacado);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.accionPreparacion>span[aria-hidden="true"]{width:32px;height:32px;flex-basis:32px}
+.cartillaMarco{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);overflow:hidden;border-radius:26px}
+.cartillaImagen{position:relative;min-height:clamp(340px,42vw,560px);overflow:hidden;background:#111}
+.cartillaImagen>.foto{z-index:0}
+.cartillaImagen::after{position:absolute;inset:45% 0 0;z-index:1;background:linear-gradient(transparent,rgba(0,0,0,.55));content:""}
+.cartillaAnio{position:absolute;z-index:2;left:24px;bottom:22px;padding:8px 14px;border:1px solid rgba(255,204,0,.62);border-radius:999px;background:rgba(5,5,5,.56);
+  font-size:12px;font-weight:700;letter-spacing:.1em}
+.cartillaTexto{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(28px,5vw,64px)}
+.cartillaTexto .titulo{font-size:clamp(36px,4.2vw,60px)}
+.cartillaTexto .parrafo{max-width:620px}
+.cartillaAcciones{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:26px}
+
 /* ---------- Manifiesto: franja amarilla que se desplaza hacia la derecha ---------- */
 .manifiesto{overflow:hidden;background:var(--primario);color:#0a0a0a;padding:18px 0}
 .manifiestoPista{display:flex;width:max-content;animation:manifiesto 45s linear infinite}
@@ -122,6 +157,12 @@
 .figura{margin:0}
 .marco{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:var(--vidrio-radio)}
 .figura figcaption{margin-top:22px;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.experienciaPresentacion{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);align-items:center;gap:clamp(32px,6vw,92px)}
+.experienciaFoto{position:relative;aspect-ratio:1.12/1;margin:0;overflow:hidden;border:1px solid var(--vidrio-borde);border-radius:24px;background:#111}
+.experienciaFoto>.foto{z-index:0}
+.experienciaFoto figcaption{position:absolute;right:0;bottom:0;left:0;z-index:1;padding:42px 22px 20px;background:linear-gradient(transparent,rgba(0,0,0,.78));font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.experienciaTexto .titulo{font-size:clamp(40px,5vw,72px)}
+.experienciaTexto .parrafo{max-width:680px}
 .cifras{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(14px,2.5vw,36px);margin:clamp(56px,9vh,90px) 0 0}
 .cifras div{position:relative;isolation:isolate;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:10px;min-height:132px;padding:16px 10px;
   overflow:hidden;border:1px solid transparent;border-radius:20px;
@@ -166,11 +207,46 @@
   -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 35%);mask-image:linear-gradient(180deg,transparent 0%,#000 35%)}
 .reto:hover>.foto{transform:scale(1.04)}
 .retoNumero{position:absolute;top:18px;left:18px;display:grid;place-items:center;width:46px;height:46px;font-family:var(--font-display);font-size:22px;color:var(--destacado)}
-.retoTexto{padding:12px 12px 14px;text-shadow:0 1px 3px rgba(0,0,0,.85),0 2px 18px rgba(0,0,0,.6)}
+.retoTexto{position:relative;padding:20px 18px 18px;overflow:hidden;border:1px solid rgba(255,255,255,.17);border-radius:18px;
+  background:linear-gradient(145deg,rgba(28,30,28,.78),rgba(10,11,10,.68));
+  -webkit-backdrop-filter:blur(16px) saturate(135%);backdrop-filter:blur(16px) saturate(135%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 14px 32px rgba(0,0,0,.24);
+  text-shadow:0 1px 3px rgba(0,0,0,.62)}
 .retoTexto h3{margin:10px 0 12px;font-family:var(--font-display);font-weight:400;font-size:clamp(28px,2.6vw,38px);
   text-transform:uppercase;line-height:1}
 .retoTexto>p:not(.etiqueta){margin:0;font-size:15px;line-height:1.5}
 .retoTexto .retoCategorias{margin-top:14px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--destacado)}
+.retoAccion{display:inline-flex;align-items:center;gap:8px;width:fit-content;margin-top:18px;padding-bottom:5px;border-bottom:1px solid rgba(255,204,0,.58);
+  color:var(--texto);font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.retoAccion>span[aria-hidden="true"]{width:32px;height:32px;flex-basis:32px;color:#111}
+.retoAccion:hover{color:var(--destacado)}
+
+/* 04 Así se vive Tolotá · video destacado y selecciones recientes del canal */
+.videosCabecera{max-width:760px;margin:0 auto 34px;text-align:center}
+.videosCabecera .titulo{margin:12px 0 14px;font-size:clamp(38px,4.4vw,68px)}
+.videosCabecera .parrafo{margin:0 auto}
+.videosRejilla{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.85fr);gap:20px;align-items:stretch}
+.videoDestacado,.videoReciente{overflow:hidden;border:1px solid var(--vidrio-borde);border-radius:22px;background:rgba(255,255,255,.045)}
+.videoPantalla{position:relative;aspect-ratio:16/9;overflow:hidden;background:#10110f}
+.videoPantalla iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.videoPortada{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;padding:0;border:0;background-color:#10110f;background-position:center;background-size:cover;color:var(--texto);cursor:pointer}
+.videoPlay,.videoPlayMini{display:grid;place-items:center;width:70px;height:70px;padding-left:5px;border:1px solid rgba(255,204,0,.85);border-radius:50%;background:rgba(5,5,5,.72);color:var(--destacado);font-size:25px;transition:transform .2s,background .2s}
+.videoPortada:hover .videoPlay,.videoReciente:hover .videoPlayMini{transform:scale(1.08);background:rgba(5,5,5,.9)}
+.videoDuracion{position:absolute;right:12px;bottom:12px;padding:5px 8px;border-radius:6px;background:rgba(0,0,0,.82);font-family:var(--font-mono);font-size:12px;font-weight:700}
+.videoTexto{padding:20px 22px 22px}
+.videoTexto>span,.videoRecienteTexto>span{color:var(--destacado);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.videoTexto h3{margin:8px 0;font-family:var(--font-display);font-size:clamp(24px,2.4vw,34px);font-weight:400;line-height:1.05;text-transform:uppercase}
+.videoTexto p{margin:0;color:var(--textoSuave);font-size:13px}
+.videosRecientes{display:grid;align-content:start;gap:20px}
+.videoReciente{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,1fr);align-items:center;gap:16px;width:100%;padding:0;color:var(--texto);text-align:left;cursor:pointer;transition:border-color .2s,transform .2s}
+.videoReciente:hover{transform:translateY(-2px);border-color:rgba(255,204,0,.65)}
+.videoMiniatura{position:relative;display:grid;place-items:center;aspect-ratio:16/9;background-color:#111;background-position:center;background-size:cover}
+.videoPlayMini{width:48px;height:48px;font-size:18px}
+.videoRecienteTexto{display:grid;gap:9px;padding:12px 14px 12px 0}
+.videoRecienteTexto strong{font-family:var(--font-display);font-size:clamp(18px,1.75vw,25px);font-weight:400;line-height:1.08;text-transform:uppercase}
+.videosCanal{display:flex;align-items:center;justify-content:center;gap:10px;width:fit-content;margin:24px auto 0;padding:12px 0 5px;border-bottom:1px solid rgba(255,204,0,.65);font-size:13px;font-weight:700;letter-spacing:.07em;text-decoration:none;text-transform:uppercase}
+.videosCanal:hover{color:var(--destacado)}
+.videosCanal>span[aria-hidden="true"]{color:#111}
 
 /* 04 Espiritual */
 .panoramica{padding-left:0;padding-right:0}
@@ -202,17 +278,26 @@
 .escena>.foto{z-index:-2}
 .tituloPanel{margin:0 0 40px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(32px,3.2vw,46px);line-height:1}
 .pilares{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.pilaresEscena{box-sizing:border-box;width:100vw;margin-left:calc(50% - 50vw);min-height:clamp(560px,70vh,760px);display:flex;flex-direction:column;justify-content:center}
-.pilaresEscena>.tituloPanel{margin-bottom:clamp(36px,5vw,64px);font-size:clamp(42px,4.3vw,64px)}
-.pilaresEscena .pilares{width:100%;gap:24px}
-.pilar{min-height:300px;padding:34px 36px 38px;display:flex;flex-direction:column}
+.pilaresEscena{box-sizing:border-box;width:100vw;margin-left:calc(50% - 50vw);min-height:0;display:flex;flex-direction:column;justify-content:center;gap:30px}
+.pilaresIntro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);align-items:end;gap:clamp(24px,5vw,72px);width:100%;margin:0 auto}
+.pilaresIntro .tituloPanel{max-width:720px;margin:10px 0 0;font-size:clamp(42px,5.2vw,72px)}
+.pilaresDescripcion{max-width:580px;margin:0;color:rgba(244,243,236,.92);font-size:clamp(15px,1.3vw,18px);line-height:1.65;text-shadow:0 1px 10px rgba(0,0,0,.75)}
+.pilaresEscena .pilares{width:100%;gap:20px}
+.pilar{min-height:250px;padding:28px;display:flex;flex-direction:column;
+  border-color:rgba(255,255,255,.2);
+  background:linear-gradient(145deg,rgba(32,34,31,.76),rgba(10,11,11,.62));
+  -webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 22px 48px rgba(0,0,0,.3);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.pilar:hover{transform:translateY(-5px);border-color:rgba(255,204,0,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 28px 56px rgba(0,0,0,.38)}
 /* El número acompaña (pequeño y solo en contorno); el que manda es el título */
-.pilarNumero{display:block;margin-bottom:18px;font-family:var(--font-display);font-size:clamp(38px,3vw,48px);line-height:1;
+.pilarNumero{display:block;margin-bottom:12px;font-family:var(--font-display);font-size:clamp(34px,2.6vw,44px);line-height:1;
   color:transparent;-webkit-text-stroke:1px rgba(244,243,236,.4)}
 .pilares .etiqueta{font-size:clamp(16px,1.35vw,20px);font-weight:700;letter-spacing:.12em}
-.pilares h3{margin:10px 0 14px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(32px,3vw,46px);line-height:1.02;color:var(--texto)}
-.pilares p:not(.etiqueta){margin:0 0 20px;font-size:17px;line-height:1.6;color:rgba(244,243,236,.9)}
+.pilares h3{margin:8px 0 10px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;
+  font-size:clamp(27px,2.4vw,36px);line-height:1.02;color:var(--texto)}
+.pilares p:not(.etiqueta){margin:0 0 16px;font-size:15px;line-height:1.55;color:rgba(244,243,236,.9)}
 .pilares .enlaceFlecha{margin-top:auto;padding-top:18px;font-size:13px}
 
 /* 06 Preguntas */
@@ -258,16 +343,28 @@
   .hero{grid-template-columns:minmax(0,1fr);row-gap:30px;padding-top:110px}
   .heroContenido{max-width:720px}
   .galeriaHero{height:clamp(300px,42vh,420px)}
+  .preparacionCabecera{align-items:flex-start;flex-direction:column;gap:8px}
+  .accesosPreparacion{gap:12px}
+  .accesoPreparacion{grid-template-columns:32px minmax(0,1fr);min-height:205px;padding:18px}
+  .cartillaMarco{grid-template-columns:minmax(0,1fr)}
+  .cartillaImagen{min-height:clamp(240px,58vw,380px)}
   .dosColumnas,.cierre,.quees{grid-template-columns:minmax(0,1fr)}
+  .experienciaPresentacion{grid-template-columns:minmax(0,1fr);gap:28px}
+  .experienciaFoto{aspect-ratio:1.3/1}
   .modalidad{grid-template-columns:64px minmax(0,1fr);padding:22px}
   .retos{grid-template-columns:minmax(0,1fr)}
   .tituloLinea{white-space:normal}
-  .reto{min-height:clamp(560px,80svh,720px)}
-  .pilares{grid-template-columns:minmax(0,1fr)}
-  .pilaresEscena{min-height:0;gap:0}
-  .pilaresEscena>.tituloPanel{margin-bottom:30px}
-  .pilaresEscena .pilares{gap:18px}
-  .pilar{min-height:260px;padding:28px}
+  .reto{min-height:clamp(420px,62svh,520px)}
+  .reto>.foto{bottom:22%}
+  .videosRejilla{grid-template-columns:minmax(0,1fr)}
+  .videosRecientes{grid-auto-columns:minmax(260px,42%);grid-auto-flow:column;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+  .videoReciente{display:block;scroll-snap-align:start}
+  .videoRecienteTexto{padding:14px 14px 16px}
+  .videoRecienteTexto strong{font-size:20px}
+  .pilaresIntro{grid-template-columns:minmax(0,1fr);gap:12px}
+  .pilaresEscena{gap:22px}
+  .pilaresEscena .pilares{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .pilar{min-height:210px;padding:22px}
   .cifras{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cifras div:last-child{grid-column:1 / -1}
   .cifras div{min-height:112px;padding:10px 4px}
@@ -288,6 +385,24 @@
   .textoTarjetaHero strong{font-size:clamp(21px,7vw,30px)}
   .datos{gap:10px;margin-bottom:26px}
   .datos div{flex-basis:100%;padding:12px 14px}
+  .preparacion{padding-top:44px}
+  .preparacionCabecera{margin-bottom:18px}
+  .preparacionCabecera h2{font-size:34px}
+  .accesosPreparacion{grid-template-columns:minmax(0,1fr);gap:10px}
+  .accesoPreparacion{grid-template-columns:36px minmax(0,1fr);grid-template-rows:auto auto auto;min-height:0;padding:18px}
+  .numeroPreparacion{grid-row:1/4;font-size:28px}
+  .iconoPreparacion{margin-bottom:8px}
+  .accesoPreparacion h3{font-size:23px}
+  .accesoPreparacion p{font-size:14px}
+  .cartillaTexto{padding:24px 20px}
+  .pilaresEscena .pilares{grid-template-columns:minmax(0,1fr)}
+  .pilar{min-height:0;padding:22px}
+  .videosCabecera{text-align:left}
+  .videosCabecera .titulo{font-size:38px}
+  .videosRecientes{grid-auto-columns:minmax(260px,78vw);gap:12px}
+  .videoTexto{padding:16px}
+  .videoTexto h3{font-size:26px}
+  .cartillaTexto .titulo{font-size:38px}
   .boton,.botonContorno{width:100%;padding:16px 22px}
   .acciones{gap:22px}
   .relojHero{gap:clamp(12px,3vw,18px);margin-top:10px}

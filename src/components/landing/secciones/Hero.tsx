@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import { EVENTO, tituloEdicion } from '@/lib/evento';
+import { EVENTO } from '@/lib/evento';
 import { MOMENTOS_HERO, type MomentoHero } from '@/lib/landing/momentosHero';
 import { rutaEdicion } from '@/lib/rutas';
 import type { EdicionPortada } from '@/lib/landing/datos';
@@ -23,31 +23,33 @@ export default function Hero({ edicion }: { edicion: EdicionPortada }) {
       <div className={s.velo} aria-hidden="true" />
       <div className={s.heroContenido}>
         <p className={s.chipEdicion}>
-          <b>{edicion.anio}</b> {tituloEdicion(edicion)}
+          <span>Desafío</span>
+          <b>{edicion.codigo}</b>
+          {edicion.nombre && <span>· {edicion.nombre.toLocaleUpperCase('es-CO')}</span>}
+          <span>· {edicion.anio}</span>
         </p>
         <h1 className={s.heroTitulo}>
           Desafío<br />
           <em>Tolotá.</em>
         </h1>
         <p className={s.heroTexto}>
-          Pon a prueba tu destreza en la pista de obstáculos y tus conocimientos bíblicos. Vive un campamento juvenil adventista
-          para superar retos en equipo y crecer juntos en la fe.
+          Campamento juvenil adventista en el que los equipos representan a su iglesia, superan retos de aventura y crecen juntos en la fe.
         </p>
         <dl className={s.datos}>
           <div>
             <CalendarMonthOutlinedIcon aria-hidden="true" />
-            <dt>Fecha</dt>
-            <dd>15 al 21 de diciembre de {EVENTO.inicio.getFullYear()}</dd>
+            <dt>Fechas y recepción</dt>
+            <dd>{EVENTO.fechasLargas} de {EVENTO.inicio.getFullYear()}<small>Recepción de equipos · martes 15, desde las 12:00 m.</small></dd>
           </div>
           <div>
             <PlaceOutlinedIcon aria-hidden="true" />
             <dt>Lugar</dt>
-            <dd>{EVENTO.sede}</dd>
+            <dd><a href={EVENTO.mapa} target="_blank" rel="noopener noreferrer">{EVENTO.sede} · {EVENTO.lugar}</a></dd>
           </div>
         </dl>
         <div className={s.acciones}>
-          <a className={s.boton} href="#inscripciones">Inscribe a tu equipo</a>
-          <a className={s.botonContorno} href={`${rutaEdicion(EVENTO.inicio.getFullYear())}#cronograma`}>Ver cronograma</a>
+          <a className={s.boton} href={`${rutaEdicion(EVENTO.inicio.getFullYear())}#cronograma`}>Ver cronograma</a>
+          <a className={s.botonContorno} href={`${rutaEdicion(EVENTO.inicio.getFullYear())}#equipos`}>Conoce a los equipos</a>
         </div>
       </div>
       <CarruselHero onFotoActiva={setFotoFondo} />
