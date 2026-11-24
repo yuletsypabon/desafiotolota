@@ -23,8 +23,8 @@
     linear-gradient(135deg,rgba(255,204,0,.98),rgba(255,255,255,.58) 42%,rgba(255,204,0,.65)) border-box;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 28px 60px rgba(0,0,0,.62),0 0 0 1px rgba(255,204,0,.4)}
 .carta[data-activa="true"] .cabeza{font-size:12px}
-.carta[data-activa="true"] .fecha b{font-size:72px}
-.carta[data-activa="true"] .fecha span{font-size:13.5px}
+.carta[data-activa="true"] .fecha b{font-size:98px}
+.carta[data-activa="true"] .fechaMes{font-size:13.5px}
 .carta[data-activa="true"] h3{font-size:29px}
 .carta[data-activa="true"] .resumen{font-size:15px;line-height:1.5}
 .carta[data-activa="true"] .actividades{font-size:14px;gap:9px}
@@ -34,9 +34,11 @@
 .cabeza{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.2);
   font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#f4f3ec}
 .pildora{padding:2px 10px;border:1.5px solid rgba(255,204,0,.85);border-radius:999px;color:#ffcc00;letter-spacing:.04em}
-.fecha{display:flex;align-items:baseline;gap:10px;margin:14px 0 2px}
-.fecha b{font-family:var(--font-display);font-weight:400;font-size:64px;line-height:.95;color:#f4f3ec}
-.fecha span{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#ffcc00}
+.fecha{display:flex;flex-direction:column;align-items:flex-start;width:fit-content;margin:14px 0 8px}
+.fechaEncabezado{display:flex;min-width:145px;align-items:flex-end;justify-content:space-between;gap:10px;padding-bottom:6px;border-bottom:3px solid #ffcc00}
+.fecha b{font-family:var(--font-display);font-weight:400;font-size:92px;line-height:.82;color:#f4f3ec}
+.fechaMes{padding-bottom:4px;font-size:12.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#ffcc00}
+.fechaDiaCompleto{display:block;height:148px;margin-top:13px;color:#f4f3ec;font-family:var(--font-display);font-size:clamp(34px,4vw,46px);font-weight:400;letter-spacing:.025em;line-height:.88;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
 .carta h3{margin:6px 0 6px;font-family:var(--font-display);font-weight:400;font-size:26px;line-height:1.05;text-transform:uppercase;color:#f4f3ec}
 .resumen{margin:0 0 12px;font-size:14px;line-height:1.45;color:#f4f3ec}
 .actividades{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,204,0,.72) transparent;
@@ -85,7 +87,9 @@
   .carrusel,.completo{--ancho:min(80vw,320px);--paso:62%}
   .carta{height:clamp(600px,76svh,700px)}
   .carta[data-activa="true"]{width:min(calc(var(--ancho) + 30px),calc(100vw - 56px));max-width:calc(100% - 32px);transform:translateX(0) translateY(0) scale(1.04)}
-  .carta[data-activa="true"] .fecha b{font-size:68px}
+  .carta[data-activa="true"] .fecha b{font-size:84px}
+  .fechaEncabezado{min-width:132px}
+  .fechaDiaCompleto{height:132px;font-size:clamp(30px,8vw,40px)}
   .carta[data-activa="true"] h3{font-size:27px}
   .carta[data-activa="true"] .resumen{font-size:14.5px}
   .carta[data-activa="true"] .actividades{font-size:13.5px}

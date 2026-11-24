@@ -4,7 +4,7 @@ import type { DiaCronograma } from '@/lib/contenido';
 import { EVENTO } from '@/lib/evento';
 import s from './carrusel.module.css';
 
-const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 const DIAS_COMPLETOS: Record<string, string> = {
   Mar: 'Martes', Mié: 'Miércoles', Jue: 'Jueves', Vie: 'Viernes', Sáb: 'Sábado', Dom: 'Domingo',
 };
@@ -114,8 +114,11 @@ export default function CarruselDias({
                 <span>Día {i + 1} de {dias.length}</span>
               </header>
               <div className={s.fecha}>
-                <b>{d.num}</b>
-                <span>{d.dia} · {mes}</span>
+                <div className={s.fechaEncabezado}>
+                  <b>{d.num}</b>
+                  <span className={s.fechaMes}>{mes}</span>
+                </div>
+              {completo && <span className={s.fechaDiaCompleto}>{DIAS_COMPLETOS[d.dia] ?? d.dia}</span>}
               </div>
               <h3>{d.titulo}</h3>
               <p className={s.resumen}>{d.resumen}</p>
