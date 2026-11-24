@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
-import SeccionProximamente from '@/components/sitio/SeccionProximamente';
+import PaginaSitio from '@/components/sitio/PaginaSitio';
+import HistoriaTimeline from '@/components/sitio/HistoriaTimeline';
 
 export const metadata: Metadata = { title: 'Historia' };
 
 export default function Pagina() {
-  return <SeccionProximamente titulo="Historia" descripcion="Desde 2017, edición por edición: la historia del Desafío Tolotá." />;
+  return (
+    <PaginaSitio
+      etiqueta="El recorrido"
+      titulo="Nuestra historia"
+      intro="Desde 2016, cada edición suma una nueva historia de aventura, fe y comunidad."
+    >
+      <HistoriaTimeline />
+    </PaginaSitio>
+  );
 }
