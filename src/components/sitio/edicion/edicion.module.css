@@ -1,6 +1,15 @@
 /* Página de una edición (/desafio-2026) */
 .portada{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:clamp(24px,4vw,56px)}
 .logoEvento{width:clamp(140px,18vw,240px);height:auto;filter:drop-shadow(0 16px 32px rgba(0,0,0,.55))}
+.datosEtiqueta{margin:0 0 12px;color:var(--destacado);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.portadaAcciones{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:22px}
+.portadaAcciones a{display:inline-flex;align-items:center;gap:8px;color:var(--texto);font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.portadaAcciones a:first-child{color:var(--destacado)}
+.portadaAcciones a:hover{text-decoration:underline;text-underline-offset:4px}
+.indiceEdicion{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 16px;border:1px solid var(--vidrio-borde);border-radius:16px;background:rgba(255,255,255,.035)}
+.indiceEdicion>span{margin:0 5px 0 0;color:var(--textoSuave);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.indiceEdicion a{padding:9px 12px;border:1px solid rgba(244,243,236,.14);border-radius:999px;color:var(--texto);font-size:12px;font-weight:700;text-decoration:none;transition:border-color .2s ease,color .2s ease}
+.indiceEdicion a:hover{border-color:var(--destacado);color:var(--destacado)}
 .datos{display:flex;flex-wrap:wrap;gap:20px 44px;margin:0 0 28px}
 .datos div{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}
 .datos svg{grid-row:span 2;width:26px;height:26px;color:var(--destacado)}
@@ -14,6 +23,83 @@
 
 .vacio{margin:0;padding:28px;border:1px dashed var(--vidrio-borde);border-radius:16px;color:var(--textoSuave);text-align:center}
 .nota{margin:14px 0 0;font-size:12.5px;color:var(--textoSuave)}
+.enlaceReglamento{display:inline-flex;align-items:center;gap:8px;margin-top:20px;color:var(--destacado);font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.enlaceReglamento:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* Cartilla 2026 y accesos verificados a sus siete capítulos. */
+.cartillaEdicion{display:grid;grid-template-columns:minmax(250px,.72fr) minmax(0,1.28fr);gap:0 32px;overflow:hidden;border:1px solid var(--vidrio-borde);border-radius:22px;
+  background:linear-gradient(145deg,rgba(30,32,30,.78),rgba(12,13,13,.64));-webkit-backdrop-filter:blur(16px) saturate(135%);backdrop-filter:blur(16px) saturate(135%);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 20px 46px rgba(0,0,0,.28)}
+.cartillaPortada{position:relative;min-height:420px;background:radial-gradient(ellipse at center,rgba(255,204,0,.12),transparent 68%),rgba(0,0,0,.2)}
+.cartillaPortada>span{position:absolute;z-index:2;left:18px;bottom:18px;padding:8px 12px;border:1px solid rgba(255,204,0,.52);border-radius:999px;background:rgba(5,5,5,.72);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.cartillaContenido{align-self:center;padding:clamp(26px,4vw,52px) clamp(22px,4vw,48px) 28px 0}
+.cartillaEtiqueta{margin:0 0 10px;color:var(--destacado);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.cartillaContenido h2{margin:0 0 16px;font-family:var(--font-display);font-size:clamp(34px,4vw,56px);font-weight:400;line-height:.98;text-transform:uppercase}
+.cartillaContenido h2 em{display:block;color:var(--destacado);font-style:normal}
+.cartillaDescripcion{max-width:720px;margin:0;color:var(--texto);font-size:16px;line-height:1.65}
+.cartillaAccionesEdicion{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.cartillaAccionesEdicion a{display:inline-flex;align-items:center;gap:9px;padding:12px 16px;border:1px solid var(--vidrio-borde);border-radius:999px;color:var(--texto);font-size:12px;font-weight:700;letter-spacing:.04em;text-decoration:none;text-transform:uppercase}
+.cartillaAccionesEdicion a:first-child{border-color:var(--destacado);background:var(--destacado);color:#080808}
+.cartillaAccionesEdicion a:hover{transform:translateY(-1px);border-color:var(--destacado)}
+.iglesiasCartilla{grid-column:1/-1;padding:26px clamp(20px,3vw,36px) 30px;border-top:1px solid var(--linea)}
+.iglesiasCartilla h3{margin:0 0 16px;font-family:var(--font-display);font-size:23px;font-weight:400;text-transform:uppercase}
+.iglesiasCartilla ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.iglesiasCartilla a{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;border:1px solid rgba(244,243,236,.15);border-radius:12px;color:var(--texto);font-size:14px;font-weight:700;text-decoration:none;transition:border-color .2s ease,background .2s ease}
+.iglesiasCartilla a:hover{border-color:var(--destacado);background:rgba(255,204,0,.06)}
+.iglesiasCartilla a span:first-child{font-family:var(--font-mono);font-size:11px;color:var(--destacado)}
+.iglesiasCartilla a>span[aria-hidden="true"]{width:32px;height:32px;flex-basis:32px;margin-left:auto;color:#111}
+
+/* Explorador manual de las siete iglesias de la Cartilla. */
+.exploradorIglesias{grid-column:1/-1;padding:26px clamp(20px,3vw,36px) 30px;border-top:1px solid var(--linea)}
+.exploradorCabecera{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px}
+.exploradorCabecera>div>p{margin:0 0 7px;color:var(--destacado);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.exploradorCabecera h3{margin:0;font-family:var(--font-display);font-size:clamp(24px,3vw,36px);font-weight:400;text-transform:uppercase}
+.exploradorCabecera>p{max-width:430px;margin:0;color:var(--textoSuave);font-size:13px;line-height:1.5}
+.exploradorRejilla{display:grid;grid-template-columns:minmax(0,1fr) repeat(6,minmax(50px,58px));gap:9px;min-height:360px}
+.iglesiaActiva{display:grid;grid-template-columns:minmax(180px,.76fr) minmax(0,1.24fr);min-width:0;overflow:hidden;border:1px solid rgba(255,204,0,.54);border-radius:7px 19px 7px 19px;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025)),#10110f;box-shadow:0 15px 34px rgba(0,0,0,.24)}
+.arteIglesia{position:relative;min-height:360px;overflow:hidden;background:#f2eee4}
+.arteIglesia img{object-fit:cover;object-position:center}
+.arteIglesia>span{position:absolute;z-index:1;left:14px;top:14px;padding:7px 10px;border:1px solid rgba(255,204,0,.6);border-radius:4px 10px 4px 10px;background:rgba(8,8,8,.84);color:var(--destacado);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.detalleIglesia{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:11px;min-width:0;padding:clamp(20px,3vw,38px)}
+.paginaIglesia{margin:0;color:var(--destacado);font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.detalleIglesia h4{margin:0;font-family:var(--font-display);font-size:clamp(34px,4vw,56px);font-weight:400;line-height:.95;text-transform:uppercase}
+.detalleIglesia>p:not(.paginaIglesia){max-width:440px;margin:0;color:rgba(244,243,236,.78);font-size:14px;line-height:1.6}
+.detalleIglesia>a{display:inline-flex;align-items:center;gap:14px;margin-top:8px;color:var(--texto);font-size:11px;font-weight:800;letter-spacing:.07em;text-decoration:none;text-transform:uppercase}
+.detalleIglesia>a:hover{color:var(--destacado)}
+.selectorIglesia{position:relative;display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:15px;overflow:hidden;padding:12px 6px;border:1px solid rgba(255,255,255,.14);border-radius:6px 15px 6px 15px;background:rgba(255,255,255,.045);color:var(--texto);cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.selectorIglesia:hover{transform:translateY(-2px);border-color:rgba(255,204,0,.64);background:rgba(255,204,0,.08)}
+.selectorNumero{font-family:var(--font-display);font-size:22px;color:var(--destacado)}
+.selectorNombre{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--font-display);font-size:17px;line-height:1;text-transform:uppercase;white-space:nowrap}
+.selectorActivo{border-color:var(--destacado);background:var(--destacado);color:#10100d}
+.selectorActivo .selectorNumero{color:#10100d}
+.selectoresMoviles{display:none}
+.selectorCompacto{flex:0 0 auto;min-width:100px;min-height:62px;gap:3px;padding:8px 12px;border-radius:8px}
+.selectorCompacto .selectorNombre{writing-mode:horizontal-tb;transform:none;font-family:inherit;font-size:12px;font-weight:750}
+.selectorPagina{color:var(--textoSuave);font-size:9px;letter-spacing:.05em}
+.selectorActivo .selectorPagina{color:rgba(0,0,0,.65)}
+.estacionesEspirituales{grid-column:1/-1;margin:0 26px 26px;padding:0 18px;border:1px solid var(--vidrio-borde);border-radius:14px;background:rgba(255,255,255,.035)}
+.estacionesEspirituales summary{padding:16px 0;cursor:pointer;font-size:15px;font-weight:700;list-style:none}
+.estacionesEspirituales summary::-webkit-details-marker{display:none}
+.estacionesEspirituales summary::after{content:"+";float:right;color:var(--destacado);font-size:20px;line-height:1}
+.estacionesEspirituales[open] summary::after{content:"−"}
+.estacionesEspirituales p{max-width:820px;margin:0 0 18px;color:var(--textoSuave);font-size:14px;line-height:1.65}
+
+/* Preguntas prácticas de la edición vigente */
+.preguntasEdicion>h2{max-width:760px}
+.preguntasEdicion>p{color:var(--textoSuave)}
+.preguntasEdicion>div{display:grid;gap:12px;margin-top:24px}
+.preguntasEdicion details{padding:0 24px;border:1px solid var(--vidrio-borde);border-radius:18px;background:rgba(255,255,255,.045);
+  -webkit-backdrop-filter:var(--vidrio-desenfoque);backdrop-filter:var(--vidrio-desenfoque)}
+.preguntasEdicion summary{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:21px 0;cursor:pointer;list-style:none;
+  font-size:clamp(16px,1.4vw,20px);font-weight:600}
+.preguntasEdicion summary::-webkit-details-marker{display:none}
+.preguntasEdicion summary span{position:relative;flex:none;width:38px;height:38px;border-radius:50%;background:var(--destacado)}
+.preguntasEdicion summary span::before,.preguntasEdicion summary span::after{position:absolute;top:50%;left:50%;width:14px;height:2px;background:#080808;content:"";transform:translate(-50%,-50%)}
+.preguntasEdicion summary span::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .2s ease}
+.preguntasEdicion details[open] summary span::after{transform:translate(-50%,-50%)}
+.preguntasEdicion details>p{max-width:720px;margin:0 0 16px;color:var(--textoSuave);font-size:15px;line-height:1.65}
+.preguntasEdicion details>a{display:inline-block;margin:0 0 20px;color:var(--texto);font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.preguntasEdicion details>a:hover{color:var(--destacado)}
 
 /* Cronograma completo: carrusel a la izquierda, resumen y selector a la derecha. */
 .cronograma{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;gap:22px;
@@ -22,8 +108,21 @@
 .cronogramaEtiqueta{margin:0 0 8px;color:var(--destacado);font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .cronogramaInfo h2{margin:0 0 14px;font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(38px,4vw,56px);line-height:1;text-wrap:balance}
 .cronogramaInfo>p:not(.cronogramaEtiqueta){margin:0 auto 18px;max-width:560px;font-size:17px;line-height:1.7;color:var(--texto)}
-.cronogramaCarrusel{grid-column:1;grid-row:2;width:100%;min-width:0;position:relative;left:0}
-.agendaCompleta{grid-column:1;grid-row:3;width:min(100%,760px);border-top:1px solid var(--linea);padding-top:14px}
+.hitosCronograma{grid-column:1;grid-row:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:min(100%,1000px);margin:0;padding:0;list-style:none}
+.hitosCronograma li{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:8px;padding:14px 16px;border:1px solid var(--vidrio-borde);border-radius:16px;background:rgba(255,255,255,.045)}
+.hitosCronograma li>span{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--destacado)}
+.hitosCronograma li>b{font-family:var(--font-display);font-size:34px;font-weight:400;line-height:1.05}
+.hitosCronograma li>small{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--textoSuave)}
+.cronogramaCarrusel{grid-column:1;grid-row:3;width:100%;min-width:0;position:relative;left:0}
+.llegadaCronograma{grid-column:1;grid-row:4;display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.8fr) auto;align-items:center;gap:20px;width:min(100%,1000px);padding:22px 24px;border:1px solid rgba(255,204,0,.42);border-radius:20px;background:linear-gradient(120deg,rgba(255,204,0,.09),rgba(255,255,255,.035))}
+.llegadaCronograma .cronogramaEtiqueta{margin-bottom:6px}
+.llegadaCronograma h3{margin:0;font-family:var(--font-display);font-size:clamp(23px,2.6vw,32px);font-weight:400;line-height:1.1;text-transform:uppercase}
+.llegadaCronograma>div>p:last-child{margin:6px 0 0;font-size:14px;line-height:1.4;color:var(--textoSuave)}
+.horarioLlegada{display:grid;gap:5px;margin:0;font-size:14px;line-height:1.4}
+.horarioLlegada span{color:var(--textoSuave)}
+.mapaCronograma{display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border:1px solid var(--vidrio-borde);border-radius:999px;color:var(--texto);font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase;white-space:nowrap}
+.mapaCronograma:hover{border-color:var(--destacado);color:var(--destacado)}
+.agendaCompleta{grid-column:1;grid-row:5;width:min(100%,760px);border-top:1px solid var(--linea);padding-top:14px}
 .agendaCompleta summary{width:fit-content;margin:0 auto;color:var(--texto);font-size:14px;font-weight:700;cursor:pointer}
 .agendaCompleta summary:hover{color:var(--destacado)}
 .agendaVista{display:grid;grid-template-columns:minmax(190px,.35fr) minmax(0,1fr);gap:clamp(28px,6vw,88px);max-width:1160px;margin:36px auto 0;padding:28px clamp(18px,4vw,52px);
@@ -87,8 +186,61 @@ a.edicion:hover{transform:translateY(-4px);border-color:var(--destacado)}
 .edicionTexto h3{margin:0;font-family:var(--font-display);font-weight:400;font-size:28px;line-height:1.05;text-transform:uppercase}
 .edicionTexto p{margin:0;font-size:14px;color:var(--textoSuave)}
 
+/* Archivo visual de ediciones, con una edición vigente destacada y eventos históricos separados. */
+.edicionesPagina{padding:6px 0 80px}
+.edicionesRejilla{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.edicionFicha{position:relative;min-width:0;min-height:340px;overflow:hidden;border:1px solid var(--vidrio-borde);border-radius:8px 24px 8px 24px;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)),#10110f;color:var(--texto);
+  box-shadow:0 18px 40px rgba(0,0,0,.22);transition:transform .25s ease,border-color .25s ease}
+.edicionFicha:hover{transform:translateY(-4px);border-color:rgba(255,204,0,.72)}
+.edicionFicha:not(.edicionDestacada){min-height:400px}
+.edicionDestacada{grid-column:span 2;min-height:400px;display:flex;align-items:flex-end}
+.fondoEdicion{object-fit:cover;object-position:center 45%;filter:brightness(.62) saturate(.84)}
+.veloEdicion{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,6,5,.93) 0%,rgba(5,6,5,.73) 53%,rgba(5,6,5,.2) 100%),linear-gradient(0deg,rgba(0,0,0,.55),transparent 55%)}
+.cuerpoEdicion{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:100%;padding:26px}
+.edicionDestacada .cuerpoEdicion{max-width:68%;padding:clamp(28px,4vw,52px)}
+.etiquetaEdicion,.periodoEdicion{color:var(--destacado);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.cuerpoEdicion h2,.cuerpoEdicion h3{margin:0;font-family:var(--font-display);font-size:clamp(26px,3vw,42px);font-weight:400;line-height:1;text-transform:uppercase}
+.cuerpoEdicion h3{font-size:clamp(23px,2.2vw,30px)}
+.cuerpoEdicion p{margin:0;color:rgba(244,243,236,.82);font-size:14px;line-height:1.55}
+.botonEdicion{display:inline-flex;align-items:center;gap:16px;margin-top:8px;padding:8px 9px 8px 18px;border:1px solid rgba(255,204,0,.52);border-radius:999px;background:rgba(7,8,7,.38);color:var(--texto);font-size:12px;font-weight:800;letter-spacing:.06em;text-decoration:none;text-transform:uppercase;backdrop-filter:blur(12px)}
+.logoDestacado{position:absolute;z-index:1;top:50%;right:7%;display:grid;width:clamp(130px,18vw,230px);aspect-ratio:1;place-items:center;transform:translateY(-50%);filter:drop-shadow(0 14px 28px rgba(0,0,0,.62))}
+.logoEdicion{width:100%;height:100%;object-fit:contain}
+.logoPendiente{position:relative;z-index:1;display:grid;width:96px;height:96px;place-items:center;border:1px solid rgba(255,204,0,.44);border-radius:50%;background:rgba(255,204,0,.07);color:var(--destacado);font-family:var(--font-display);font-size:40px}
+.enlaceFicha{position:absolute;inset:0;display:flex;flex-direction:column;color:inherit;text-decoration:none}
+.logoArchivo{position:relative;display:grid;min-height:170px;flex:0 0 170px;place-items:center;overflow:hidden;padding:16px;
+  background:radial-gradient(ellipse at 50% 80%,rgba(255,204,0,.12),transparent 65%),linear-gradient(140deg,rgba(255,255,255,.05),rgba(0,0,0,.42))}
+.logoArchivo::after{position:absolute;inset:0;border-bottom:1px solid rgba(255,255,255,.12);background:linear-gradient(0deg,rgba(0,0,0,.2),transparent 65%);content:"";pointer-events:none}
+.logoArchivo .logoEdicion{position:relative;z-index:1;width:min(75%,190px);height:158px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.58))}
+.anioArchivo{position:absolute;z-index:2;top:16px;left:16px;padding:8px 11px;border:1px solid rgba(255,204,0,.48);border-radius:4px 12px 4px 12px;background:rgba(8,8,8,.76);color:var(--destacado);font-family:var(--font-display);font-size:21px;line-height:1;backdrop-filter:blur(10px)}
+.enlaceFicha .cuerpoEdicion{box-sizing:border-box;flex:1 0 222px;min-height:222px;gap:8px;padding:16px 22px 20px}
+.enlaceFicha .cuerpoEdicion h3{font-size:clamp(21px,2vw,27px)}
+.detalleEdicion{box-sizing:border-box;display:flex;min-height:56px;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:auto;padding:8px 0;color:var(--texto);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.periodoEdicion{font-size:9px;letter-spacing:.08em}
+
+@media (max-width:1040px){
+  .edicionesRejilla{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .edicionDestacada{grid-column:span 2}
+  .exploradorRejilla{grid-template-columns:minmax(0,1fr);min-height:0}
+  .selectoresVerticales{display:none}
+  .selectoresMoviles{display:flex;gap:8px;overflow-x:auto;padding:9px 7px 12px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:rgba(255,204,0,.55) transparent}
+  .selectorCompacto{scroll-snap-align:start}
+}
+
 @media (max-width:760px){
+  .edicionesPagina{padding-bottom:48px}
+  .edicionesRejilla{grid-template-columns:minmax(0,1fr);gap:14px}
+  .edicionDestacada{grid-column:auto;min-height:440px}
+  .edicionDestacada .cuerpoEdicion{max-width:100%;padding:24px}
+  .logoDestacado{top:22px;right:18px;width:clamp(100px,29vw,145px);transform:none;opacity:.92}
+  .veloEdicion{background:linear-gradient(0deg,rgba(5,6,5,.94),rgba(5,6,5,.45) 76%,rgba(5,6,5,.28))}
+  .edicionFicha:not(.edicionDestacada){min-height:410px}
+  .logoArchivo{min-height:170px;flex-basis:170px}
+  .enlaceFicha .cuerpoEdicion{flex-basis:230px;min-height:230px;padding:14px 18px 18px}
+  .hitosCronograma{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .llegadaCronograma{grid-template-columns:minmax(0,1fr);justify-items:start;padding:20px}
   .portada{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .portadaAcciones{justify-content:center}
   .datos{justify-content:center}
   .reloj{gap:8px;width:100%}
   .reloj div{width:auto;min-width:0;flex:1;padding:15px 0 13px}
@@ -96,6 +248,23 @@ a.edicion:hover{transform:translateY(-4px);border-color:var(--destacado)}
   .reloj span{margin-top:6px;font-size:10px}
   .podio{gap:8px}
   .tabla td:nth-child(3),.tabla th:nth-child(3){display:none}
+  .cartillaEdicion{grid-template-columns:minmax(0,1fr)}
+  .cartillaPortada{min-height:clamp(290px,82vw,420px)}
+  .cartillaContenido{padding:26px 22px 28px}
+  .iglesiasCartilla{grid-column:1;padding:22px 18px}
+  .iglesiasCartilla ol{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .exploradorIglesias{grid-column:1;padding:22px 18px}
+  .exploradorCabecera{align-items:flex-start;flex-direction:column;gap:8px}
+  .exploradorRejilla{gap:10px}
+  .iglesiaActiva{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);min-height:300px}
+  .arteIglesia{min-height:300px}
+  .detalleIglesia{gap:9px;padding:17px}
+  .detalleIglesia h4{font-size:clamp(27px,8vw,42px)}
+  .detalleIglesia>p:not(.paginaIglesia){font-size:12px}
+  .detalleIglesia>a{gap:8px;font-size:10px}
+  .detalleIglesia>a>span[aria-hidden="true"]{width:32px;height:32px;flex-basis:32px}
+  .selectoresMoviles{margin:0 -5px}
+  .estacionesEspirituales{grid-column:1;margin:0 16px 18px}
 }
 @media (max-width:900px){
   .cronograma{gap:16px}

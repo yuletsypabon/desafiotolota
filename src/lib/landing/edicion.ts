@@ -13,13 +13,13 @@ const corto = (nombre: string) => {
 };
 
 /**
- * Datos públicos del evento de un año (el más reciente si hay varios): pruebas y equipos con sus integrantes.
+ * Datos públicos del evento: si se pasa un ID, garantiza que pertenezca al año solicitado; si no, elige el más reciente.
  * De cada persona solo sale su primer nombre, primer apellido y lugar de origen.
  */
-export async function datosEdicion(anio: number): Promise<EdicionPublica | null> {
+export async function datosEdicion(anio: number, eventoId?: string): Promise<EdicionPublica | null> {
   const [ev, anios] = await Promise.all([
     prisma.evento.findFirst({
-      where: { anio },
+      where: { anio, ...(eventoId ? { id: eventoId } : {}) },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, anio: true, nombre: true, logo: true,

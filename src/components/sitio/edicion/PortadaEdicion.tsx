@@ -1,5 +1,6 @@
 'use client';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import FlechaAccion from '@/components/sitio/FlechaAccion';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import { EVENTO } from '@/lib/evento';
@@ -11,10 +12,11 @@ export default function PortadaEdicion({ logo, nombre, equipos }: { logo: string
   const c = useCuentaRegresiva();
   const casillas = [[c.dias, 'Días'], [c.horas, 'Horas'], [c.minutos, 'Min'], [c.segundos, 'Seg']] as const;
   return (
-    <section className={s.portada} aria-label="Datos del evento">
+    <section id="datos-edicion" className={s.portada} aria-label="Datos de la edición">
       {/* eslint-disable-next-line @next/next/no-img-element -- el logo es un data URL guardado en la base */}
       {logo && <img className={s.logoEvento} src={logo} alt={`Logo de ${nombre}`} />}
       <div>
+        <p className={s.datosEtiqueta}>Datos de la edición</p>
         <dl className={s.datos}>
           <div><CalendarMonthOutlinedIcon aria-hidden="true" /><dt>Fecha</dt><dd>{EVENTO.fechas}</dd></div>
           <div><PlaceOutlinedIcon aria-hidden="true" /><dt>Lugar</dt><dd>{EVENTO.sede} · {EVENTO.lugar}</dd></div>
@@ -31,6 +33,10 @@ export default function PortadaEdicion({ logo, nombre, equipos }: { logo: string
             ))}
           </div>
         )}
+        <div className={s.portadaAcciones}>
+          <a href={EVENTO.mapa} target="_blank" rel="noopener noreferrer">Abrir ubicación en Maps <FlechaAccion /></a>
+          <a href="#cronograma">Ver cronograma <FlechaAccion direccion="abajo" /></a>
+        </div>
       </div>
     </section>
   );

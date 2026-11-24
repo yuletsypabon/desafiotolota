@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import PaginaSitio from '@/components/sitio/PaginaSitio';
 import s from '@/components/sitio/pagina.module.css';
 import { DOCUMENTOS, INSCRIPCION } from '@/lib/contenido';
@@ -44,6 +45,7 @@ export default function Recursos() {
         ) : (
           <span className={s.pronto}>Formulario disponible pronto</span>
         )}
+        <p>¿Tienes otra pregunta? <Link className={s.enlace} href="/contacto">Comunícate con la organización</Link>.</p>
       </section>
     </PaginaSitio>
   );
