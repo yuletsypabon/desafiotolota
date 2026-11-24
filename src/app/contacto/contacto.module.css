@@ -1,0 +1,35 @@
+.contactoGrid{display:grid;grid-template-columns:minmax(260px,.72fr) minmax(0,1.75fr);grid-template-areas:"canales mensaje" "oracion evento";gap:16px;padding-bottom:72px}
+.canales,.mensajeDirecto{border-radius:22px;color:#111;background:#f2eee4}
+.canales{grid-area:canales;padding:clamp(22px,3vw,34px)}
+.eyebrow{margin:0;color:#655f50;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.canales h2,.mensajeDirecto h2{margin:8px 0 24px;font-family:var(--font-display);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:.98;text-transform:uppercase}
+.datoContacto{display:grid;gap:7px;padding:17px 0;border-top:1px solid rgba(17,17,17,.2)}
+.datoContacto>span,.referenciaContacto>span{color:#6d6759;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.datoContacto>a{display:inline-flex;align-items:center;gap:8px;justify-self:start;color:#111;font-size:14px;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.datoContacto>a:hover{text-decoration:underline;text-underline-offset:4px}
+.datoContacto>a>span[aria-hidden="true"]{width:32px;height:32px;flex-basis:32px}
+.referenciaContacto{display:grid;gap:5px;padding-top:16px;border-top:1px solid rgba(17,17,17,.2)}
+.referenciaContacto>b{font-size:15px}.referenciaContacto>small{font-size:12px;color:#6d6759}
+.mensajeDirecto{grid-area:mensaje;display:flex;flex-direction:column;justify-content:space-between;min-height:360px;padding:clamp(26px,4vw,52px)}
+.mensajeDirecto h2{max-width:600px;margin-bottom:14px;font-size:clamp(36px,5vw,60px)}
+.mensajeDirecto>div:first-child>p:last-child{max-width:660px;margin:0;color:#4c493f;font-size:15px;line-height:1.7}
+.accionesContacto{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.accionesContacto>a{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:12px 18px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em;text-decoration:none;text-transform:uppercase;transition:transform .2s ease}
+.accionesContacto>a:hover{transform:translateY(-2px)}
+.botonPrincipal{background:var(--destacado);color:#080808}
+.botonSecundario{border:1px solid rgba(17,17,17,.3);color:#111}
+.accesoContacto{grid-area:oracion;position:relative;display:flex;flex-direction:column;justify-content:center;gap:9px;min-height:152px;padding:24px 68px 24px 26px;border:1px solid var(--vidrio-borde);border-radius:20px;background:rgba(255,255,255,.045);color:var(--texto);text-decoration:none;transition:border-color .2s ease,transform .2s ease}
+a.accesoContacto:hover,.accesoEvento>a:hover{transform:translateY(-2px);border-color:var(--destacado)}
+.accesoContacto>span{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--destacado)}
+.accesoContacto>b{font-family:var(--font-display);font-size:clamp(21px,2.4vw,30px);font-weight:400;line-height:1;text-transform:uppercase}
+.accesoContacto>span[aria-hidden="true"]{position:absolute;right:24px;top:50%;color:#10100d;transform:translateY(-50%)}
+.accesoEvento{grid-area:evento;background:linear-gradient(125deg,rgba(255,204,0,.1),rgba(255,255,255,.04))}
+.accesoEvento>a{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:4px;padding:9px 13px;border:1px solid var(--vidrio-borde);border-radius:999px;color:var(--texto);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;transition:transform .2s ease,border-color .2s ease}
+.accesoEvento>a>span[aria-hidden="true"]{width:30px;height:30px;flex-basis:30px}
+@media(max-width:760px){
+  .contactoGrid{grid-template-columns:minmax(0,1fr);grid-template-areas:"canales" "mensaje" "oracion" "evento";gap:12px;padding-bottom:48px}
+  .mensajeDirecto{min-height:0}
+  .accionesContacto{display:grid;grid-template-columns:minmax(0,1fr)}
+  .accionesContacto>a{width:100%}
+  .accesoContacto{min-height:130px}
+}
