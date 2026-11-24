@@ -17,8 +17,8 @@ export default function Alineacion({ equipo: e }: { equipo: EquipoPublico }) {
   return (
     // Dos columnas: las cartas y, a la derecha y a media altura, el nombre del equipo
     <Box sx={{
-      pt: 2.5, pb: 3, px: { xs: 0.5, md: 2 }, display: 'grid', gap: { xs: 2, md: 3 }, alignItems: 'start',
-      gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) 220px' },
+      pt: 2.5, pb: 3, px: { xs: 0.5, md: 0 }, display: 'grid', gap: { xs: 2, md: 2 }, alignItems: 'start',
+      gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) 160px' },
     }}>
       <Stack gap={0.75} sx={{ minWidth: 0, order: { sm: 2 }, textAlign: 'center', alignSelf: { sm: 'center' } }}>
         <Typography sx={{
@@ -51,11 +51,11 @@ export default function Alineacion({ equipo: e }: { equipo: EquipoPublico }) {
 }
 
 /**
- * Columnas de la alineación para que las cartas llenen el ancho: todas en una fila si caben (mínimo 4 para que no
- * queden gigantes) y, si son más, filas parejas (7 → 4 + 3, 9 → 5 + 4).
+ * Columnas de la alineación para que los equipos habituales de hasta 6 integrantes queden en una sola fila y los
+ * grupos mayores se distribuyan en filas equilibradas (7 → 4 + 3, 9 → 5 + 4).
  */
 function columnasCartas(total: number, maximo: number) {
-  if (total <= maximo) return Math.min(maximo, Math.max(total, 4));
+  if (total <= maximo) return total;
   return Math.ceil(total / Math.ceil(total / maximo));
 }
 
@@ -78,7 +78,7 @@ function Carta({ p, logo, orden, capitan }: CartaProps) {
       '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
     }}>
       <Box sx={{
-        position: 'relative', aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: '14px',
+        position: 'relative', aspectRatio: '3 / 4', overflow: 'hidden', borderRadius: '6px',
         border: `${capitan ? 2 : 1}px solid ${capitan ? alfa(capitan, .8) : COLORS.border}`,
         bgcolor: capitan ? alfa(capitan, .16) : 'rgba(244,243,236,.06)',
         boxShadow: capitan ? `0 0 22px ${alfa(capitan, .28)}` : 'none',
