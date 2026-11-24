@@ -4,7 +4,7 @@ import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { mutate } from 'swr';
-import { api } from '@/lib/client';
+import { api, store } from '@/lib/client';
 import { useToast } from '@/components/Toast';
 import { useAppDialog } from '@/components/AppDialog';
 
@@ -58,7 +58,13 @@ export default function RespaldoDatos() {
               Descarga un JSON con todos los eventos, pruebas, equipos, fichas, tiempos y disciplina.
             </Typography>
           </Box>
-          <Button variant="outlined" startIcon={<DownloadIcon />} href="/api/respaldo" sx={{ flexShrink: 0 }}>
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            href="/api/respaldo"
+            onClick={() => store.set('respaldo:ultima-descarga', new Date().toISOString())}
+            sx={{ flexShrink: 0 }}
+          >
             Exportar
           </Button>
         </Stack>
