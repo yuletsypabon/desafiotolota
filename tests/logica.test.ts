@@ -17,6 +17,7 @@ import { toCSV } from '../src/lib/csv';
 import { claveCorrecta, hashAnticuado, hashClave } from '../src/lib/clave';
 import { descuentoPorPuntoSegundos, descuentoEspiritualMs } from '../src/lib/espiritual';
 import { EDICIONES, EVENTO, codigoEdicion, cuentaRegresiva, tituloCategoria, tituloEdicion } from '../src/lib/evento';
+import { evaluarPreparacion, preparacionLista, resumirPistasGuardadas } from '../src/lib/preparacion';
 
 const cfg = { penLeveMs: 300, penMediaMs: 500, penGraveMs: 1000, bonPositivoMs: 100 };
 const evento = { id: 'ev', nombre: 'Desafío', anio: 2026, ...cfg };
@@ -316,6 +317,40 @@ test('pulsador rojo: solo altera una pista seleccionada explícitamente', () => 
   // Los otros botones físicos se ignoran; los controles de tarjeta son manuales.
   assert.equal(accionDeBoton(1, 1), null);
   assert.equal(accionDeBoton(6, 2), null);
+});
+
+test('preparación: la nube no bloquea, pero base, equipos, pistas y prueba sí se comprueban', () => {
+  const chequeos = evaluarPreparacion({
+    servidorDisponible: true,
+    equipos: 6,
+    pistas: 3,
+    prueba: { id: 'p1', nombre: 'Muro', estado: 'EN_CURSO', habilitadaDesde: new Date().toISOString() },
+    respaldoEn: null,
+    mandoDetectado: false,
+    mandoProbado: false,
+    recuperacion: { activas: 0, sinGuardar: 0 },
+  });
+  assert.equal(preparacionLista(chequeos), true);
+  assert.equal(chequeos.find((chequeo) => chequeo.id === 'mando')?.bloquea, false);
+  assert.equal(chequeos.find((chequeo) => chequeo.id === 'respaldo')?.estado, 'advertencia');
+  assert.equal(chequeos.find((chequeo) => chequeo.id === 'prueba')?.estado, 'ok');
+
+  const incompleta = evaluarPreparacion({ ...{
+    servidorDisponible: true, equipos: 0, pistas: 0, prueba: null, respaldoEn: null, mandoDetectado: false, mandoProbado: false, recuperacion: { activas: 0, sinGuardar: 0 },
+  } });
+  assert.equal(preparacionLista(incompleta), false);
+  assert.equal(incompleta.filter((chequeo) => chequeo.bloquea).length, 3);
+});
+
+test('recuperación: identifica pistas activas y llegadas locales sin guardar', () => {
+  assert.deepEqual(resumirPistasGuardadas([
+    { state: 'run', guardado: 'no' },
+    { state: 'det', guardado: 'no' },
+    { state: 'fin', guardado: 'no' },
+    { state: 'fin', guardado: 'si' },
+    { state: 'idle' },
+  ]), { activas: 2, sinGuardar: 1 });
+  assert.deepEqual(resumirPistasGuardadas(null), { activas: 0, sinGuardar: 0 });
 });
 
 test('rutas: el sitio es público y el sistema privado', () => {

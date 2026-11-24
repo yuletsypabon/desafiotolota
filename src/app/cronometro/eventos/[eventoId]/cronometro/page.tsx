@@ -358,11 +358,44 @@ export default function Cronometro() {
     mutClas();
   };
 
-  const finalizarPrueba = () =>
+  const finalizarPrueba = async () => {
+    if (!prueba) return;
+    if (prueba.estado === 'FINALIZADA') {
+      if (!await dialog({
+        title: '¿Reabrir prueba?',
+        message: 'La prueba volverá a mostrarse como en curso. Los tiempos ya registrados no cambian.',
+        tone: 'warning',
+        confirmLabel: 'Reabrir prueba',
+      })) return;
+      run(async () => {
+        await api(`/api/pruebas/${pruebaId}`, 'PATCH', { estado: 'EN_CURSO' });
+        await mutEv();
+      }, 'Prueba reabierta');
+      return;
+    }
+
+    const activas = lanes.filter((lane) => lane.state === 'run' || lane.state === 'det').length;
+    const sinGuardar = lanes.filter((lane) => lane.state === 'fin' && lane.guardado !== 'si').length;
+    if (activas || sinGuardar) {
+      await dialog({
+        title: 'Aún no se puede finalizar',
+        message: `${activas ? `${activas} pista${activas === 1 ? '' : 's'} sigue${activas === 1 ? '' : 'n'} activa${activas === 1 ? '' : 's'}` : ''}${activas && sinGuardar ? ' y ' : ''}${sinGuardar ? `${sinGuardar} llegada${sinGuardar === 1 ? '' : 's'} aún no está${sinGuardar === 1 ? '' : 'n'} guardada${sinGuardar === 1 ? '' : 's'}` : ''}. Resuelve esas pistas antes de cerrar la prueba.`,
+        tone: 'warning',
+        confirmLabel: 'Entendido',
+      });
+      return;
+    }
+    if (!await dialog({
+      title: '¿Finalizar prueba?',
+      message: 'La clasificación quedará marcada como finalizada. Podrás reabrirla o corregir resultados después si es necesario.',
+      tone: 'warning',
+      confirmLabel: 'Finalizar prueba',
+    })) return;
     run(async () => {
-      await api(`/api/pruebas/${pruebaId}`, 'PATCH', { estado: prueba?.estado === 'FINALIZADA' ? 'EN_CURSO' : 'FINALIZADA' });
+      await api(`/api/pruebas/${pruebaId}`, 'PATCH', { estado: 'FINALIZADA' });
       await mutEv();
-    }, prueba?.estado === 'FINALIZADA' ? 'Prueba reabierta' : 'Prueba finalizada');
+    }, 'Prueba finalizada');
+  };
 
   const guardarOrden = (ids: string[]) =>
     run(async () => {
@@ -370,6 +403,21 @@ export default function Cronometro() {
       await mutEv();
       setOrdenOpen(false);
     }, 'Orden guardado');
+
+  const laneActiva = lanes.some((l) => l.state !== 'idle');
+  const pistasEnRiesgo = lanes.filter((lane) => (lane.state === 'run' || lane.state === 'det') || (lane.state === 'fin' && lane.guardado !== 'si')).length;
+
+  // Las pistas se guardan en este portátil; la advertencia evita que se cierre o recargue la pestaña por accidente
+  // mientras todavía hay un tiempo vivo o una llegada pendiente de llegar al servidor.
+  useEffect(() => {
+    if (!pistasEnRiesgo) return;
+    const avisar = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', avisar);
+    return () => window.removeEventListener('beforeunload', avisar);
+  }, [pistasEnRiesgo]);
 
   if (!ev || !equipos) return null;
   if (!ev.pruebas.length)
@@ -388,7 +436,6 @@ export default function Cronometro() {
   const penDe = (equipoId: string | null) => filas.find((f) => f.equipoId === equipoId)?.penMs ?? null;
   const libLane = libDlg !== null ? lanes[libDlg] : null;
   const libEq = libLane?.equipoId ? eqMap.get(libLane.equipoId) : null;
-  const laneActiva = lanes.some((l) => l.state !== 'idle');
 
   return (
     <Box>
@@ -421,6 +468,11 @@ export default function Cronometro() {
       </EnBarraEvento>
       {prueba?.estado === 'FINALIZADA' && (
         <Alert severity="info" sx={{ mb: 1.5 }}>Esta prueba está marcada como finalizada. Puedes seguir registrando tiempos si es necesario.</Alert>
+      )}
+      {pistasEnRiesgo > 0 && (
+        <Alert severity="warning" sx={{ mb: 1.5 }}>
+          Hay {pistasEnRiesgo} pista{pistasEnRiesgo === 1 ? '' : 's'} con tiempo activo o una llegada sin guardar. No cierres esta pestaña hasta resolverla{pistasEnRiesgo === 1 ? '' : 's'}.
+        </Alert>
       )}
 
       <Paper sx={{ p: { xs: 2, sm: 2.5 }, mb: 2, borderColor: `${COLORS.acento}55` }}>
